@@ -230,6 +230,9 @@
   (evil-define-key 'normal 'global (kbd "<leader> r m") 'bookmark-set)
   (evil-define-key 'normal 'global (kbd "<leader> r l") 'bookmark-bmenu-list)
 
+  ;; Project
+  (evil-define-key 'normal 'global (kbd "<leader> p f") 'project-find-file)
+
   ;; Org Roam
   (evil-define-key 'normal 'global (kbd "<leader> n f") 'org-roam-node-find)
   (evil-define-key 'normal 'global (kbd "<leader> n i") 'org-roam-node-insert)
