@@ -26,6 +26,7 @@
   (save-place-mode 1)                             ;; Enable saving the place in files for easier return.
   (line-number-mode -1)                           ;; Disable display of line number in the mode-line
   (winner-mode 1)                                 ;; Enable winner mode to easily undo window configuration changes.
+  (modify-coding-system-alist 'file "" 'utf-8)    ;; Set the default coding system for files to UTF-8.
 
   :custom                                         ;; Set custom variables to configure Emacs behavior.
   (custom-safe-themes t)
@@ -216,9 +217,18 @@
   (evil-define-key 'normal 'global (kbd "<leader> w q") 'evil-quit)
   (evil-define-key 'normal 'global (kbd "<leader> w u") 'winner-undo)
 
+  ;; Help
+  (evil-define-key 'normal 'global (kbd "<leader> h f") 'helpful-callable)
+  (evil-define-key 'normal 'global (kbd "<leader> h v") 'helpful-variable)
+  (evil-define-key 'normal 'global (kbd "<leader> h k") 'helpful-key)
+  (evil-define-key 'normal 'global (kbd "<leader> h x") 'helpful-command)
+  (evil-define-key 'normal 'global (kbd "<leader> h d") 'helpful-at-point)
+  (evil-define-key 'normal 'global (kbd "<leader> h F") 'helpful-function)
+
   ;; Bookmark / Recent
   (evil-define-key 'normal 'global (kbd "<leader> r b") 'bookmark-jump)
   (evil-define-key 'normal 'global (kbd "<leader> r m") 'bookmark-set)
+  (evil-define-key 'normal 'global (kbd "<leader> r l") 'bookmark-bmenu-list)
 
   ;; Org Roam
   (evil-define-key 'normal 'global (kbd "<leader> n f") 'org-roam-node-find)
@@ -230,6 +240,13 @@
 
   ;; Show UI / Elements
   (evil-define-key 'normal 'global (kbd "<leader> s u") 'vundo)
+
+  ;; Toggle UI / Elements
+  (evil-define-key 'normal 'global (kbd "<leader> t t") 'modus-themes-toggle)
+
+  ;; Execute commands
+  (evil-define-key 'normal 'global (kbd "<leader> :") 'execute-extended-command)
+  
 
 
   (evil-mode t))
@@ -266,6 +283,13 @@
   ;; Add all your customizations prior to loading the themes
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs t)
+
+  (setq modus-vivendi-palette-overrides
+	`((bg-main "#090909")
+	  (fg-heading-1 magenta-faint)))
+
+  (setq modus-operandi-palette-overrides
+        '((fg-heading-1 "#2f5f9f")))
 
   ;; Maybe define some palette overrides, such as by using our presets
   ;;(setq modus-themes-common-palette-overrides
@@ -315,6 +339,8 @@
 
 ;; Completions
 
+    ;; In buffer
+
 (use-package corfu
   :straight t
   ;; Optional customizations
@@ -342,7 +368,173 @@
   ;; be used globally (M-/).  See also the customization variable
   ;; `global-corfu-modes' to exclude certain modes.
   :init
-  (global-corfu-mode))
+  (global-corfu-mode)
+  (corfu-popupinfo-mode))
+
+(use-package cape
+  :straight t
+  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+  ;; Press C-c p ? to for help.
+  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+  ;; Alternatively bind Cape commands individually.
+  ;; :bind (("C-c p d" . cape-dabbrev)
+  ;;        ("C-c p h" . cape-history)
+  ;;        ("C-c p f" . cape-file)
+  ;;        ...)
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
+  ;; ...
+)
+
+    ;; Minibuffer
+
+;; Example configuration for Consult
+(use-package consult
+  :straight t
+  ;; Replace bindings. Lazily loaded by `use-package'.
+  :bind (;; C-c bindings in `mode-specific-map'
+         ("C-c M-x" . consult-mode-command)
+         ("C-c h" . consult-history)
+         ("C-c k" . consult-kmacro)
+         ("C-c m" . consult-man)
+         ("C-c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x bindings in `ctl-x-map'
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ;; M-g bindings in `goto-map'
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings in `search-map'
+         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+         ("M-s c" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Tweak the register preview for `consult-register-load',
+  ;; `consult-register-store' and the built-in commands.  This improves the
+  ;; register formatting, adds thin separator lines, register sorting and hides
+  ;; the window mode line.
+  (advice-add #'register-preview :override #'consult-register-window)
+  (setq register-preview-delay 0.5)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key "M-.")
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep consult-man
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; "C-+"
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+)
+
+(use-package embark
+  :straight t
+
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  ;; Show the Embark target at point via Eldoc. You may adjust the
+  ;; Eldoc strategy, if you want to see the documentation from
+  ;; multiple providers. Beware that using this can be a little
+  ;; jarring since the message shown in the minibuffer can be more
+  ;; than one line, causing the modeline to move up and down:
+
+  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :straight t
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
 
 ;; Treesitter Programming Modes & More
 
@@ -368,11 +560,13 @@
 
 (use-package nix-mode
   :straight t
+  :defer t
   :mode "\\.nix\\'")
 
 (use-package nix-ts-mode
   :straight t
   :if (treesit-language-available-p 'nix)
+  :defer t
   :after (treesit)
   :init
   (setq major-mode-remap-alist
@@ -390,7 +584,7 @@
 
 (use-package python
   :init
-  (if (treesit-language-available-p 'nix)
+  (if (treesit-language-available-p 'python)
       (setq major-mode-remap-alist
 	    (append major-mode-remap-alist
 		    '((python-mode . python-ts-mode))))))
@@ -431,4 +625,5 @@
                     :height 140
                     :weight 'normal
                     :width 'normal)
+    (set-face-attribute 'variable-pitch nil :family "Aporetic Sans" :height 160)
     )))
