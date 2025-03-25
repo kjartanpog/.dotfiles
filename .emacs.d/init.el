@@ -201,9 +201,15 @@
   (evil-set-leader 'normal (kbd "SPC")) 
   (evil-set-leader 'visual (kbd "SPC")) 
 
+  ;; Buffers
+  (evil-define-key 'normal 'global (kbd "<leader> b n") 'next-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader> b p") 'previous-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader> b k") 'kill-buffer)
+
   ;; File Searching
   (evil-define-key 'normal 'global (kbd "<leader> f f") 'find-file)
   (evil-define-key 'normal 'global (kbd "<leader> f r") 'recentf)
+  (evil-define-key 'normal 'global (kbd "<leader> f b") 'consult-buffer)
 
   ;; Window Navigation
   (evil-define-key 'normal 'global (kbd "<leader> w l") 'evil-window-right)
@@ -224,6 +230,7 @@
   (evil-define-key 'normal 'global (kbd "<leader> h x") 'helpful-command)
   (evil-define-key 'normal 'global (kbd "<leader> h d") 'helpful-at-point)
   (evil-define-key 'normal 'global (kbd "<leader> h F") 'helpful-function)
+  (evil-define-key 'normal 'global (kbd "<leader> h m") 'describe-mode)
 
   ;; Bookmark / Recent
   (evil-define-key 'normal 'global (kbd "<leader> r b") 'bookmark-jump)
@@ -249,8 +256,6 @@
 
   ;; Execute commands
   (evil-define-key 'normal 'global (kbd "<leader> :") 'execute-extended-command)
-  
-
 
   (evil-mode t))
 
@@ -617,6 +622,13 @@
   :if (not (display-graphic-p))
   :config
   (evil-terminal-cursor-changer-activate))
+
+;; AI Stuff
+
+(use-package gptel
+  :straight t
+  :init
+  (setq gptel-default-mode #'org-mode))
 
 (cond
 
