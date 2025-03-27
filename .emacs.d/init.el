@@ -284,6 +284,7 @@
     "ho" '(helpful-symbol :which-key "Symbol")
     "hm" '(describe-mode :which-key "Major mode")
     "hM" '(describe-minor-mode :which-key "Minor mode")
+    "hp" '(describe-package :which-key "Package")
 
      ;; Bookmark / Recent
     "r" '(:ignore t :which-key "Recent")
@@ -317,6 +318,8 @@
     "g" '(:ignore t :which-key "Toggle")
     "g <escape>" '(keyboard-escape-quit :which-key t)
     "gs" '(magit-status :which-key "Status")
+    "gn" '(diff-hl-next-hunk :which-key "Next Hunk")
+    "gp" '(diff-hl-previous-hunk :which-key "Previous Hunk")
   ))
 
 (use-package expreg
@@ -717,9 +720,11 @@
 
 (use-package diff-hl
   :straight t
+  :after (magit)
   :config
   (global-diff-hl-mode)
-  (global-diff-hl-show-hunk-mouse-mode))
+  (global-diff-hl-show-hunk-mouse-mode)
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
 
 
 (cond
