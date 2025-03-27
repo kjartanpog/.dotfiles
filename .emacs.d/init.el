@@ -46,9 +46,9 @@
   (prog-mode . display-line-numbers-mode)
   (prog-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers in programming modes.
 
-  :bind (("C-+" . text-scale-increase)
-	 ("C--" . text-scale-decrease)
-	 ("C-x C-r" . recentf))
+  ;; :bind (("C-+" . text-scale-increase)
+  ;; 	 ("C--" . text-scale-decrease)
+  ;; 	 ("C-x C-r" . recentf))
   ;; TODO - Can I get this integrated with :map ?
   ;; (global-set-key (kbd "C-+") 'text-scale-increase)
   ;; (global-set-key (kbd "C--") 'text-scale-decrease)
@@ -180,12 +180,15 @@
 (use-package which-key
   :ensure nil
   :diminish which-key-mode
+  :init
+  (setq which-key-idle-delay 0.5)
   :config
   (which-key-mode t))
 
 (use-package evil
   :straight t
   :init
+	;;In addition we need to add this to the :init block of use-package evil to prevent evil and evil-collection interfering
   (setq evil-want-keybinding nil ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
 	evil-want-integration t)
   :custom
@@ -197,66 +200,6 @@
   (evil-undo-system 'undo-fu)
   ;; (evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
   :config
-  ;; Define the leader key as Space
-  (evil-set-leader 'normal (kbd "SPC")) 
-  (evil-set-leader 'visual (kbd "SPC")) 
-
-  ;; Buffers
-  (evil-define-key 'normal 'global (kbd "<leader> b n") 'next-buffer)
-  (evil-define-key 'normal 'global (kbd "<leader> b p") 'previous-buffer)
-  (evil-define-key 'normal 'global (kbd "<leader> b k") 'kill-buffer)
-
-  ;; File Searching
-  (evil-define-key 'normal 'global (kbd "<leader> f f") 'find-file)
-  (evil-define-key 'normal 'global (kbd "<leader> f r") 'recentf)
-  (evil-define-key 'normal 'global (kbd "<leader> f b") 'consult-buffer)
-
-  ;; Window Navigation
-  (evil-define-key 'normal 'global (kbd "<leader> w l") 'evil-window-right)
-  (evil-define-key 'normal 'global (kbd "<leader> w h") 'evil-window-left)
-  (evil-define-key 'normal 'global (kbd "<leader> w k") 'evil-window-up)
-  (evil-define-key 'normal 'global (kbd "<leader> w j") 'evil-window-down)
-  (evil-define-key 'normal 'global (kbd "<leader> w r") 'evil-window-rotate-downwards)
-  (evil-define-key 'normal 'global (kbd "<leader> w s") 'evil-window-split)
-  (evil-define-key 'normal 'global (kbd "<leader> w v") 'evil-window-vsplit)
-  (evil-define-key 'normal 'global (kbd "<leader> w c") 'evil-window-delete)
-  (evil-define-key 'normal 'global (kbd "<leader> w q") 'evil-quit)
-  (evil-define-key 'normal 'global (kbd "<leader> w u") 'winner-undo)
-
-  ;; Help
-  (evil-define-key 'normal 'global (kbd "<leader> h f") 'helpful-callable)
-  (evil-define-key 'normal 'global (kbd "<leader> h v") 'helpful-variable)
-  (evil-define-key 'normal 'global (kbd "<leader> h k") 'helpful-key)
-  (evil-define-key 'normal 'global (kbd "<leader> h x") 'helpful-command)
-  (evil-define-key 'normal 'global (kbd "<leader> h d") 'helpful-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader> h F") 'helpful-function)
-  (evil-define-key 'normal 'global (kbd "<leader> h m") 'describe-mode)
-
-  ;; Bookmark / Recent
-  (evil-define-key 'normal 'global (kbd "<leader> r b") 'bookmark-jump)
-  (evil-define-key 'normal 'global (kbd "<leader> r m") 'bookmark-set)
-  (evil-define-key 'normal 'global (kbd "<leader> r l") 'bookmark-bmenu-list)
-
-  ;; Project
-  (evil-define-key 'normal 'global (kbd "<leader> p f") 'project-find-file)
-
-  ;; Org Roam
-  (evil-define-key 'normal 'global (kbd "<leader> n f") 'org-roam-node-find)
-  (evil-define-key 'normal 'global (kbd "<leader> n i") 'org-roam-node-insert)
-  (evil-define-key 'normal 'global (kbd "<leader> n c") 'org-roam-capture)
-  (evil-define-key 'normal 'global (kbd "<leader> n g") 'org-roam-graph)
-  (evil-define-key 'normal 'global (kbd "<leader> n l") 'org-roam-buffer-toggle)
-  (evil-define-key 'normal 'global (kbd "<leader> n j") 'org-roam-dailies-capture-today)
-
-  ;; Show UI / Elements
-  (evil-define-key 'normal 'global (kbd "<leader> s u") 'vundo)
-
-  ;; Toggle UI / Elements
-  (evil-define-key 'normal 'global (kbd "<leader> t t") 'modus-themes-toggle)
-
-  ;; Execute commands
-  (evil-define-key 'normal 'global (kbd "<leader> :") 'execute-extended-command)
-
   (evil-mode t))
 
 (use-package evil-collection
@@ -283,6 +226,104 @@
   :config
   (global-evil-surround-mode t))
 
+(use-package general
+  :straight t
+  :config
+  (general-evil-setup)
+
+  (general-create-definer leader-keys
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (leader-keys
+    ;; Execute / Commands
+    "<escape>" '(keyboard-escape-quit :which-key t)
+    ":" '(execute-extended-command :which-key "execute command")
+
+    ;; File Searching
+    "f"  '(:ignore t :which-key "File")
+    "f <escape>" '(keyboard-escape-quit :which-key t)
+    "fi" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
+    "ff"  '(find-file :which-key t)
+    "fr"  '(recentf :which-key t)
+
+    ;; Buffer
+    "b" '(:ignore t :which-key "Buffer")
+    "b <escape>" '(keyboard-escape-quit :which-key t)
+    ;; "bk"  '(kill-current-buffer)
+    "bk"  '(kill-current-buffer :which-key "Kill Current")
+    "bn"  '(next-buffer :which-key "Next")
+    "bp"  '(previous-buffer :which-key "Previous")
+    "bf"  '(consult-buffer :which-key "Find")
+
+    ;; Window Navigation
+    "w" '(:ignore t :which-key "Window")
+    "w <escape>" '(keyboard-escape-quit :which-key t)
+    "wl" '(evil-window-right :which-key t)
+    "wh" '(evil-window-left :which-key t)
+    "wk" '(evil-window-up :which-key t)
+    "wj" '(evil-window-down :which-key t)
+    "wr" '(evil-window-rotate-downwards :which-key t)
+    "ws" '(evil-window-split :which-key t)
+    "wv" '(evil-window-vsplit :which-key t)
+    "wc" '(evil-window-delete :which-key t)
+    "wq" '(evil-quit :which-key t)
+    "wu" '(winner-undo :which-key t)
+
+     ;; Help
+    "h" '(:ignore t :which-key "Help")
+    "h <escape>" '(keyboard-escape-quit :which-key t)
+    "hf" '(helpful-callable :which-key "Callable")
+    "hv" '(helpful-variable :which-key "Variable")
+    "hk" '(helpful-key :which-key "Key")
+    "hx" '(helpful-command :which-key "Command")
+    "hd" '(helpful-at-point :which-key "At point")
+    "hF" '(helpful-function :which-key "Function")
+    "ho" '(helpful-symbol :which-key "Symbol")
+    "hm" '(describe-mode :which-key "Major mode")
+    "hM" '(describe-minor-mode :which-key "Minor mode")
+
+     ;; Bookmark / Recent
+    "r" '(:ignore t :which-key "Recent")
+    "r <escape>" '(keyboard-escape-quit :which-key t)
+    "rb" '(bookmark-jump :which-key t)
+    "rm" '(bookmark-set :which-key t)
+    "rl" '(bookmark-bmenu-list :which-key t)
+    "ru" '(vundo :which-key t)
+
+     ;; Project
+    "p" '(:ignore t :which-key "Project")
+    "p <escape>" '(keyboard-escape-quit :which-key t)
+    "pf" '(project-find-file :which-key t)
+
+     ;; Org Roam
+    "n" '(:ignore t :which-key "Org Roam")
+    "n <escape>" '(keyboard-escape-quit :which-key t)
+    "nf" '(org-roam-node-find :which-key t)
+    "ni" '(org-roam-node-insert :which-key t)
+    "nc" '(org-roam-capture :which-key t)
+    "ng" '(org-roam-graph :which-key t)
+    "nl" '(org-roam-buffer-toggle :which-key t)
+    "nj" '(org-roam-dailies-capture-today :which-key t)
+
+     ;; Toggle UI / Elements
+    "t" '(:ignore t :which-key "Toggle")
+    "t <escape>" '(keyboard-escape-quit :which-key t)
+    "tt" '(modus-themes-toggle :which-key t)
+
+    ;; Git (Magit)
+    "g" '(:ignore t :which-key "Toggle")
+    "g <escape>" '(keyboard-escape-quit :which-key t)
+    "gs" '(magit-status :which-key "Status")
+  ))
+
+(use-package expreg
+  :straight t
+  :bind (("C-+" . expreg-expand)
+	 ("C--" . expreg-contract)))
+
 ;; Fonts & Theme
 
 (use-package modus-themes
@@ -306,6 +347,9 @@
   ;; Load the theme of your choice.
   ;; (load-theme 'modus-operandi :no-confirm)
   (load-theme 'modus-vivendi))
+
+(use-package spacious-padding
+  :straight t)
 
 (use-package vi-tilde-fringe
   :straight t
@@ -555,13 +599,17 @@
   )
 
 (use-package tree-sitter-langs
-  :disabled
+  ;; :disabled
   :straight t
   ;; :after treesit
   :config
+  (setq treesit-load-name-override-list
+	'((python "python" "tree_sitter_python")
+	  (nix "nix" "tree_sitter_nix")))
   (setq treesit-extra-load-path
 	(list tree-sitter-langs--dir
 	      (concat tree-sitter-langs--dir "bin/")))
+
   ;; (setq treesit-load-name-override-list
   ;;     (list (list "python" "python" "python")))
 )
@@ -575,7 +623,6 @@
   :straight t
   :if (treesit-language-available-p 'nix)
   :defer t
-  :after (treesit)
   :init
   (setq major-mode-remap-alist
 	(append major-mode-remap-alist
@@ -623,12 +670,57 @@
   :config
   (evil-terminal-cursor-changer-activate))
 
-;; AI Stuff
+;; (use-package combobulate
+;;   :straight (combobulate :type git :host github :repo "mickeynp/combobulate")
+;;   :defer t
+;;   )
+
+(use-package conda
+  :straight t)
+
+;; AI
 
 (use-package gptel
   :straight t
-  :init
+  :config
   (setq gptel-default-mode #'org-mode))
+
+(use-package indent-bars
+  :straight t
+  :custom
+  (indent-bars-no-descend-lists t) ; no extra bars in continued func arg lists
+  (indent-bars-treesit-support t)
+  (indent-bars-treesit-ignore-blank-lines-types '("module"))
+  ;; Add other languages as needed
+  (indent-bars-treesit-scope '((python function_definition class_definition for_statement
+	  if_statement with_statement while_statement)))
+  ;; Note: wrap may not be needed if no-descend-list is enough
+  ;;(indent-bars-treesit-wrap '((python argument_list parameters ; for python, as an example
+  ;;				      list list_comprehension
+  ;;				      dictionary dictionary_comprehension
+  ;;				      parenthesized_expression subscript)))
+  ;; :hook ((python-ts-mode yaml-mode) . indent-bars-mode)
+  :hook (((python-base-mode yaml-mode) . indent-bars-mode)
+	 (nix-ts-mode . indent-bars-mode)))
+
+(use-package treesit-fold
+  :straight t
+  :config
+  (setq treesit-fold-line-count-show t
+	treesit-fold-line-count-format " <%d lines> ")
+  (global-treesit-fold-mode))
+
+
+;; Version Control
+(use-package magit
+  :straight t)
+
+(use-package diff-hl
+  :straight t
+  :config
+  (global-diff-hl-mode)
+  (global-diff-hl-show-hunk-mouse-mode))
+
 
 (cond
 
