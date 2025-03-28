@@ -62,14 +62,13 @@
   (when (file-exists-p (concat user-emacs-directory "custom.el"))
     (load (concat user-emacs-directory "custom.el")))
   (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
-  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t)))
-  
-  )
+  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t))))
 
 ;; Modeline
 
 (use-package diminish
-  :straight t)
+  :straight t
+  :config)
 
 (use-package project
   :custom
@@ -312,7 +311,8 @@
      ;; Toggle UI / Elements
     "t" '(:ignore t :which-key "Toggle")
     "t <escape>" '(keyboard-escape-quit :which-key t)
-    "tt" '(modus-themes-toggle :which-key t)
+    "tt" '(modus-themes-toggle :which-key "Theme")
+    "tr" '(rainbow-mode  :which-key "Rainbow")
 
     ;; Git (Magit)
     "g" '(:ignore t :which-key "Toggle")
@@ -350,6 +350,9 @@
   ;; Load the theme of your choice.
   ;; (load-theme 'modus-operandi :no-confirm)
   (load-theme 'modus-vivendi))
+
+(use-package rainbow-mode
+  :straight t)
 
 (use-package spacious-padding
   :straight t)
@@ -739,3 +742,6 @@
                     :width 'normal)
     (set-face-attribute 'variable-pitch nil :family "Aporetic Sans" :height 160)
     )))
+
+
+(diminish 'auto-revert-mode)
