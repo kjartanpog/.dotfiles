@@ -62,7 +62,22 @@
   (when (file-exists-p (concat user-emacs-directory "custom.el"))
     (load (concat user-emacs-directory "custom.el")))
   (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
-  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t))))
+  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t)))
+
+
+  (setq word-wrap t)
+
+  ;; :TODO: Move to use-package org
+  (defun my/enable-visual-line-mode-and-wrap ()
+    "Enable visual line mode and set word wrap in non-programming modes."
+    (visual-line-mode 1)
+    (org-indent-mode 1)
+    (variable-pitch-mode 1))
+  ;; (add-hook 'text-mode-hook 'my/enable-visual-line-mode-and-wrap)
+  (add-hook 'org-mode-hook 'my/enable-visual-line-mode-and-wrap)
+  ;; (add-hook 'markdown-mode-hook 'my/enable-visual-line-mode-and-wrap)
+  ;; (add-hook 'message-mode-hook 'my/enable-visual-line-mode-and-wrap)
+  )
 
 ;; Modeline
 
@@ -343,6 +358,14 @@
   (setq modus-operandi-palette-overrides
         '((fg-heading-1 "#2f5f9f")))
 
+  (setq modus-themes-headings
+	'((0 . (1.35))
+          (1 . (1.30))
+          (2 . (1.24))
+          (3 . (semibold 1.17))
+          (4 . (1.14))
+          (t . (monochrome))))
+
   ;; Maybe define some palette overrides, such as by using our presets
   ;;(setq modus-themes-common-palette-overrides
   ;;      modus-themes-preset-overrides-intense)
@@ -355,7 +378,27 @@
   :straight t)
 
 (use-package spacious-padding
-  :straight t)
+  :straight t
+  :config
+  (setq spacious-padding-widths
+      '( :internal-border-width 15
+         :header-line-width 4
+         :mode-line-width 2
+         :tab-width 4
+         :right-divider-width 30
+         :scroll-bar-width 8
+         :fringe-width 8))
+  ;; (spacious-padding-mode 1)
+  )
+
+(use-package visual-fill-column
+  :straight t
+  :defer t
+  :custom
+  (visual-fill-column-width 80)
+  :hook (org-mode . (lambda ()
+		      (visual-fill-column-mode)
+		      (visual-fill-column-toggle-center-text))))
 
 (use-package vi-tilde-fringe
   :straight t
@@ -742,6 +785,24 @@
                     :width 'normal)
     (set-face-attribute 'variable-pitch nil :family "Aporetic Sans" :height 160)
     )))
+
+(use-package org-indent
+  :config
+  ;; In order to avoid line spacing issues when a line of text
+  ;; contains both variable- and fixed-pitch text, we need to
+  ;; make sure that the org-indent face inherits from fixed-pitch.
+  ;; (set-face-attribute 'org-indent nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height 0.85)
+  ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch) :height 0.85)
+  (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch) :height 0.85)
+  ;; (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch) :height 0.85)
+  ;; (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  ;; (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  )
+
 
 
 (diminish 'auto-revert-mode)
