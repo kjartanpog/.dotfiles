@@ -17,11 +17,15 @@
 
 (straight-use-package 'use-package)
 
+(use-package diminish
+  :straight t
+  :config)
+
 (use-package emacs
   :init                                           ;; Initialization settings that apply before the package is loaded.
   (setq inhibit-startup-screen t)                 ;; Inhibits the default welcome to emacs startup screen.
   (tool-bar-mode -1)                              ;; Disable the tool bar for a cleaner interface.
-  (scroll-bar-mode -1)                            ;; Disable the scroll bar for a cleaner interface.
+  ;; (scroll-bar-mode -1)                            ;; Disable the scroll bar for a cleaner interface.
   (savehist-mode 1)                               ;; Enable saving of command history.
   (save-place-mode 1)                             ;; Enable saving the place in files for easier return.
   (line-number-mode -1)                           ;; Disable display of line number in the mode-line
@@ -34,8 +38,8 @@
   (use-short-answers t)                           ;; Use short answers in prompts for quicker responses (y instead of yes)
   (tab-always-indent 'complete) ;; TAB first tries to indent the current line, and if the line was already indented, then try to complete the thing at point.
   (global-auto-revert-non-file-buffers t)         ;; Automatically refresh non-file buffers.
-  (pixel-scroll-precision-mode t)                 ;; Enable precise pixel scrolling.
-  (pixel-scroll-precision-use-momentum nil)       ;; Disable momentum scrolling for pixel precision.
+  ;; (pixel-scroll-precision-mode t)                 ;; Enable precise pixel scrolling.
+  ;; (pixel-scroll-precision-use-momentum nil)       ;; Disable momentum scrolling for pixel precision.
 
   ;; Hide commands in M-x which do not apply to the current mode.  Corfu
   ;; commands are hidden, since they are not used via M-x. This setting is
@@ -63,6 +67,10 @@
     (load (concat user-emacs-directory "custom.el")))
   (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
   (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t)))
+  (set-window-scroll-bars (minibuffer-window) nil nil nil nil 1)
+  (set-window-parameter (get-buffer-window "*Messages*") 'vertical-scroll-bars nil)
+  (setq display-line-numbers-width-start t)
+
 
 
   (setq word-wrap t)
@@ -71,7 +79,7 @@
   (defun my/enable-visual-line-mode-and-wrap ()
     "Enable visual line mode and set word wrap in non-programming modes."
     (visual-line-mode 1)
-    (org-indent-mode 1)
+    ;; (org-indent-mode 1)
     (variable-pitch-mode 1))
   ;; (add-hook 'text-mode-hook 'my/enable-visual-line-mode-and-wrap)
   (add-hook 'org-mode-hook 'my/enable-visual-line-mode-and-wrap)
@@ -81,9 +89,6 @@
 
 ;; Modeline
 
-(use-package diminish
-  :straight t
-  :config)
 
 (use-package project
   :custom
@@ -240,6 +245,23 @@
   :config
   (global-evil-surround-mode t))
 
+(use-package evil-snipe
+  :straight t
+  :after evil
+  :diminish (evil-snipe-local-mode)
+  :config
+  (evil-snipe-mode +1)
+  (evil-snipe-override-mode +1)
+
+  ;; and disable in specific modes
+  ;; (push 'python-mode evil-snipe-disabled-modes)
+
+  ;; or disable it manually
+  ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-mode)
+  ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-override-mode)
+  )
+  
+
 (use-package general
   :straight t
   :config
@@ -273,18 +295,19 @@
     "bf"  '(consult-buffer :which-key "Find")
 
     ;; Window Navigation
-    "w" '(:ignore t :which-key "Window")
+    "w" '(:ignore t :which-key "window")
     "w <escape>" '(keyboard-escape-quit :which-key t)
-    "wl" '(evil-window-right :which-key t)
-    "wh" '(evil-window-left :which-key t)
-    "wk" '(evil-window-up :which-key t)
-    "wj" '(evil-window-down :which-key t)
-    "wr" '(evil-window-rotate-downwards :which-key t)
-    "ws" '(evil-window-split :which-key t)
-    "wv" '(evil-window-vsplit :which-key t)
-    "wc" '(evil-window-delete :which-key t)
-    "wq" '(evil-quit :which-key t)
-    "wu" '(winner-undo :which-key t)
+    "wl" '(evil-window-right :which-key "right")
+    "wh" '(evil-window-left :which-key "left")
+    "wk" '(evil-window-up :which-key "up")
+    "wj" '(evil-window-down :which-key "down")
+    "wr" '(evil-window-rotate-downwards :which-key "rotate")
+    "ws" '(evil-window-split :which-key "split horizontally")
+    "wv" '(evil-window-vsplit :which-key "split vertically")
+    "wc" '(evil-window-delete :which-key "delete")
+    "wq" '(evil-quit :which-key "quit")
+    "wt" '(tab-new :which-key "new tab")
+    "wu" '(winner-undo :which-key "undo")
 
      ;; Help
     "h" '(:ignore t :which-key "Help")
@@ -312,6 +335,11 @@
     "p" '(:ignore t :which-key "Project")
     "p <escape>" '(keyboard-escape-quit :which-key t)
     "pf" '(project-find-file :which-key t)
+
+    ;; LLM
+    "l" '(:ignore t :which-key "LLM")
+    "l <escape>" '(keyboard-escape-quit :which-key t)
+    "ll" '(gptel :which-key "gptel")
 
      ;; Org Roam
     "n" '(:ignore t :which-key "Org Roam")
@@ -388,7 +416,7 @@
          :right-divider-width 30
          :scroll-bar-width 8
          :fringe-width 8))
-  ;; (spacious-padding-mode 1)
+  (spacious-padding-mode 1)
   )
 
 (use-package visual-fill-column
@@ -764,13 +792,19 @@
 (use-package magit
   :straight t)
 
-(use-package diff-hl
+(use-package diff-hl 
   :straight t
   :after (magit)
   :config
   (global-diff-hl-mode)
   (global-diff-hl-show-hunk-mouse-mode)
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+       (custom-set-faces
+      '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
+      '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
+      '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f"))))
+      )
+)
 
 
 (cond
@@ -793,7 +827,7 @@
   ;; make sure that the org-indent face inherits from fixed-pitch.
   ;; (set-face-attribute 'org-indent nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height 0.85)
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height 0.85)
   ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch) :height 0.85)
   (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
@@ -802,6 +836,70 @@
   ;; (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
   ;; (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
   )
+(use-package org-download
+  :straight t
+  :config
+
+  ;; Drag-and-drop to `dired`
+  (add-hook 'dired-mode-hook 'org-download-enable)
+  (add-hook 'org-mode-hook 'org-download-enable)
+  )
+
+(use-package ultra-scroll
+  :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
+  ;; :vc (:url "https://github.com/jdtsmith/ultra-scroll") ; For Emacs>=30
+  ;:load-path "~/code/emacs/ultra-scroll" ; if you git clone'd instead of using vc
+  :init
+  (setq scroll-conservatively 101 ; important!
+        scroll-margin 0) 
+  :config
+  (ultra-scroll-mode 1))
+
+(use-package nerd-icons
+  :straight t
+  :config
+  (custom-set-faces
+   '(nerd-icons-folder ((t (:foreground "#008899"))))
+   '(nerd-icons-folder-open ((t (:foreground "#008899"))))
+   ;; Add more customizations as needed for other icons
+   )
+  )
+
+(use-package nerd-icons-dired
+  :straight t
+  :after nerd-icons
+  :hook (dired-mode . nerd-icons-dired-mode))
+
+(use-package nerd-icons-completion
+  :straight t
+  :after (nerd-icons marginalia)
+  :config
+  (nerd-icons-completion-mode)
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
+  ;; :hook (marginalia-mode-hook . nerd-icons-completion-marginalia-setup)
+  )
+
+(use-package nerd-icons-corfu
+  :straight t
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+
+  ;; Optionally:
+  ;; (setq nerd-icons-corfu-mapping
+  ;; 	'((array :style "cod" :icon "symbol_array" :face font-lock-type-face)
+  ;;         (boolean :style "cod" :icon "symbol_boolean" :face font-lock-builtin-face)
+  ;;         ;; You can alternatively specify a function to perform the mapping,
+  ;;         ;; use this when knowing the exact completion candidate is important.
+  ;;         (file :fn nerd-icons-icon-for-file :face font-lock-string-face)
+  ;;         ;; ...
+  ;;         (t :style "cod" :icon "code" :face font-lock-warning-face)))
+  ;; Remember to add an entry for `t', the library uses that as default.
+
+  ;; The Custom interface is also supported for tuning the variable above.
+  )
+
+
+  
 
 
 

@@ -12,3 +12,7 @@
 
 ;; Don't load package.el since we're using Straight
 (setq package-enable-at-startup nil)
+
+(setq default-frame-alist
+      '((width . 100)   ; Width in characters
+        (height . 30))) ; Height in lines
