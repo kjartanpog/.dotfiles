@@ -47,6 +47,7 @@
   (read-extended-command-predicate #'command-completion-default-include-p)
 
   :hook                                           ;; Add hooks to enable specific features in certain modes.
+  (prog-mode . electric-pair-local-mode)
   (prog-mode . display-line-numbers-mode)
   (prog-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers in programming modes.
 
@@ -70,6 +71,10 @@
   (set-window-scroll-bars (minibuffer-window) nil nil nil nil 1)
   (set-window-parameter (get-buffer-window "*Messages*") 'vertical-scroll-bars nil)
   (setq display-line-numbers-width-start t)
+  (setq display-line-numbers-type 'relative) ; Set relative line numbers
+  (setq vc-follow-symlinks t) ; Always follow symbolic link to a file under version control.
+  (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
+
 
 
 
@@ -87,8 +92,7 @@
   ;; (add-hook 'message-mode-hook 'my/enable-visual-line-mode-and-wrap)
   )
 
-;; Modeline
-
+;;; Modeline
 
 (use-package project
   :custom
@@ -97,7 +101,7 @@
 (use-package eldoc
   :diminish eldoc-mode)
 
-;; Bookmarks, History & Undo
+;;; Bookmarks, History & Undo
 
 (use-package bookmark
  :config
@@ -123,7 +127,7 @@
   :bind (:map vundo-mode-map
               ("<escape>" . vundo-quit)))
 
-;; Minibuffer
+;;; Minibuffer
 
 (use-package vertico
   :straight t
@@ -194,7 +198,7 @@
   (corfu-prescient-mode t))
 
 
-;; Keymaps
+;;; Keymaps
 
 (use-package which-key
   :ensure nil
@@ -206,6 +210,7 @@
 
 (use-package evil
   :straight t
+  :after dired
   :init
 	;;In addition we need to add this to the :init block of use-package evil to prevent evil and evil-collection interfering
   (setq evil-want-keybinding nil ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
@@ -219,7 +224,10 @@
   (evil-undo-system 'undo-fu)
   ;; (evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
   :config
-  (evil-mode t))
+  (evil-mode t)
+  (with-eval-after-load 'dired
+  (evil-define-key 'normal dired-mode-map "h" 'dired-up-directory)
+  (evil-define-key 'normal dired-mode-map "l" 'dired-find-alternate-file)))
 
 (use-package evil-collection
   :straight t
@@ -294,6 +302,12 @@
     "bp"  '(previous-buffer :which-key "Previous")
     "bf"  '(consult-buffer :which-key "Find")
 
+    ;;;; Search
+    "s" '(:ignore t :which-key "Search")
+    "s <escape>" '(keyboard-escape-quit :which-key t)
+    "sr" '(consult-ripgrep :which-key "ripgrep")
+    "so" '(consult-outline :which-key "outline")
+
     ;; Window Navigation
     "w" '(:ignore t :which-key "window")
     "w <escape>" '(keyboard-escape-quit :which-key t)
@@ -301,6 +315,10 @@
     "wh" '(evil-window-left :which-key "left")
     "wk" '(evil-window-up :which-key "up")
     "wj" '(evil-window-down :which-key "down")
+    "wL" '(evil-window-move-far-right :which-key "move right")
+    "wH" '(evil-window-move-far-left :which-key "move left")
+    "wK" '(evil-window-move-very-top :which-key "move top")
+    "wJ" '(evil-window-move-very-bottom :which-key "move bottom")
     "wr" '(evil-window-rotate-downwards :which-key "rotate")
     "ws" '(evil-window-split :which-key "split horizontally")
     "wv" '(evil-window-vsplit :which-key "split vertically")
@@ -344,12 +362,12 @@
      ;; Org Roam
     "n" '(:ignore t :which-key "Org Roam")
     "n <escape>" '(keyboard-escape-quit :which-key t)
-    "nf" '(org-roam-node-find :which-key t)
-    "ni" '(org-roam-node-insert :which-key t)
-    "nc" '(org-roam-capture :which-key t)
-    "ng" '(org-roam-graph :which-key t)
-    "nl" '(org-roam-buffer-toggle :which-key t)
-    "nj" '(org-roam-dailies-capture-today :which-key t)
+    ;; "nf" '(org-roam-node-find :which-key "node find")
+    ;; "ni" '(org-roam-node-insert :which-key "node insert")
+    ;; "nc" '(org-roam-capture :which-key "capture")
+    ;; "ng" '(org-roam-graph :which-key "graph")
+    ;; "nl" '(org-roam-buffer-toggle :which-key t)
+    ;; "nj" '(org-roam-dailies-capture-today :which-key t)
 
      ;; Toggle UI / Elements
     "t" '(:ignore t :which-key "Toggle")
@@ -723,21 +741,21 @@
 
 ;; Org Mode
 
-(use-package org-roam
-  :straight t
-  :custom
-  (org-roam-directory "~/org/roam")
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n g" . org-roam-graph)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture)
-         ;; Dailies
-         ("C-c n j" . org-roam-dailies-capture-today))
-  :config
-  ;; If you're using a vertical completion framework, you might want a more informative completion interface
-  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-  (org-roam-db-autosync-mode))
+;; (use-package org-roam
+;;   :straight t
+;;   :custom
+;;   (org-roam-directory "~/org/roam")
+;;   :bind (("C-c n l" . org-roam-buffer-toggle)
+;;          ("C-c n f" . org-roam-node-find)
+;;          ("C-c n g" . org-roam-graph)
+;;          ("C-c n i" . org-roam-node-insert)
+;;          ("C-c n c" . org-roam-capture)
+;;          ;; Dailies
+;;          ("C-c n j" . org-roam-dailies-capture-today))
+;;   :config
+;;   ;; If you're using a vertical completion framework, you might want a more informative completion interface
+;;   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+;;   (org-roam-db-autosync-mode))
 
 ;; Terminal Emacs
 
@@ -751,9 +769,6 @@
 ;;   :straight (combobulate :type git :host github :repo "mickeynp/combobulate")
 ;;   :defer t
 ;;   )
-
-(use-package conda
-  :straight t)
 
 ;; AI
 
@@ -799,11 +814,10 @@
   (global-diff-hl-mode)
   (global-diff-hl-show-hunk-mouse-mode)
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-       (custom-set-faces
-      '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
-      '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
-      '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f"))))
-      )
+  (custom-set-faces
+   '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
+   '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
+   '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f")))))
 )
 
 
@@ -899,8 +913,73 @@
   )
 
 
-  
+ (use-package pulsar
+  :straight t
+  :config
+  (add-to-list 'pulsar-pulse-functions 'evil-yank)
+  (add-to-list 'pulsar-pulse-functions 'evil-jump-backward)
+  (setq pulsar-pulse-functions (remove 'evil-scroll-up pulsar-pulse-functions))
+  (setq pulsar-pulse-functions (remove 'evil-scroll-down pulsar-pulse-functions))
+  (pulsar-global-mode))
+
+(diminish 'auto-revert-mode)
+;; (load "./custom.el")
+(progn
+
+  ;; set font for emoji
+  ;; if before emacs 28, this should come after setting symbols, because emacs 28 now has 'emoji . before, emoji is part of 'symbol
+
+  (set-fontset-font
+   t
+   (if (< emacs-major-version 28)
+       '(#x1f300 . #x1fad0)
+     'emoji
+     )
+   (cond
+    ((member "Apple Color Emoji" (font-family-list)) "Apple Color Emoji")
+    ((member "Noto Color Emoji" (font-family-list)) "Noto Color Emoji")
+    ((member "Noto Emoji" (font-family-list)) "Noto Emoji")
+    ((member "Segoe UI Emoji" (font-family-list)) "Segoe UI Emoji")
+    ((member "Symbola" (font-family-list)) "Symbola"))))
+
+(use-package qrencode
+  :straight t) 
+
+(use-package eglot
+  :config
+  (add-hook 'nix-ts-mode-hook 'eglot-ensure)
+
+  (defun my-cape-complete-eglot ()
+    (when (and (eglot-managed-p) (bound-and-true-p eglot--current-server))
+      (eglot-completion-at-point)))
+
+  ;; Add Eglot completions to cape
+  (add-to-list 'completion-at-point-functions #'my-cape-complete-eglot)
+  )
+
+;;; Note taking
+
+(use-package denote
+  :straight t
+  :hook (dired-mode . denote-dired-mode)
+  :bind
+  (("C-c n n" . denote)
+   ("C-c n r" . denote-rename-file)
+   ("C-c n l" . denote-link)
+   ("C-c n b" . denote-backlinks)
+   ("C-c n d" . denote-dired)
+   ("C-c n g" . denote-grep))
+  :config
+  (setq denote-directory (expand-file-name "~/Denote"))
+
+  ;; Automatically rename Denote buffers when opening them so that
+  ;; instead of their long file name they have, for example, a literal
+  ;; "[D]" followed by the file's title.  Read the doc string of
+  ;; `denote-rename-buffer-format' for how to modify this.
+  (denote-rename-buffer-mode 1))
 
 
 
 (diminish 'auto-revert-mode)
+(diminish 'treesit-fold-mode)
+(put 'dired-find-alternate-file 'disabled nil)
