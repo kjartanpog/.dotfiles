@@ -75,9 +75,6 @@
   (setq vc-follow-symlinks t) ; Always follow symbolic link to a file under version control.
   (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
 
-
-
-
   (setq word-wrap t)
 
   ;; :TODO: Move to use-package org
@@ -208,13 +205,13 @@
   :config
   (which-key-mode t))
 
+;;;; evil
 (use-package evil
   :straight t
-  :after dired
   :init
-	;;In addition we need to add this to the :init block of use-package evil to prevent evil and evil-collection interfering
-  (setq evil-want-keybinding nil ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
-	evil-want-integration t)
+  (setq evil-want-keybinding nil) ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
+  (setq evil-want-integration t)
+  (setq evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
   :custom
   (evil-want-C-u-scroll t)                 ;; Makes ‘C-u’ scroll up (like Vim).
   (evil-want-C-u-delete t)                 ;; Makes ‘C-u’ delete on insert mode
@@ -226,8 +223,22 @@
   :config
   (evil-mode t)
   (with-eval-after-load 'dired
-  (evil-define-key 'normal dired-mode-map "h" 'dired-up-directory)
-  (evil-define-key 'normal dired-mode-map "l" 'dired-find-alternate-file)))
+    (evil-define-key 'normal dired-mode-map "h" 'dired-up-directory)
+    (evil-define-key 'normal dired-mode-map "l" 'dired-find-alternate-file))
+  (add-hook 'evil-insert-state-entry-hook
+	    (lambda ()
+	      (when (derived-mode-p 'prog-mode)
+		(setq display-line-numbers-type t)
+		;; (hl-line-mode -1)
+		(display-line-numbers-mode -1)
+		(display-line-numbers-mode 1))))
+  (add-hook 'evil-insert-state-exit-hook
+	    (lambda ()
+	      (when (derived-mode-p 'prog-mode)
+		(setq display-line-numbers-type 'relative)
+		;; (hl-line-mode 1)
+		(display-line-numbers-mode -1)
+		(display-line-numbers-mode 1)))))
 
 (use-package evil-collection
   :straight t
@@ -268,8 +279,18 @@
   ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-mode)
   ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-override-mode)
   )
-  
 
+(use-package evil-textobj-tree-sitter
+  :straight t
+  :after (evil evil-collection)
+  :config
+  (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+  (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
+  (define-key evil-outer-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+  (define-key evil-inner-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "comment.inner"))
+  )
+  
+;;;; general
 (use-package general
   :straight t
   :config
@@ -307,6 +328,7 @@
     "s <escape>" '(keyboard-escape-quit :which-key t)
     "sr" '(consult-ripgrep :which-key "ripgrep")
     "so" '(consult-outline :which-key "outline")
+    "sl" '(consult-line :which-key "line")
 
     ;; Window Navigation
     "w" '(:ignore t :which-key "window")
@@ -374,6 +396,7 @@
     "t <escape>" '(keyboard-escape-quit :which-key t)
     "tt" '(modus-themes-toggle :which-key "Theme")
     "tr" '(rainbow-mode  :which-key "Rainbow")
+    "tl" '(toggle-truncate-lines :which-key "truncate lines")
 
     ;; Git (Magit)
     "g" '(:ignore t :which-key "Toggle")
@@ -444,7 +467,9 @@
   (visual-fill-column-width 80)
   :hook (org-mode . (lambda ()
 		      (visual-fill-column-mode)
-		      (visual-fill-column-toggle-center-text))))
+		      ;; (visual-line-fill-column-mode)
+		      (visual-fill-column-toggle-center-text)))
+  )
 
 (use-package vi-tilde-fringe
   :straight t
@@ -648,12 +673,10 @@
 
 (use-package embark
   :straight t
-
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
    ("C-;" . embark-dwim)        ;; good alternative: M-.
    ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
-
   :init
 
   ;; Optionally replace the key help with a completing-read interface
@@ -840,11 +863,11 @@
   ;; contains both variable- and fixed-pitch text, we need to
   ;; make sure that the org-indent face inherits from fixed-pitch.
   ;; (set-face-attribute 'org-indent nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height 0.85)
+  ;; (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height 0.85)
   ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch) :height 0.85)
-  (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch) :height 0.85)
   ;; (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch) :height 0.85)
   ;; (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
@@ -978,8 +1001,29 @@
   ;; `denote-rename-buffer-format' for how to modify this.
   (denote-rename-buffer-mode 1))
 
+	      
 
+
+;;; Organize later
+;; (use-package dashboard
+;;   :straight t
+;;   :config
+;;   (dashboard-setup-startup-hook)
+;;   :init
+;;   (setq dashboard-items '((recents   . 5)
+;; 			  (bookmarks . 5)
+;; 			  (projects  . 5)
+;; 			  (agenda    . 5)
+;; 			  (registers . 5)))
+;;   ;; (setq dashboard-center-content t)
+;;   (setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
+;;   (setq dashboard-set-heading-icons t)
+;;   (setq dashboard-set-file-icons t)
+;;   (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
+;;   ;; To add icons to the widget headings and their items:
+;;   )
 
 (diminish 'auto-revert-mode)
 (diminish 'treesit-fold-mode)
+(diminish 'outline-minor-mode)
 (put 'dired-find-alternate-file 'disabled nil)
