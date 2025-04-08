@@ -1,0 +1,6 @@
+[user]
+	email = kjartan.masson@proton.me
+	name = Kjartan Másson
+[alias]
+	lol = log --oneline --decorate
+	gud = log --oneline --graph --decorate
