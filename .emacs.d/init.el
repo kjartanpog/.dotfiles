@@ -323,12 +323,14 @@
     "bp"  '(previous-buffer :which-key "Previous")
     "bf"  '(consult-buffer :which-key "Find")
 
-    ;;;; Search
+;;;; general s
     "s" '(:ignore t :which-key "Search")
     "s <escape>" '(keyboard-escape-quit :which-key t)
     "sr" '(consult-ripgrep :which-key "ripgrep")
     "so" '(consult-outline :which-key "outline")
     "sl" '(consult-line :which-key "line")
+    "su" '(vundo :which-key t "undo")
+    "st" '(consult-todo-project :which-key t "todo")
 
     ;; Window Navigation
     "w" '(:ignore t :which-key "window")
@@ -391,14 +393,14 @@
     ;; "nl" '(org-roam-buffer-toggle :which-key t)
     ;; "nj" '(org-roam-dailies-capture-today :which-key t)
 
-     ;; Toggle UI / Elements
+;;;; general t
     "t" '(:ignore t :which-key "Toggle")
     "t <escape>" '(keyboard-escape-quit :which-key t)
     "tt" '(modus-themes-toggle :which-key "Theme")
     "tr" '(rainbow-mode  :which-key "Rainbow")
     "tl" '(toggle-truncate-lines :which-key "truncate lines")
 
-    ;; Git (Magit)
+;;;; general g
     "g" '(:ignore t :which-key "Toggle")
     "g <escape>" '(keyboard-escape-quit :which-key t)
     "gs" '(magit-status :which-key "Status")
@@ -521,7 +523,8 @@
   ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
   ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
   ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-  (corfu-preselect 'prompt)      ;; Preselect the prompt
+  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+  (corfu-preselect 'first)
   ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   :bind
   (:map corfu-map
@@ -670,6 +673,10 @@
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
 )
+
+(use-package consult-todo
+  :straight t
+  :after (consult))
 
 (use-package embark
   :straight t
@@ -1023,6 +1030,12 @@
 ;;   (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
 ;;   ;; To add icons to the widget headings and their items:
 ;;   )
+
+;;; Get shit done
+(use-package hl-todo
+  :straight t
+  :config
+  (global-hl-todo-mode))
 
 (diminish 'auto-revert-mode)
 (diminish 'treesit-fold-mode)
