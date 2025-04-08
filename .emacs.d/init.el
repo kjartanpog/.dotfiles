@@ -219,7 +219,7 @@
   (evil-vsplit-window-right t)             ;; Vertically split windows with are created to the right.
   (evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
   (evil-undo-system 'undo-fu)
-  ;; (evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
+  (evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
   :config
   (evil-mode t)
   (with-eval-after-load 'dired
