@@ -913,8 +913,9 @@
   :config
   (nerd-icons-completion-mode)
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
-  ;; :hook (marginalia-mode-hook . nerd-icons-completion-marginalia-setup)
-  )
+  (custom-set-faces
+   '(nerd-icons-completion-dir-face ((t (:foreground "#008899"))))
+  ))
 
 (use-package nerd-icons-corfu
   :straight t
