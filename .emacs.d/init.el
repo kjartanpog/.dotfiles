@@ -383,9 +383,11 @@
     "l <escape>" '(keyboard-escape-quit :which-key t)
     "ll" '(gptel :which-key "gptel")
 
-     ;; Org Roam
-    "n" '(:ignore t :which-key "Org Roam")
+;;;; general n
+    "n" '(:ignore t :which-key "Note")
     "n <escape>" '(keyboard-escape-quit :which-key t)
+    "nj" '(denote-journal-new-or-existing-entry :which-key "journal today")
+    "nn" '(denote :which-key "new")
     ;; "nf" '(org-roam-node-find :which-key "node find")
     ;; "ni" '(org-roam-node-insert :which-key "node insert")
     ;; "nc" '(org-roam-capture :which-key "capture")
@@ -869,7 +871,13 @@
                     :height 140
                     :weight 'normal
                     :width 'normal)
+    (set-face-attribute 'fixed-pitch nil
+                    :family "Aporetic Sans Mono"
+                    :height 140
+                    :weight 'normal
+                    :width 'normal)
     (set-face-attribute 'variable-pitch nil :family "Aporetic Sans" :height 160)
+    ;; (set-face-attribute 'variable-pitch nil :family "Adwaita Sans" :height 160)
     )))
 
 (use-package org-indent
@@ -878,10 +886,10 @@
   ;; contains both variable- and fixed-pitch text, we need to
   ;; make sure that the org-indent face inherits from fixed-pitch.
   ;; (set-face-attribute 'org-indent nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height 0.85)
   ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch) :height 0.85)
+  ;; (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch) :height 0.85)
   ;; (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch) :height 0.85)
@@ -896,6 +904,9 @@
   (add-hook 'dired-mode-hook 'org-download-enable)
   (add-hook 'org-mode-hook 'org-download-enable)
   )
+
+(use-package org-mouse
+  :after org)
 
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
@@ -987,6 +998,10 @@
 (use-package eglot
   :config
   (add-hook 'nix-ts-mode-hook 'eglot-ensure)
+  (add-hook 'python-ts-mode-hook 'eglot-ensure)
+
+  (add-to-list 'eglot-server-programs
+	       '((python-mode) . ("pyright-langserver" "--stdio")))
 
   (defun my-cape-complete-eglot ()
     (when (and (eglot-managed-p) (bound-and-true-p eglot--current-server))
@@ -1017,6 +1032,21 @@
   ;; `denote-rename-buffer-format' for how to modify this.
   (denote-rename-buffer-mode 1))
 
+(use-package denote-journal
+  :straight (denote-journal :type git :host github :repo "protesilaos/denote-journal")
+  :after denote
+  :hook (calendar-mode . denote-journal-calendar-mode)
+  :config
+  ;; Use the "journal" subdirectory of the `denote-directory'.  Set this
+  ;; to nil to use the `denote-directory' instead.
+  (setq denote-journal-directory
+        (expand-file-name "journal" denote-directory))
+  ;; Default keyword for new journal entries. It can also be a list of
+  ;; strings.
+  (setq denote-journal-keyword "journal")
+  ;; Read the doc string of `denote-journal-title-format'.
+  (setq denote-journal-title-format 'day-date-month-year))
+
 	      
 
 
@@ -1044,6 +1074,20 @@
   :straight t
   :config
   (global-hl-todo-mode))
+
+(defun my/org-toggle-hide-emphasis-markers ()
+  "Toggle `org-hide-emphasis-markers' locally and refresh fontification."
+  (interactive)
+  (if (bound-and-true-p org-hide-emphasis-markers)
+      (setq-local org-hide-emphasis-markers nil)
+    (setq-local org-hide-emphasis-markers t))
+  ;; Refresh fontification
+  (font-lock-flush)
+  (font-lock-ensure)
+  ;; (message "org-hide-emphasis-markers is now %s" org-hide-emphasis-markers)
+  )
+
+(define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
 
 (diminish 'auto-revert-mode)
 (diminish 'treesit-fold-mode)
