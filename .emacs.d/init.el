@@ -388,6 +388,7 @@
     "n <escape>" '(keyboard-escape-quit :which-key t)
     "nj" '(denote-journal-new-or-existing-entry :which-key "journal today")
     "nn" '(denote :which-key "new")
+    "nf" '(denote-open-or-create :which-key "find")
     ;; "nf" '(org-roam-node-find :which-key "node find")
     ;; "ni" '(org-roam-node-insert :which-key "node insert")
     ;; "nc" '(org-roam-capture :which-key "capture")
