@@ -766,6 +766,7 @@
   :if (treesit-language-available-p 'yaml)
   :defer t
   :mode (("\\.ya?ml\\'" . yaml-ts-mode))
+  :hook ((yaml-ts-mode . (lambda () (setq-local tab-width 2))))
   )
   
 
