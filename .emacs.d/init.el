@@ -730,7 +730,8 @@
   :config
   (setq treesit-load-name-override-list
 	'((python "python" "tree_sitter_python")
-	  (nix "nix" "tree_sitter_nix")))
+	  (nix "nix" "tree_sitter_nix")
+	  (yaml "yaml" "tree_sitter_yaml")))
   (setq treesit-extra-load-path
 	(list tree-sitter-langs--dir
 	      (concat tree-sitter-langs--dir "bin/")))
@@ -759,6 +760,12 @@
   :hook
   (conf-mode . display-line-numbers-mode)
   (conf-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers 
+  )
+
+(use-package yaml-ts-mode
+  :if (treesit-language-available-p 'yaml)
+  :defer t
+  :mode (("\\.ya?ml\\'" . yaml-ts-mode))
   )
   
 
