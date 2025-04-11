@@ -28,7 +28,8 @@
   ;; (scroll-bar-mode -1)                            ;; Disable the scroll bar for a cleaner interface.
   (savehist-mode 1)                               ;; Enable saving of command history.
   (save-place-mode 1)                             ;; Enable saving the place in files for easier return.
-  (line-number-mode -1)                           ;; Disable display of line number in the mode-line
+  ;; (line-number-mode -1)                           ;; Disable display of line number in the mode-line
+  (column-number-mode 1)                           ;; Disable display of column number in the mode-line
   (winner-mode 1)                                 ;; Enable winner mode to easily undo window configuration changes.
   (modify-coding-system-alist 'file "" 'utf-8)    ;; Set the default coding system for files to UTF-8.
 
@@ -734,6 +735,7 @@
   (setq treesit-load-name-override-list
 	'((python "python" "tree_sitter_python")
 	  (nix "nix" "tree_sitter_nix")
+	  (json "json" "tree_sitter_json")
 	  (yaml "yaml" "tree_sitter_yaml")))
   (setq treesit-extra-load-path
 	(list tree-sitter-langs--dir
@@ -772,6 +774,12 @@
   :hook ((yaml-ts-mode . (lambda () (setq-local tab-width 2))))
   )
   
+(use-package yaml-ts-mode
+  :if (treesit-language-available-p 'json)
+  :defer t
+  :mode (("\\.json\\'" . json-ts-mode))
+  ;; :hook ((json-ts-mode . (lambda () (setq-local tab-width 2))))
+  )
 
 (use-package python
   :init
@@ -964,10 +972,11 @@
   )
 
 
- (use-package pulsar
+(use-package pulsar
   :straight t
   :config
-  (add-to-list 'pulsar-pulse-functions 'evil-yank)
+  ;; (add-to-list 'pulsar-pulse-region-functions 'evil-yank)
+  ;; (add-to-list 'pulsar-pulse-functions 'evil-yank)
   (add-to-list 'pulsar-pulse-functions 'evil-jump-backward)
   (setq pulsar-pulse-functions (remove 'evil-scroll-up pulsar-pulse-functions))
   (setq pulsar-pulse-functions (remove 'evil-scroll-down pulsar-pulse-functions))
