@@ -28,8 +28,8 @@
   ;; (scroll-bar-mode -1)                            ;; Disable the scroll bar for a cleaner interface.
   (savehist-mode 1)                               ;; Enable saving of command history.
   (save-place-mode 1)                             ;; Enable saving the place in files for easier return.
-  ;; (line-number-mode -1)                           ;; Disable display of line number in the mode-line
-  (column-number-mode 1)                           ;; Disable display of column number in the mode-line
+  (line-number-mode -1)                           ;; Disable display of line number in the mode-line
+  ;; (column-number-mode 1)                           ;; Disable display of column number in the mode-line
   (winner-mode 1)                                 ;; Enable winner mode to easily undo window configuration changes.
   (modify-coding-system-alist 'file "" 'utf-8)    ;; Set the default coding system for files to UTF-8.
 
