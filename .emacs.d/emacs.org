@@ -1,0 +1,698 @@
+#+title: My Literate Emacs Configuration
+#+author: Kjartan Másson
+#+auto_tangle: t
+
+* What is this?
+
+** Motivation & Goals
+
++ Main focus on keyboard driven workflow, but fully embrace & integrate the convenience of mouse specific functionality
+
++ Focus the configuration for cross-platform graphical sessions, but try to have as much terminal-mode compatibility as possible (f.x. choosing nerd-icons over regular icons)
+  
++ Prefer enhancing & integrating built-in emacs capabilities & features instead of replacing them
+
++ Draw inspiration & integrate new functionality from modern editors, such as llm features in [[https://www.cursor.com/][cursor]]
+
++ Harness the power of emacs org-mode, making use of advanced features when applicable as a showcase & future reference, such as:
+  - Tangled source code blocks (perhaps de-tangle as well)
+  - Tags & TODOs with agenda integration
+  - Citations & references
+  - File & project specific org-mode bahviour
+  - image display
+    
+** Literate Programming
+
+** Inspiration
+
+*** positron-solutions
+
+[[https://github.com/positron-solutions][Github]]
+[[https://www.youtube.com/@Positron-gv7do][YouTube]]
+
+*** Karthinks
+
+**** TODO Check how he obtain color on visual selection
+
+**** TODO Check if he uses space indent in org-mode source code blocks
+
++ Check how he likes to integrate poppler for various buffers
+
+*** Protesilaos
+
++ Check how he handles general emacs configuration with or without use-package in his literate configuration
+
+** TODO Wanted functionality
+
++ TODO Icelandic dictionary lookup
++ GPTEL tooling
++ Mode specific <leader> s o
++ Context-aware multi-language spell checking
++ Context & text-object aware at-point help/documentation keymaps
++ drag-drop org-mode images
++ org-mode inline code font
++ length indicator
+
+** TODO Tweaks
+
++ consistent window focus between helpful & help-mode buffers
++ add hook to re-apply custom face-attributes when changing themes
+  
+* Configuration Files
+
+** early-init.el
+
+This file is loaded before the package system and GUI is initialized, so in it you can customize variables that affect the package initialization process, such as package-enable-at-startup, package-load-list, and package-user-dir. Note that variables like package-archives which only affect the installation of new packages, and not the process of making already-installed packages available, may be customized in the regular init file. See Package Installation.
+
+#+begin_src elisp :tangle my-early-init.el
+  ;;; -*- lexical-binding: t -*-
+
+  ;; Set the maximum output size for reading process output, allowing for larger data transfers.
+  (setq read-process-output-max (* 1024 1024 4))
+
+  ;; Don't load package.el since we're using Straight
+  (setq package-enable-at-startup nil)
+
+  (setq default-frame-alist
+        '((width . 100)   ; Width in characters
+          (height . 30))) ; Height in lines
+#+end_src
+
+** init.el
+
+#+begin_src elisp :tangle my-init.el
+  ;;; -*- lexical-binding: t -*-
+#+end_src
+
+** defun.el
+
+/Custom elisp functions used in my configuration/
+
+#+begin_src elisp :tangle defun.el
+  ;;; -*- lexical-binding: t -*-
+#+end_src
+
+* Other Files
+
+** custom.el
+
+/File reserved for interactive customizations made inside of emacs/
+
+** local.el
+
+/File reserved for machine specific configurations/
+
+* Components
+
+** Completions
+
+|           | minibuffer | in-buffer |
+| framework | vertico    | cape      |
+| functions | consult    | corfu     |
+
+*** Minibuffer
+
+**** vertico :package:
+
+/A performant and minimalistic vertical completion UI based on the default completion system/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package vertico
+    :straight t
+    :custom
+    ;; (vertico-scroll-margin 0) ;; Different scroll margin
+    ;; (vertico-count 20) ;; Show more candidates
+    ;; (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
+    (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
+    :init
+    (vertico-mode))
+#+end_src
+
+***** vertico-directory :package:
+
+/Commands for Ido-like directory navigation/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package vertico-directory
+    :after vertico
+    ;; :ensure nil
+    ;; More convenient directory navigation commands
+    :bind (:map vertico-map
+                ("RET" . vertico-directory-enter)
+                ("DEL" . vertico-directory-delete-char)
+                ("M-DEL" . vertico-directory-delete-word))
+    ;; Tidy shadowed file names
+    :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+#+end_src
+
+***** vertico-mouse
+
+/Mouse support for scrolling and candidate selection/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package vertico-mouse
+    :after vertico
+    :config
+    (vertico-mouse-mode t))
+#+end_src
+
+**** marginalia :package:
+
+/Adds marginalia to the minibuffer completions/
+
+**** consult :package:
+
+/Search and navigation commands for minibuffer completions/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package consult
+    :straight t
+    ;; Replace bindings. Lazily loaded by `use-package'.
+    :bind (;; C-c bindings in `mode-specific-map'
+           ("C-c M-x" . consult-mode-command)
+           ("C-c h" . consult-history)
+           ("C-c k" . consult-kmacro)
+           ("C-c m" . consult-man)
+           ("C-c i" . consult-info)
+           ([remap Info-search] . consult-info)
+           ;; C-x bindings in `ctl-x-map'
+           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+           ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+           ;; Custom M-# bindings for fast register access
+           ("M-#" . consult-register-load)
+           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+           ("C-M-#" . consult-register)
+           ;; Other custom bindings
+           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+           ;; M-g bindings in `goto-map'
+           ("M-g e" . consult-compile-error)
+           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+           ("M-g g" . consult-goto-line)             ;; orig. goto-line
+           ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+           ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+           ("M-g m" . consult-mark)
+           ("M-g k" . consult-global-mark)
+           ("M-g i" . consult-imenu)
+           ("M-g I" . consult-imenu-multi)
+           ;; M-s bindings in `search-map'
+           ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+           ("M-s c" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s k" . consult-keep-lines)
+           ("M-s u" . consult-focus-lines)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history)
+           :map isearch-mode-map
+           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+           ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+           ;; Minibuffer history
+           :map minibuffer-local-map
+           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+           ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
+
+    ;; The :init configuration is always executed (Not lazy)
+    :init
+
+    ;; Tweak the register preview for `consult-register-load',
+    ;; `consult-register-store' and the built-in commands.  This improves the
+    ;; register formatting, adds thin separator lines, register sorting and hides
+    ;; the window mode line.
+    (advice-add #'register-preview :override #'consult-register-window)
+    (setq register-preview-delay 0.5)
+
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
+
+    ;; Configure other variables and modes in the :config section,
+    ;; after lazily loading the package.
+    :config
+
+    ;; Optionally configure preview. The default value
+    ;; is 'any, such that any key triggers the preview.
+    ;; (setq consult-preview-key 'any)
+    ;; (setq consult-preview-key "M-.")
+    ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+    ;; For some commands and buffer sources it is useful to configure the
+    ;; :preview-key on a per-command basis using the `consult-customize' macro.
+    (consult-customize
+     consult-theme :preview-key '(:debounce 0.2 any)
+     consult-ripgrep consult-git-grep consult-grep consult-man
+     consult-bookmark consult-recent-file consult-xref
+     consult--source-bookmark consult--source-file-register
+     consult--source-recent-file consult--source-project-recent-file
+     ;; :preview-key "M-."
+     :preview-key '(:debounce 0.4 any))
+
+    ;; Optionally configure the narrowing key.
+    ;; Both < and C-+ work reasonably well.
+    (setq consult-narrow-key "<") ;; "C-+"
+
+    ;; Optionally make narrowing help available in the minibuffer.
+    ;; You may want to use `embark-prefix-help-command' or which-key instead.
+    ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+  )
+#+end_src
+
+***** consult-todo :package:
+
+/Search and jump hl-todo keywords in buffers with consult/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package consult-todo
+    :straight t
+    :after (consult))
+#+end_src
+
+*** At-point
+
+**** corfu :package:
+
+**** cape :package:
+
+*** Candidate selection
+
+**** orderless :package:
+
+**** prescient :package:
+
+/Simple but effective sorting and filtering of completion candidates/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package prescient
+    :straight t)
+#+end_src
+
+***** vertico-prescient :package:
+
+/Vertico integration for prescient/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package vertico-prescient
+    :straight t
+    :after (prescient vertico)
+    :config
+    (vertico-prescient-mode t))
+    
+#+end_src
+
+***** corfu-prescient :package:
+
+/Corfu integration for prescient/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package corfu-prescient
+    :straight t
+    :after (prescient corfu)
+    :config
+    (corfu-prescient-mode t))
+#+end_src
+
+
+** Fonts
+
+*** Aporetic :font:
+
+[[https://github.com/protesilaos/aporetic][Aporetic fonts - Github]]
+
++ I like narrow mono-spaced fonts
+
+
+*** [[https://github.com/protesilaos/fontaine][fontaine]] :package:
+
++ define detailed font configurations and set them on demand
+
+#+begin_src elisp :tangle my-init.el
+  (use-package fontaine
+  :straight t
+  :config
+  (locate-user-emacs-file "fontaine-latest-state.eld")
+  (setq fontaine-presets
+  	'((small
+  	   :default-family "Aporetic Serif Mono"
+  	   :default-height 80
+  	   :variable-pitch-family "Aporetic Sans")
+  	  (regular) ; like this it uses all the fallback values and is named `regular'
+  	  (medium
+  	   :default-weight semilight
+  	   :default-height 115
+  	   :bold-weight extrabold)
+  	  (large
+  	   :inherit medium
+  	   :default-height 150)
+  	  (presentation
+  	   :default-height 180)
+  	  (t
+  	   ;; I keep all properties for didactic purposes, but most can be
+  	   ;; omitted.  See the fontaine manual for the technicalities:
+  	   ;; <https://protesilaos.com/emacs/fontaine>.
+  	   :default-family "Aporetic Sans Mono"
+  	   :default-weight regular
+  	   :default-height 140
+
+           :fixed-pitch-family nil ; falls back to :default-family
+           :fixed-pitch-weight nil ; falls back to :default-weight
+           :fixed-pitch-height 1.0
+
+           :fixed-pitch-serif-family nil ; falls back to :default-family
+           :fixed-pitch-serif-weight nil ; falls back to :default-weight
+           :fixed-pitch-serif-height 1.0
+
+           :variable-pitch-family "Aporetic Serif"
+           :variable-pitch-weight nil
+           :variable-pitch-height 1.0
+
+           :mode-line-active-family nil ; falls back to :default-family
+           :mode-line-active-weight nil ; falls back to :default-weight
+           :mode-line-active-height 0.9
+
+           :mode-line-inactive-family nil ; falls back to :default-family
+           :mode-line-inactive-weight nil ; falls back to :default-weight
+           :mode-line-inactive-height 0.9
+
+           :header-line-family nil ; falls back to :default-family
+           :header-line-weight nil ; falls back to :default-weight
+           :header-line-height 0.9
+
+           :line-number-family nil ; falls back to :default-family
+           :line-number-weight nil ; falls back to :default-weight
+           :line-number-height 0.9
+
+           :tab-bar-family nil ; falls back to :default-family
+           :tab-bar-weight nil ; falls back to :default-weight
+           :tab-bar-height 1.0
+
+           :tab-line-family nil ; falls back to :default-family
+           :tab-line-weight nil ; falls back to :default-weight
+           :tab-line-height 1.0
+
+           :bold-family nil ; use whatever the underlying face has
+           :bold-weight bold
+
+           :italic-family nil
+           :italic-slant italic
+
+           :line-spacing nil)))
+
+  ;; Set the last preset or fall back to desired style from `fontaine-presets'
+  ;; (the `regular' in this case).
+  (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+
+  ;; Persist the latest font preset when closing/starting Emacs and
+  ;; while switching between themes.
+  (fontaine-mode 1))
+#+end_src
+
+** Keymaps
+
+*** evil :package:
+
+[[https://github.com/emacs-evil/evil][evil - Github]]
+
+#+begin_src elisp :tangle my-init.el
+  (use-package evil
+  :straight t
+  :init
+  (setq evil-want-keybinding nil) ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
+  (setq evil-want-integration t)
+  (setq evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
+  :custom
+  (evil-want-C-u-scroll t)                 ;; Makes ‘C-u’ scroll up (like Vim).
+  (evil-want-C-u-delete t)                 ;; Makes ‘C-u’ delete on insert mode
+  (evil-split-window-below t)              ;; Horizontally split windows are created below.
+  (evil-vsplit-window-right t)             ;; Vertically split windows with are created to the right.
+  (evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
+  (evil-undo-system 'undo-fu)
+  (evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
+  :config
+  (evil-mode t)
+  (with-eval-after-load 'dired
+    (evil-define-key 'normal dired-mode-map "h" 'dired-up-directory)
+    (evil-define-key 'normal dired-mode-map "l" 'dired-find-alternate-file))
+  )
+#+end_src
+
+**** evil-collection :package:
+
+/Collection of Evil bindings for the parts of Emacs that Evil does not cover properly by default/
+
+[[https://github.com/emacs-evil/evil-collection][Github]]
+
+#+begin_src elisp :tangle my-init.el
+  (use-package evil-collection
+    :straight t
+    :after evil
+    :diminish evil-collection-unimpaired-mode
+    :custom
+    (evil-collection-setup-minibuffer t) ;; Setup ‘evil’ bindings in the ‘minibuffer’
+    (evil-collection-which-key-setup t) ;; Setup ‘evil’ bindings for ‘which-key’.
+    :config
+    (setq evil-collection-unimpaired-want-repeat-mode-integration t)
+    (evil-collection-init))
+#+end_src
+
+**** evil-commentary :package:
+
+/Emulates vim-commentary by Tim Pope/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package evil-commentary
+    :straight t
+    :after evil-collection
+    :diminish evil-commentary-mode
+    :config
+    (evil-commentary-mode t))
+#+end_src
+
+**** evil-surround :package:
+
+/Emulates surround.vim by Tim Pope/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package evil-surround
+    :straight t
+    :after evil-collection
+    :diminish global-evil-surround-mode
+    :config
+    (global-evil-surround-mode t))
+#+end_src
+
+**** evil-snipe :package:
+
+/Emulates vim-seek and/or vim-sneak/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package evil-snipe
+    :straight t
+    :after evil
+    :diminish (evil-snipe-local-mode)
+    :config
+    (evil-snipe-mode +1)
+    (evil-snipe-override-mode +1)
+
+    ;; and disable in specific modes
+    ;; (push 'python-mode evil-snipe-disabled-modes)
+
+    ;; or disable it manually
+    ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-mode)
+    ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-override-mode)
+    )
+#+end_src
+
+**** evil-textobj-tree-sitter :package:
+
+/Tree-sitter powered textobjects/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package evil-textobj-tree-sitter
+    :straight t
+    :after (evil evil-collection)
+    :config
+    (define-key evil-outer-text-objects-map
+  	      "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+    (define-key evil-inner-text-objects-map
+  	      "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
+    (define-key evil-outer-text-objects-map
+  	      "c" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+    (define-key evil-inner-text-objects-map
+  	      "c" (evil-textobj-tree-sitter-get-textobj "comment.inner"))
+    )
+#+end_src
+
+*** general.el :package:
+
+[[https://github.com/noctuid/general.el][general.el - Github]]
+
+
+
+** Tree-sitter
+** Note Taking
+
+** Performance
+
+*** Garbage Collection
+
+Emacs is an Elisp interpreter, and when running programs or packages, it can occasionally experience pauses due to garbage collection. By increasing the garbage collection threshold, we reduce these pauses during heavy operations, leading to smoother performance.
+
+#+begin_src elisp :tangle my-early-init.el
+  ;;; -*- lexical-binding: t -*-
+
+
+  (setq gc-cons-threshold #x40000000)
+
+  ;; Set the maximum output size for reading process output, allowing for larger data transfers.
+  (setq read-process-output-max (* 1024 1024 4))
+
+  ;; Don't load package.el since we're using Straight
+  (setq package-enable-at-startup nil)
+
+  (setq default-frame-alist
+        '((width . 100)   ; Width in characters
+          (height . 30))) ; Height in lines
+#+end_src
+
+**** gcmh :package:
+
+/Enforce a sneaky Garbage Collection strategy to minimize GC interference with user activity/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package gcmh
+    :straight t
+    :diminish gcmh-mode
+    :hook
+    (after-init-hook . gcmh-mode))
+#+end_src
+
+*** Improved Scrolling
+
+**** [[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]] :package:
+
++ highly optimized, pixel-precise smooth scrolling which can readily keep up with the very high event rates of modern track-pads and high-precision wheel mice.
+
+#+begin_src elisp :tangle my-init.el
+  (use-package ultra-scroll
+    :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
+    :init
+    (setq scroll-conservatively 101 ; important!
+	  scroll-margin 0) 
+    :config
+    (ultra-scroll-mode 1))
+#+end_src
+
+
+** Window Management
+
+* Custom Functions
+
+*** TODO Auto tangle on save :elisp_function:
+
++ Make case insensitive
+
+#+begin_src elisp :tangle defun.el
+  (defun my/org-auto-tangle ()
+    "Automatically tangle Org file on save, but only if the file contains '#+auto_tangle: t'."
+    (when (and (derived-mode-p 'org-mode)
+               (save-excursion
+                 (goto-char (point-min))
+                 (re-search-forward "^#\\+auto_tangle: t" nil t)))
+      (org-babel-tangle)))
+
+  (defun my/org-auto-tangle-enable ()
+    "Enable auto-tangling for this buffer."
+    (add-hook 'after-save-hook #'my/org-auto-tangle nil 'local))
+
+  (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
+#+end_src
+
+*** Hybrid line numbers :elisp_function:
+
+/Swap between regular & relative line numbers wether you're in evil insert mode or not/
+
+#+begin_src elisp :tangle defun.el
+  (defun my/hybrid-line-numbers-evil-insert-state-entry ()
+    "Swap to regular line numbers if inside prog-mode"
+    (lambda ()
+      (when (derived-mode-p 'prog-mode)
+        (setq display-line-numbers-type t)
+        (display-line-numbers-mode -1)
+        (display-line-numbers-mode 1))))
+
+  (defun my/hybrid-line-numbers-evil-insert-state-exit ()
+    "Swap to relative line numbers if inside prog-mode"
+  	  (lambda ()
+  	    (when (derived-mode-p 'prog-mode)
+  	      (setq display-line-numbers-type 'relative)
+  	      (display-line-numbers-mode -1)
+  	      (display-line-numbers-mode 1))))
+#+end_src
+
+#+begin_src elisp :tangle my-init.el
+  (add-hook 'evil-insert-state-entry-hook
+  	  #'my/hybrid-line-numbers-evil-insert-state-entry)
+  (add-hook 'evil-insert-state-exit-hook
+  	  #'my/hybrid-line-numbers-evil-insert-state-exit)
+#+end_src
+
+*** Toggle org-mode emphasis markers :elisp_function:
+
+/Toggle `org-hide-emphasis-markers' locally and refresh fontification./
+
+#+begin_src elisp :tangle defun.el
+  (defun my/org-toggle-hide-emphasis-markers ()
+    "Toggle `org-hide-emphasis-markers' locally and refresh fontification."
+    (interactive)
+    (if (bound-and-true-p org-hide-emphasis-markers)
+        (setq-local org-hide-emphasis-markers nil)
+      (setq-local org-hide-emphasis-markers t))
+    ;; Refresh fontification
+    (font-lock-flush)
+    (font-lock-ensure)
+    ;; (message "org-hide-emphasis-markers is now %s" org-hide-emphasis-markers)
+    )
+#+end_src
+
+#+begin_src elisp :tangle my-init.el
+  (define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
+#+end_src
+
+
+* Glossary
+
+** Lexical Binding
+
+[[https://www.gnu.org/software/emacs/manual/html_node/elisp/Lexical-Binding.html][Lexical Binding - GNU Emacs Manual]]
+
++ Will increase performance
++ Often seen contained in the header of .el files
+
+** use-package
+
+[[https://www.gnu.org/software/emacs/manual/html_node/use-package/][use-package - GNU Emacs Manual]]
+
++ A macro that allows you to set up package customization in your init file in a declarative way.
++ Allows for lazy loading packages to speed up performance
++ Keeps your emacs configuration tidy
+
+** straight.el
+
+[[https://github.com/radian-software/straight.el?tab=readme-ov-file#installing-packages-programmatically][straight.el - Github Documentation]]
+
++ Next-generation, purely functional package manager
++ Declare package sources from either repositories or git revisions
++ Modern lockfile capabilities
+  

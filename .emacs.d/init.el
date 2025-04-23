@@ -981,10 +981,11 @@
   ;; contains both variable- and fixed-pitch text, we need to
   ;; make sure that the org-indent face inherits from fixed-pitch.
   ;; (set-face-attribute 'org-indent nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height 0.85)
-  ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
   ;; (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch) :height 0.85)
   ;; (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch) :height 0.85)
@@ -1005,8 +1006,6 @@
 
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
-  ;; :vc (:url "https://github.com/jdtsmith/ultra-scroll") ; For Emacs>=30
-  ;:load-path "~/code/emacs/ultra-scroll" ; if you git clone'd instead of using vc
   :init
   (setq scroll-conservatively 101 ; important!
         scroll-margin 0) 
@@ -1189,3 +1188,28 @@
 (diminish 'treesit-fold-mode)
 (diminish 'outline-minor-mode)
 (put 'dired-find-alternate-file 'disabled nil)
+
+(defun my/org-auto-tangle ()
+  "Automatically tangle Org file on save, but only if the file contains '#+AUTO_TANGLE: t'."
+  (when (and (derived-mode-p 'org-mode)
+             (save-excursion
+               (goto-char (point-min))
+               (re-search-forward "^#\\+auto_tangle: t" nil t)))
+    (org-babel-tangle)))
+
+(defun my/org-auto-tangle-enable ()
+  "Enable auto-tangling for this buffer."
+  (add-hook 'after-save-hook #'my/org-auto-tangle nil 'local))
+
+(add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
+
+(use-package org-modern
+  :straight t)
+
+(use-package org-modern-indent
+  :straight (org-modern-indent :type git :host github :repo "https://github.com/jdtsmith/org-modern-indent"))
+
+
+(setq
+ org-auto-align-tags nil
+ org-hide-emphasis-markers t)
