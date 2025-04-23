@@ -75,6 +75,7 @@
   (setq display-line-numbers-type 'relative) ; Set relative line numbers
   (setq vc-follow-symlinks t) ; Always follow symbolic link to a file under version control.
   (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
+  (repeat-mode)
 
   (setq word-wrap t)
 
@@ -122,8 +123,14 @@
   ;; (:keymaps 'vundo-mode-map
   ;; 	    :states '(normal insert visual)
   ;; 	    "<escape>" 'vundo-quit)
+  :config
+  (setq vundo-glyph-alist vundo-ascii-symbols)
+  (custom-set-faces
+   '(vundo-saved ((t (:foreground "#008899"))))
+   '(vundo-last-saved ((t (:foreground "#900276"))))
+   )
   :bind (:map vundo-mode-map
-              ("<escape>" . vundo-quit)))
+	      ("<escape>" . vundo-quit)))
 
 ;;; Minibuffer
 
@@ -249,6 +256,7 @@
   (evil-collection-setup-minibuffer t) ;; Setup ‘evil’ bindings in the ‘minibuffer’
   (evil-collection-which-key-setup t) ;; Setup ‘evil’ bindings for ‘which-key’.
   :config
+  (setq evil-collection-unimpaired-want-repeat-mode-integration t)
   (evil-collection-init))
 
 (use-package evil-commentary
@@ -408,8 +416,8 @@
     "g" '(:ignore t :which-key "Toggle")
     "g <escape>" '(keyboard-escape-quit :which-key t)
     "gs" '(magit-status :which-key "Status")
-    "gn" '(diff-hl-next-hunk :which-key "Next Hunk")
-    "gp" '(diff-hl-previous-hunk :which-key "Previous Hunk")
+    ;; "gn" '(diff-hl-next-hunk :which-key "Next Hunk")
+    ;; "gp" '(diff-hl-previous-hunk :which-key "Previous Hunk")
   ))
 
 (use-package expreg
@@ -869,25 +877,103 @@
    '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f")))))
 )
 
+(use-package fontaine
+  :straight t
+  :config
+  (locate-user-emacs-file "fontaine-latest-state.eld")
+  (setq fontaine-presets
+	'((small
+	   :default-family "Aporetic Serif Mono"
+	   :default-height 80
+	   :variable-pitch-family "Aporetic Sans")
+	  (regular) ; like this it uses all the fallback values and is named `regular'
+	  (medium
+	   :default-weight semilight
+	   :default-height 115
+	   :bold-weight extrabold)
+	  (large
+	   :inherit medium
+	   :default-height 150)
+	  (presentation
+	   :default-height 180)
+	  (t
+	   ;; I keep all properties for didactic purposes, but most can be
+	   ;; omitted.  See the fontaine manual for the technicalities:
+	   ;; <https://protesilaos.com/emacs/fontaine>.
+	   :default-family "Aporetic Sans Mono"
+	   :default-weight regular
+	   :default-height 140
 
-(cond
+           :fixed-pitch-family nil ; falls back to :default-family
+           :fixed-pitch-weight nil ; falls back to :default-weight
+           :fixed-pitch-height 1.0
 
- ((when (member "Aporetic Sans Mono" (font-family-list))
+           :fixed-pitch-serif-family nil ; falls back to :default-family
+           :fixed-pitch-serif-weight nil ; falls back to :default-weight
+           :fixed-pitch-serif-height 1.0
 
-    ;;(set-frame-font "Aporetic Sans Mono 14" t t)
-    (set-face-attribute 'default nil
-                    :family "Aporetic Sans Mono"
-                    :height 140
-                    :weight 'normal
-                    :width 'normal)
-    (set-face-attribute 'fixed-pitch nil
-                    :family "Aporetic Sans Mono"
-                    :height 140
-                    :weight 'normal
-                    :width 'normal)
-    (set-face-attribute 'variable-pitch nil :family "Aporetic Sans" :height 160)
-    ;; (set-face-attribute 'variable-pitch nil :family "Adwaita Sans" :height 160)
-    )))
+           :variable-pitch-family "Aporetic Serif"
+           :variable-pitch-weight nil
+           :variable-pitch-height 1.0
+
+           :mode-line-active-family nil ; falls back to :default-family
+           :mode-line-active-weight nil ; falls back to :default-weight
+           :mode-line-active-height 0.9
+
+           :mode-line-inactive-family nil ; falls back to :default-family
+           :mode-line-inactive-weight nil ; falls back to :default-weight
+           :mode-line-inactive-height 0.9
+
+           :header-line-family nil ; falls back to :default-family
+           :header-line-weight nil ; falls back to :default-weight
+           :header-line-height 0.9
+
+           :line-number-family nil ; falls back to :default-family
+           :line-number-weight nil ; falls back to :default-weight
+           :line-number-height 0.9
+
+           :tab-bar-family nil ; falls back to :default-family
+           :tab-bar-weight nil ; falls back to :default-weight
+           :tab-bar-height 1.0
+
+           :tab-line-family nil ; falls back to :default-family
+           :tab-line-weight nil ; falls back to :default-weight
+           :tab-line-height 1.0
+
+           :bold-family nil ; use whatever the underlying face has
+           :bold-weight bold
+
+           :italic-family nil
+           :italic-slant italic
+
+           :line-spacing nil)))
+
+  ;; Set the last preset or fall back to desired style from `fontaine-presets'
+  ;; (the `regular' in this case).
+  (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+
+  ;; Persist the latest font preset when closing/starting Emacs and
+  ;; while switching between themes.
+  (fontaine-mode 1))
+
+;; (cond
+
+;;  ((when (member "Aporetic Sans Mono" (font-family-list))
+
+;;     ;;(set-frame-font "Aporetic Sans Mono 14" t t)
+;;     (set-face-attribute 'default nil
+;;                     :family "Aporetic Sans Mono"
+;;                     :height 140
+;;                     :weight 'normal
+;;                     :width 'normal)
+;;     (set-face-attribute 'fixed-pitch nil
+;;                     :family "Aporetic Sans Mono"
+;;                     :height 140
+;;                     :weight 'normal
+;;                     :width 'normal)
+;;     (set-face-attribute 'variable-pitch nil :family "Aporetic Sans" :height 160)
+;;     ;; (set-face-attribute 'variable-pitch nil :family "Adwaita Sans" :height 160)
+;;     )))
 
 (use-package org-indent
   :config
