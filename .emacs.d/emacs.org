@@ -32,9 +32,9 @@
 
 *** Karthinks
 
-**** TODO Check how he obtain color on visual selection
+**** DONE Check how he obtain color on visual selection
 
-**** TODO Check if he uses space indent in org-mode source code blocks
+**** Check if he uses space indent in org-mode source code blocks
 
 + Check how he likes to integrate poppler for various buffers
 
@@ -42,7 +42,12 @@
 
 + Check how he handles general emacs configuration with or without use-package in his literate configuration
 
-** TODO Wanted functionality
+
+*** Doom Emacs
+
+**** TODO Investigate org-mode bindings
+  
+** Wanted functionality
 
 + TODO Icelandic dictionary lookup
 + GPTEL tooling
@@ -92,6 +97,14 @@ This file is loaded before the package system and GUI is initialized, so in it y
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
+** defvar.el
+
+/Custom elisp variables used in my configuration/
+
+#+begin_src elisp :tangle defun.el
+  ;;; -*- lexical-binding: t -*-
+#+end_src
+
 * Other Files
 
 ** custom.el
@@ -101,6 +114,11 @@ This file is loaded before the package system and GUI is initialized, so in it y
 ** local.el
 
 /File reserved for machine specific configurations/
+
+* TODO Dependencies
+
++ run =M-x nerd-icons-install-fonts=
++ run =M-x tree-sitter-langs-install-latest-grammar=
 
 * Components
 
@@ -159,6 +177,24 @@ This file is loaded before the package system and GUI is initialized, so in it y
 **** marginalia :package:
 
 /Adds marginalia to the minibuffer completions/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package marginalia
+    :straight t
+    ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+    ;; available in the *Completions* buffer, add it to the
+    ;; `completion-list-mode-map'.
+    :bind (:map minibuffer-local-map
+  	      ("M-A" . marginalia-cycle))
+
+    ;; The :init section is always executed.
+    :init
+
+    ;; Marginalia must be activated in the :init section of use-package such that
+    ;; the mode gets enabled right away. Note that this forces loading the
+    ;; package.
+    (marginalia-mode))
+#+end_src
 
 **** consult :package:
 
@@ -283,11 +319,112 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 **** corfu :package:
 
+#+begin_src elisp :tangle my-init.el
+  (use-package corfu
+    :straight t
+    ;; Optional customizations
+    :custom
+    (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+    ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+    ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+    ;; (corfu-preview-current nil)    ;; Disable current candidate preview
+    ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+    (corfu-preselect 'first)
+    ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+    :bind
+    (:map corfu-map
+	  ("TAB" . corfu-next) ;; Use TAB for cycling to the next candidate
+	  ([tab] . corfu-next) ;; Ensure both TAB and [tab] work
+	  ("S-TAB" . corfu-previous) ;; Use Shift-TAB for cycling to the previous candidate
+	  ([backtab] . corfu-previous)
+	  ("SPC" . corfu-insert-separator))
+
+    ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
+    ;; :hook ((prog-mode . corfu-mode)
+    ;;        (shell-mode . corfu-mode)
+    ;;        (eshell-mode . corfu-mode))
+
+    ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
+    ;; be used globally (M-/).  See also the customization variable
+    ;; `global-corfu-modes' to exclude certain modes.
+    :init
+    (global-corfu-mode)
+    (corfu-popupinfo-mode))
+#+end_src
+
 **** cape :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package cape
+    :straight t
+    ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+    ;; Press C-c p ? to for help.
+    :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+    ;; Alternatively bind Cape commands individually.
+    ;; :bind (("C-c p d" . cape-dabbrev)
+    ;;        ("C-c p h" . cape-history)
+    ;;        ("C-c p f" . cape-file)
+    ;;        ...)
+    :init
+    ;; Add to the global default value of `completion-at-point-functions' which is
+    ;; used by `completion-at-point'.  The order of the functions matters, the
+    ;; first function returning a result wins.  Note that the list of buffer-local
+    ;; completion functions takes precedence over the global list.
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block)
+    ;; (add-hook 'completion-at-point-functions #'cape-history)
+    ;; ...
+    )
+#+end_src
+
+**** embark :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package embark
+    :straight t
+    :bind
+    (("C-." . embark-act)         ;; pick some comfortable binding
+     ("C-;" . embark-dwim)        ;; good alternative: M-.
+     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+    :init
+
+    ;; Optionally replace the key help with a completing-read interface
+    (setq prefix-help-command #'embark-prefix-help-command)
+
+    ;; Show the Embark target at point via Eldoc. You may adjust the
+    ;; Eldoc strategy, if you want to see the documentation from
+    ;; multiple providers. Beware that using this can be a little
+    ;; jarring since the message shown in the minibuffer can be more
+    ;; than one line, causing the modeline to move up and down:
+
+    ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+    ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+    :config
+
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none)))))
+#+end_src
 
 *** Candidate selection
 
 **** orderless :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package orderless
+    :straight t
+    :custom
+    ;; Configure a custom style dispatcher (see the Consult wiki)
+    ;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
+    ;; (orderless-component-separator #'orderless-escapable-split-on-space)
+    (completion-styles '(orderless basic))
+    (completion-category-defaults nil)
+    (completion-category-overrides '((file (styles partial-completion)))))
+#+end_src
 
 **** prescient :package:
 
@@ -534,14 +671,51 @@ This file is loaded before the package system and GUI is initialized, so in it y
     )
 #+end_src
 
-*** general.el :package:
+*** TODO general.el :package:
 
 [[https://github.com/noctuid/general.el][general.el - Github]]
 
 
-
 ** Tree-sitter
+
+*** tree-sitter-langs :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package tree-sitter-langs
+    :straight t
+    :config
+    (setq treesit-load-name-override-list
+	  '((python "python" "tree_sitter_python")
+	    (nix "nix" "tree_sitter_nix")
+	    (json "json" "tree_sitter_json")
+	    (yaml "yaml" "tree_sitter_yaml")))
+    (setq treesit-extra-load-path
+	  (list tree-sitter-langs--dir
+		(concat tree-sitter-langs--dir "bin/")))
+    )
+#+end_src
+
 ** Note Taking
+
+*** org-roam :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package org-roam
+    :straight t
+    :custom
+    (org-roam-directory "~/org/roam")
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+	   ("C-c n f" . org-roam-node-find)
+	   ("C-c n g" . org-roam-graph)
+	   ("C-c n i" . org-roam-node-insert)
+	   ("C-c n c" . org-roam-capture)
+	   ;; Dailies
+	   ("C-c n j" . org-roam-dailies-capture-today))
+    :config
+    ;; If you're using a vertical completion framework, you might want a more informative completion interface
+    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode))
+#+end_src
 
 ** Performance
 
@@ -597,33 +771,213 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 ** org-mode
 ** Programming
 *** Languages
+
 **** Nix
+
+***** nix-mode :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package nix-mode
+    :straight t
+    :defer t
+    :mode "\\.nix\\'")
+#+end_src
+
+***** nix-ts-mode :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package nix-ts-mode
+    :straight t
+    :if (treesit-language-available-p 'nix)
+    :defer t
+    :init
+    (setq major-mode-remap-alist
+  	(append major-mode-remap-alist
+  		'((nix-mode . nix-ts-mode)))))
+#+end_src
+
+**** Configuration Files
+
+***** conf-mode :builtin:package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package conf-mode
+    :straight nil ;; builtin
+    :mode "\\.inputrc\\'"
+    :hook
+    (conf-mode . display-line-numbers-mode)
+    (conf-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers 
+    )
+#+end_src
+
+**** YAML
+
+***** yaml :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package yaml-ts-mode
+    :if (treesit-language-available-p 'yaml)
+    :defer t
+    :mode (("\\.ya?ml\\'" . yaml-ts-mode))
+    :hook ((yaml-ts-mode . (lambda () (setq-local tab-width 2))))
+    )
+#+end_src
+
 **** Python
+
+***** python :builtin:package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package python
+    :init
+    (if (treesit-language-available-p 'python)
+        (setq major-mode-remap-alist
+  	    (append major-mode-remap-alist
+  		    '((python-mode . python-ts-mode))))))
+#+end_src
+
+
 *** LSP
 *** TODO Formatting
 ** Utilities
-*** TODO rainbow-mode :package:
-*** TODO rainbow-mode :package:
+*** rainbow-mode :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package rainbow-mode
+    :straight t)
+#+end_src
+
+*** qrencode :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package qrencode
+    :straight t)
+#+end_src
+
 
 ** User Interface
 
 *** Cursor
 
-**** TODO evil-terminal-cursor-changer :package:
+**** evil-terminal-cursor-changer :package:
 
-**** TODO pulsar :package: 
+#+begin_src elisp :tangle my-init.el
+  (use-package evil-terminal-cursor-changer
+    :straight t
+    :if (not (display-graphic-p))
+    :config
+    (evil-terminal-cursor-changer-activate))
+#+end_src
 
+**** pulsar :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package pulsar
+    :straight t
+    :config
+    ;; (add-to-list 'pulsar-pulse-region-functions 'evil-yank)
+    ;; (add-to-list 'pulsar-pulse-functions 'evil-yank)
+    (add-to-list 'pulsar-pulse-functions 'evil-jump-backward)
+    (setq pulsar-pulse-functions (remove 'evil-scroll-up pulsar-pulse-functions))
+    (setq pulsar-pulse-functions (remove 'evil-scroll-down pulsar-pulse-functions))
+    (pulsar-global-mode))
+#+end_src
 
 
 *** Layout
 
-**** TODO spacious-padding :package:
+**** spacious-padding :package:
 
-**** TODO vi-tilde-fringe :package:
+#+begin_src elisp :tangle my-init.el
+  (use-package spacious-padding
+    :straight t
+    :config
+    (setq spacious-padding-widths
+	'( :internal-border-width 15
+	     :header-line-width 4
+	     :mode-line-width 2
+	     :tab-width 4
+	     :right-divider-width 30
+	     :scroll-bar-width 8
+	     :fringe-width 8))
+    (spacious-padding-mode 1)
+    )
+#+end_src
+
+**** vi-tilde-fringe :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package vi-tilde-fringe
+    :straight t
+    :diminish vi-tilde-fringe-mode
+    :hook (prog-mode-hook . vi-tilde-fringe-mode))
+#+end_src
+
 
 **** TODO modeline
 
+***** diminish :builtin:package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package diminish
+    :straight t
+    :config)
+#+end_src
+
 *** Icons
+
+**** nerd-icons :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package nerd-icons
+    :straight t)
+#+end_src
+
+***** nerd-icons-dired :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package nerd-icons-dired
+    :straight t
+    :after nerd-icons
+    :hook (dired-mode . nerd-icons-dired-mode))
+#+end_src
+
+***** nerd-icons-completion :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package nerd-icons-completion
+    :straight t
+    :after (nerd-icons marginalia)
+    :config
+    (nerd-icons-completion-mode)
+    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
+    )
+#+end_src
+
+
+
+***** nerd-icons-corfu :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package nerd-icons-corfu
+    :straight t
+    :config
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+
+    ;; Optionally:
+    ;; (setq nerd-icons-corfu-mapping
+    ;; 	'((array :style "cod" :icon "symbol_array" :face font-lock-type-face)
+    ;;         (boolean :style "cod" :icon "symbol_boolean" :face font-lock-builtin-face)
+    ;;         ;; You can alternatively specify a function to perform the mapping,
+    ;;         ;; use this when knowing the exact completion candidate is important.
+    ;;         (file :fn nerd-icons-icon-for-file :face font-lock-string-face)
+    ;;         ;; ...
+    ;;         (t :style "cod" :icon "code" :face font-lock-warning-face)))
+    ;; Remember to add an entry for `t', the library uses that as default.
+
+    ;; The Custom interface is also supported for tuning the variable above.
+    )
+#+end_src
 
 *** Theme
 
@@ -676,10 +1030,89 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 *** Text alignment
 
+**** visual-fill-column :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package visual-fill-column
+    :straight t
+    :defer t
+    :custom
+    (visual-fill-column-width 100)
+    :hook (org-mode . (lambda ()
+			(visual-fill-column-mode)
+			;; (visual-line-fill-column-mode)
+			(visual-fill-column-toggle-center-text)))
+    )
+#+end_src
+
+** LLM Integration
+
+*** gptel :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package gptel
+    :straight t
+    :config
+    (setq gptel-default-mode #'org-mode))
+#+end_src
+
+** Version Control
+
+*** magit :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package magit
+    :straight t)
+#+end_src
 
 ** Help, Information & Documentation
 
+*** helpful :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package helpful
+    :straight t
+    :config
+    (global-set-key (kbd "C-h f") #'helpful-callable)
+    (global-set-key (kbd "C-h v") #'helpful-variable)
+    (global-set-key (kbd "C-h k") #'helpful-key)
+    (global-set-key (kbd "C-h x") #'helpful-command)
+    (global-set-key (kbd "C-c C-d") #'helpful-at-point)
+    (global-set-key (kbd "C-h F") #'helpful-function))
+#+end_src
+
 ** Window Management
+
+*** Context grouping
+
+**** Help modes :elisp_variable:
+
+#+begin_src elisp :tangle defvar.el
+  (defvar my/help-modes-list '(helpful-mode
+  			     help-mode
+  			     ;; pydoc-mode
+  			     ;; TeX-special-mode
+  			     )
+    "List of major-modes used in documentation buffers")
+#+end_src
+
+*** Popup Buffers
+
+**** popper :package:
+
+#+begin_src elisp :tangle my-init.el
+  (use-package popper
+    :straight t
+    ;; :after (setup-windows setup-project)
+    :commands popper-mode
+    :init
+    (if (boundp 'elpaca-after-init-hook)
+        (add-hook 'elpaca-after-init-hook #'popper-mode)
+      (add-hook 'emacs-startup-hook #'popper-mode))
+    (setq popper-reference-buffers
+  	(append my/help-modes-list))
+    )
+#+end_src
 
 * Custom Functions
 

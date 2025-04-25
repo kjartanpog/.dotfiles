@@ -79,7 +79,6 @@
 
   (setq word-wrap t)
 
-  ;; :TODO: Move to use-package org
   (defun my/enable-visual-line-mode-and-wrap ()
     "Enable visual line mode and set word wrap in non-programming modes."
     (visual-line-mode 1)
@@ -125,10 +124,6 @@
   ;; 	    "<escape>" 'vundo-quit)
   :config
   (setq vundo-glyph-alist vundo-ascii-symbols)
-  (custom-set-faces
-   '(vundo-saved ((t (:foreground "#008899"))))
-   '(vundo-last-saved ((t (:foreground "#900276"))))
-   )
   :bind (:map vundo-mode-map
 	      ("<escape>" . vundo-quit)))
 
@@ -411,6 +406,7 @@
     "tt" '(modus-themes-toggle :which-key "Theme")
     "tr" '(rainbow-mode  :which-key "Rainbow")
     "tl" '(toggle-truncate-lines :which-key "truncate lines")
+    "tp" '(popper-toggle :which-key "popper-toggle")
 
 ;;;; general g
     "g" '(:ignore t :which-key "Toggle")
@@ -418,44 +414,14 @@
     "gs" '(magit-status :which-key "Status")
     ;; "gn" '(diff-hl-next-hunk :which-key "Next Hunk")
     ;; "gp" '(diff-hl-previous-hunk :which-key "Previous Hunk")
+
+    "<tab>" '(popper-toggle :which-key "popper-toggle")
   ))
 
 (use-package expreg
   :straight t
   :bind (("C-+" . expreg-expand)
 	 ("C--" . expreg-contract)))
-
-;; Fonts & Theme
-
-(use-package modus-themes
-  :straight t
-  :config
-  ;; Add all your customizations prior to loading the themes
-  (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs t)
-
-  (setq modus-vivendi-palette-overrides
-	`((bg-main "#090909")
-	  (fg-heading-1 magenta-faint)))
-
-  (setq modus-operandi-palette-overrides
-        '((fg-heading-1 "#2f5f9f")))
-
-  (setq modus-themes-headings
-	'((0 . (1.35))
-          (1 . (1.30))
-          (2 . (1.24))
-          (3 . (semibold 1.17))
-          (4 . (1.14))
-          (t . (monochrome))))
-
-  ;; Maybe define some palette overrides, such as by using our presets
-  ;;(setq modus-themes-common-palette-overrides
-  ;;      modus-themes-preset-overrides-intense)
-
-  ;; Load the theme of your choice.
-  ;; (load-theme 'modus-operandi :no-confirm)
-  (load-theme 'modus-vivendi))
 
 (use-package rainbow-mode
   :straight t)
@@ -490,16 +456,7 @@
   :diminish vi-tilde-fringe-mode
   :hook (prog-mode-hook . vi-tilde-fringe-mode))
 
-(use-package auto-dark
-  :straight t
-  :diminish auto-dark-mode
-  :if (display-graphic-p)
-  :custom
-  (auto-dark-themes '((modus-vivendi) (modus-operandi)))
-  (auto-dark-polling-interval-seconds 5)
-  (auto-dark-allow-osascript nil)
-  (auto-dark-allow-powershell nil)
-  :init (auto-dark-mode)) 
+ 
 
 
 
@@ -781,13 +738,7 @@
   :mode (("\\.ya?ml\\'" . yaml-ts-mode))
   :hook ((yaml-ts-mode . (lambda () (setq-local tab-width 2))))
   )
-  
-(use-package yaml-ts-mode
-  :if (treesit-language-available-p 'json)
-  :defer t
-  :mode (("\\.json\\'" . json-ts-mode))
-  ;; :hook ((json-ts-mode . (lambda () (setq-local tab-width 2))))
-  )
+
 
 (use-package python
   :init
@@ -871,10 +822,7 @@
   (global-diff-hl-mode)
   (global-diff-hl-show-hunk-mouse-mode)
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-  (custom-set-faces
-   '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
-   '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
-   '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f")))))
+  
 )
 
 (use-package fontaine
@@ -956,42 +904,6 @@
   ;; while switching between themes.
   (fontaine-mode 1))
 
-;; (cond
-
-;;  ((when (member "Aporetic Sans Mono" (font-family-list))
-
-;;     ;;(set-frame-font "Aporetic Sans Mono 14" t t)
-;;     (set-face-attribute 'default nil
-;;                     :family "Aporetic Sans Mono"
-;;                     :height 140
-;;                     :weight 'normal
-;;                     :width 'normal)
-;;     (set-face-attribute 'fixed-pitch nil
-;;                     :family "Aporetic Sans Mono"
-;;                     :height 140
-;;                     :weight 'normal
-;;                     :width 'normal)
-;;     (set-face-attribute 'variable-pitch nil :family "Aporetic Sans" :height 160)
-;;     ;; (set-face-attribute 'variable-pitch nil :family "Adwaita Sans" :height 160)
-;;     )))
-
-(use-package org-indent
-  :config
-  ;; In order to avoid line spacing issues when a line of text
-  ;; contains both variable- and fixed-pitch text, we need to
-  ;; make sure that the org-indent face inherits from fixed-pitch.
-  ;; (set-face-attribute 'org-indent nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height 0.85)
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch) :height 0.85)
-  ;; (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch) :height 0.85)
-  ;; (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  ;; (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  )
 (use-package org-download
   :straight t
   :config
@@ -1013,14 +925,7 @@
   (ultra-scroll-mode 1))
 
 (use-package nerd-icons
-  :straight t
-  :config
-  (custom-set-faces
-   '(nerd-icons-folder ((t (:foreground "#008899"))))
-   '(nerd-icons-folder-open ((t (:foreground "#008899"))))
-   ;; Add more customizations as needed for other icons
-   )
-  )
+  :straight t)
 
 (use-package nerd-icons-dired
   :straight t
@@ -1033,9 +938,7 @@
   :config
   (nerd-icons-completion-mode)
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
-  (custom-set-faces
-   '(nerd-icons-completion-dir-face ((t (:foreground "#008899"))))
-  ))
+  )
 
 (use-package nerd-icons-corfu
   :straight t
@@ -1106,64 +1009,6 @@
   (add-to-list 'completion-at-point-functions #'my-cape-complete-eglot)
   )
 
-;;; Note taking
-
-;; (use-package denote
-;;   :straight t
-;;   :hook (dired-mode . denote-dired-mode)
-;;   :bind
-;;   (("C-c n n" . denote)
-;;    ("C-c n r" . denote-rename-file)
-;;    ("C-c n l" . denote-link)
-;;    ("C-c n b" . denote-backlinks)
-;;    ("C-c n d" . denote-dired)
-;;    ("C-c n g" . denote-grep))
-;;   :config
-;;   (setq denote-directory (expand-file-name "~/Denote"))
-
-;;   ;; Automatically rename Denote buffers when opening them so that
-;;   ;; instead of their long file name they have, for example, a literal
-;;   ;; "[D]" followed by the file's title.  Read the doc string of
-;;   ;; `denote-rename-buffer-format' for how to modify this.
-;;   (denote-rename-buffer-mode 1))
-
-;; (use-package denote-journal
-;;   :straight (denote-journal :type git :host github :repo "protesilaos/denote-journal")
-;;   :after denote
-;;   :hook (calendar-mode . denote-journal-calendar-mode)
-;;   :config
-;;   ;; Use the "journal" subdirectory of the `denote-directory'.  Set this
-;;   ;; to nil to use the `denote-directory' instead.
-;;   (setq denote-journal-directory
-;;         (expand-file-name "journal" denote-directory))
-;;   ;; Default keyword for new journal entries. It can also be a list of
-;;   ;; strings.
-;;   (setq denote-journal-keyword "journal")
-;;   ;; Read the doc string of `denote-journal-title-format'.
-;;   (setq denote-journal-title-format 'day-date-month-year))
-
-	      
-
-
-;;; Organize later
-;; (use-package dashboard
-;;   :straight t
-;;   :config
-;;   (dashboard-setup-startup-hook)
-;;   :init
-;;   (setq dashboard-items '((recents   . 5)
-;; 			  (bookmarks . 5)
-;; 			  (projects  . 5)
-;; 			  (agenda    . 5)
-;; 			  (registers . 5)))
-;;   ;; (setq dashboard-center-content t)
-;;   (setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
-;;   (setq dashboard-set-heading-icons t)
-;;   (setq dashboard-set-file-icons t)
-;;   (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
-;;   ;; To add icons to the widget headings and their items:
-;;   )
-
 ;;; Get shit done
 (use-package hl-todo
   :straight t
@@ -1204,15 +1049,125 @@
 (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
 
 (use-package org-modern
-  :straight t)
+  :straight t
+  :config
+  (setq org-modern-table nil
+	org-modern-block-name nil
+	org-modern-block-fringe nil))
 
 ;; (use-package org-modern-indent
 ;;   :straight (org-modern-indent :type git :host github :repo "https://github.com/jdtsmith/org-modern-indent"))
 
+(defun my/org-mode-entry ()
+    "Enable visual line mode and set word wrap in non-programming modes."
+    (org-modern-mode 1))
 
-(setq
- org-auto-align-tags nil
- org-hide-emphasis-markers t)
+(use-package org
+  :config
+  (setq org-auto-align-tags nil
+	org-hide-emphasis-markers t
+	org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
+  (add-hook 'org-mode-hook 'my/org-mode-entry))
+
+(defun my/modus-themes-custom-faces (&rest _)
+  (modus-themes-with-colors
+    (custom-set-faces
+
+     ;; Change nerd-icons folder colors
+     '(nerd-icons-folder ((t (:foreground "#008899"))))
+     '(nerd-icons-folder-open ((t (:foreground "#008899"))))
+     '(nerd-icons-completion-dir-face ((t (:foreground "#008899"))))
+
+     ;; diff-hl fringe/margin colors
+     '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
+     '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
+     '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f"))))
+
+     ;; org-mode mixed fonts
+     '(org-checkbox ((t (:inherit 'fixed-pitch))))
+     '(org-block ((t (:foreground nil :inherit 'fixed-pitch))))
+     '(org-block-begin-line ((t (:inherit 'fixed-pitch))))
+     ;; '(org-block-end-line ((t (:inherit 'fixed-pitch))))
+     '(org-table ((t (:inherit 'fixed-pitch))))
+     '(org-code ((t (:inherit 'fixed-pitch))))
+     
+     ;; Vundo symbol colors
+     '(vundo-saved ((t (:foreground "#008899"))))
+     '(vundo-last-saved ((t (:foreground "#900276"))))
+     )))
+
+(use-package modus-themes
+  :straight t
+  :config
+  ;; Add all your customizations prior to loading the themes
+  (setq modus-themes-italic-constructs t
+	modus-themes-bold-constructs t)
+
+  (setq modus-themes-common-palette-overrides
+	`((fg-region unspecified)
+	  (bg-region bg-sage)
+
+	  ;; A nuanced accented background, combined with a suitable foreground.
+	  (bg-prose-code bg-green-nuanced)
+          (fg-prose-code green-cooler)
+
+          (bg-prose-verbatim bg-magenta-nuanced)
+          (fg-prose-verbatim magenta-warmer)
+
+          (bg-prose-macro bg-blue-nuanced)
+          (fg-prose-macro magenta-cooler)))
+
+  (setq modus-vivendi-palette-overrides
+	`((bg-main "#090909")
+	  (fg-heading-1 magenta-faint)
+	  (bg-region bg-lavender)))
+
+  (setq modus-operandi-palette-overrides
+        '((fg-heading-1 "#2f5f9f")))
+
+  (setq modus-themes-headings
+	'((0 . (1.35))
+          (1 . (1.30))
+          (2 . (1.24))
+          (3 . (semibold 1.17))
+          (4 . (1.14))
+          (t . (monochrome))))
+  
+  (add-hook 'modus-themes-after-load-theme-hook #'my/modus-themes-custom-faces)
+  ;; (load-theme 'modus-vivendi)
+  (load-theme 'modus-operandi)
+  )
+
+(defvar my/help-modes-list '(helpful-mode
+			     help-mode
+			     ;; pydoc-mode
+			     ;; TeX-special-mode
+			     )
+  "List of major-modes used in documentation buffers")
+
+(use-package popper
+  :straight t
+  ;; :after (setup-windows setup-project)
+  :commands popper-mode
+  :init
+  (if (boundp 'elpaca-after-init-hook)
+      (add-hook 'elpaca-after-init-hook #'popper-mode)
+    (add-hook 'emacs-startup-hook #'popper-mode))
+  (setq popper-reference-buffers
+	(append my/help-modes-list))
+  )
+
+;; (use-package auto-dark
+;;   :straight t
+;;   :after (modus-themes)
+;;   :diminish auto-dark-mode
+;;   :if (display-graphic-p)
+;;   :custom
+;;   (auto-dark-themes '((modus-vivendi) (modus-operandi)))
+;;   (auto-dark-polling-interval-seconds 5)
+;;   (auto-dark-allow-osascript nil)
+;;   (auto-dark-allow-powershell nil)
+;;   :init (auto-dark-mode))
 
 ;; (use-package ledger-mode
 ;;   :straight t
