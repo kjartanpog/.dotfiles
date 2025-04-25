@@ -594,6 +594,90 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
     (ultra-scroll-mode 1))
 #+end_src
 
+** org-mode
+** Programming
+*** Languages
+**** Nix
+**** Python
+*** LSP
+*** TODO Formatting
+** Utilities
+*** TODO rainbow-mode :package:
+*** TODO rainbow-mode :package:
+
+** User Interface
+
+*** Cursor
+
+**** TODO evil-terminal-cursor-changer :package:
+
+**** TODO pulsar :package: 
+
+
+
+*** Layout
+
+**** TODO spacious-padding :package:
+
+**** TODO vi-tilde-fringe :package:
+
+**** TODO modeline
+
+*** Icons
+
+*** Theme
+
+**** modus-themes :package:
+
+/Highly accessible themes by Protesilous, conforming with the highest standard for colour contrast between background and foreground values/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package modus-themes
+    :straight t
+    :config
+    ;; Add all your customizations prior to loading the themes
+    (setq modus-themes-italic-constructs t
+	modus-themes-bold-constructs t)
+
+    (setq modus-vivendi-palette-overrides
+  	`((bg-main "#090909")
+  	  (fg-heading-1 magenta-faint)))
+
+    (setq modus-operandi-palette-overrides
+  	'((fg-heading-1 "#2f5f9f")))
+
+    (setq modus-themes-headings
+  	'((0 . (1.35))
+            (1 . (1.30))
+            (2 . (1.24))
+            (3 . (semibold 1.17))
+            (4 . (1.14))
+            (t . (monochrome))))
+
+    (load-theme 'modus-vivendi))
+#+end_src
+
+**** auto-dark :package:
+
+/Toggle between two themes in sync with system dark/light mode/
+
+#+begin_src elisp :tangle my-init.el
+  (use-package auto-dark
+    :straight t
+    :diminish auto-dark-mode
+    :if (display-graphic-p)
+    :custom
+    (auto-dark-themes '((modus-vivendi) (modus-operandi)))
+    (auto-dark-polling-interval-seconds 5)
+    (auto-dark-allow-osascript nil)
+    (auto-dark-allow-powershell nil)
+    :init (auto-dark-mode))
+#+end_src
+
+*** Text alignment
+
+
+** Help, Information & Documentation
 
 ** Window Management
 

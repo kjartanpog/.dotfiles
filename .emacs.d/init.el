@@ -395,15 +395,15 @@
 ;;;; general n
     "n" '(:ignore t :which-key "Note")
     "n <escape>" '(keyboard-escape-quit :which-key t)
-    "nj" '(denote-journal-new-or-existing-entry :which-key "journal today")
-    "nn" '(denote :which-key "new")
-    "nf" '(denote-open-or-create :which-key "find")
-    ;; "nf" '(org-roam-node-find :which-key "node find")
-    ;; "ni" '(org-roam-node-insert :which-key "node insert")
-    ;; "nc" '(org-roam-capture :which-key "capture")
-    ;; "ng" '(org-roam-graph :which-key "graph")
-    ;; "nl" '(org-roam-buffer-toggle :which-key t)
-    ;; "nj" '(org-roam-dailies-capture-today :which-key t)
+    ;; "nj" '(denote-journal-new-or-existing-entry :which-key "journal today")
+    ;; "nn" '(denote :which-key "new")
+    ;; "nf" '(denote-open-or-create :which-key "find")
+    "nf" '(org-roam-node-find :which-key "node find")
+    "ni" '(org-roam-node-insert :which-key "node insert")
+    "nc" '(org-roam-capture :which-key "capture")
+    "ng" '(org-roam-graph :which-key "graph")
+    "nl" '(org-roam-buffer-toggle :which-key t)
+    "nj" '(org-roam-dailies-capture-today :which-key t)
 
 ;;;; general t
     "t" '(:ignore t :which-key "Toggle")
@@ -478,7 +478,7 @@
   :straight t
   :defer t
   :custom
-  (visual-fill-column-width 80)
+  (visual-fill-column-width 100)
   :hook (org-mode . (lambda ()
 		      (visual-fill-column-mode)
 		      ;; (visual-line-fill-column-mode)
@@ -798,21 +798,21 @@
 
 ;; Org Mode
 
-;; (use-package org-roam
-;;   :straight t
-;;   :custom
-;;   (org-roam-directory "~/org/roam")
-;;   :bind (("C-c n l" . org-roam-buffer-toggle)
-;;          ("C-c n f" . org-roam-node-find)
-;;          ("C-c n g" . org-roam-graph)
-;;          ("C-c n i" . org-roam-node-insert)
-;;          ("C-c n c" . org-roam-capture)
-;;          ;; Dailies
-;;          ("C-c n j" . org-roam-dailies-capture-today))
-;;   :config
-;;   ;; If you're using a vertical completion framework, you might want a more informative completion interface
-;;   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-;;   (org-roam-db-autosync-mode))
+(use-package org-roam
+  :straight t
+  :custom
+  (org-roam-directory "~/org/roam")
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
+  :config
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode))
 
 ;; Terminal Emacs
 
@@ -1108,39 +1108,39 @@
 
 ;;; Note taking
 
-(use-package denote
-  :straight t
-  :hook (dired-mode . denote-dired-mode)
-  :bind
-  (("C-c n n" . denote)
-   ("C-c n r" . denote-rename-file)
-   ("C-c n l" . denote-link)
-   ("C-c n b" . denote-backlinks)
-   ("C-c n d" . denote-dired)
-   ("C-c n g" . denote-grep))
-  :config
-  (setq denote-directory (expand-file-name "~/Denote"))
+;; (use-package denote
+;;   :straight t
+;;   :hook (dired-mode . denote-dired-mode)
+;;   :bind
+;;   (("C-c n n" . denote)
+;;    ("C-c n r" . denote-rename-file)
+;;    ("C-c n l" . denote-link)
+;;    ("C-c n b" . denote-backlinks)
+;;    ("C-c n d" . denote-dired)
+;;    ("C-c n g" . denote-grep))
+;;   :config
+;;   (setq denote-directory (expand-file-name "~/Denote"))
 
-  ;; Automatically rename Denote buffers when opening them so that
-  ;; instead of their long file name they have, for example, a literal
-  ;; "[D]" followed by the file's title.  Read the doc string of
-  ;; `denote-rename-buffer-format' for how to modify this.
-  (denote-rename-buffer-mode 1))
+;;   ;; Automatically rename Denote buffers when opening them so that
+;;   ;; instead of their long file name they have, for example, a literal
+;;   ;; "[D]" followed by the file's title.  Read the doc string of
+;;   ;; `denote-rename-buffer-format' for how to modify this.
+;;   (denote-rename-buffer-mode 1))
 
-(use-package denote-journal
-  :straight (denote-journal :type git :host github :repo "protesilaos/denote-journal")
-  :after denote
-  :hook (calendar-mode . denote-journal-calendar-mode)
-  :config
-  ;; Use the "journal" subdirectory of the `denote-directory'.  Set this
-  ;; to nil to use the `denote-directory' instead.
-  (setq denote-journal-directory
-        (expand-file-name "journal" denote-directory))
-  ;; Default keyword for new journal entries. It can also be a list of
-  ;; strings.
-  (setq denote-journal-keyword "journal")
-  ;; Read the doc string of `denote-journal-title-format'.
-  (setq denote-journal-title-format 'day-date-month-year))
+;; (use-package denote-journal
+;;   :straight (denote-journal :type git :host github :repo "protesilaos/denote-journal")
+;;   :after denote
+;;   :hook (calendar-mode . denote-journal-calendar-mode)
+;;   :config
+;;   ;; Use the "journal" subdirectory of the `denote-directory'.  Set this
+;;   ;; to nil to use the `denote-directory' instead.
+;;   (setq denote-journal-directory
+;;         (expand-file-name "journal" denote-directory))
+;;   ;; Default keyword for new journal entries. It can also be a list of
+;;   ;; strings.
+;;   (setq denote-journal-keyword "journal")
+;;   ;; Read the doc string of `denote-journal-title-format'.
+;;   (setq denote-journal-title-format 'day-date-month-year))
 
 	      
 
@@ -1206,10 +1206,18 @@
 (use-package org-modern
   :straight t)
 
-(use-package org-modern-indent
-  :straight (org-modern-indent :type git :host github :repo "https://github.com/jdtsmith/org-modern-indent"))
+;; (use-package org-modern-indent
+;;   :straight (org-modern-indent :type git :host github :repo "https://github.com/jdtsmith/org-modern-indent"))
 
 
 (setq
  org-auto-align-tags nil
  org-hide-emphasis-markers t)
+
+;; (use-package ledger-mode
+;;   :straight t
+;;   :init
+;;   (setq ledger-clear-whole-transactions 1)
+;;   :config
+;;   (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
+;;   :mode "\\.dat\\")
