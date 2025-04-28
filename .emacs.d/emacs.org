@@ -1,8 +1,11 @@
-#+title: My Literate Emacs Configuration
++title: My Literate Emacs Configuration
 #+author: Kjartan Másson
+#+options: toc:nil
 #+auto_tangle: t
 
-* What is this?
+My literate emacs configuration
+
+#+toc: headlines 8 insert TOC here, with eight headline levels
 
 ** Motivation & Goals
 
@@ -31,8 +34,6 @@
 [[https://www.youtube.com/@Positron-gv7do][YouTube]]
 
 *** Karthinks
-
-**** DONE Check how he obtain color on visual selection
 
 **** Check if he uses space indent in org-mode source code blocks
 
@@ -69,24 +70,34 @@
 
 This file is loaded before the package system and GUI is initialized, so in it you can customize variables that affect the package initialization process, such as package-enable-at-startup, package-load-list, and package-user-dir. Note that variables like package-archives which only affect the installation of new packages, and not the process of making already-installed packages available, may be customized in the regular init file. See Package Installation.
 
-#+begin_src elisp :tangle my-early-init.el
+#+begin_src elisp :tangle early-init.el
   ;;; -*- lexical-binding: t -*-
-
-  ;; Set the maximum output size for reading process output, allowing for larger data transfers.
-  (setq read-process-output-max (* 1024 1024 4))
-
-  ;; Don't load package.el since we're using Straight
-  (setq package-enable-at-startup nil)
-
-  (setq default-frame-alist
-        '((width . 100)   ; Width in characters
-          (height . 30))) ; Height in lines
 #+end_src
 
 ** init.el
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el
   ;;; -*- lexical-binding: t -*-
+#+end_src
+
+#+begin_src elisp :tangle init.el :comments link
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name
+          "straight/repos/straight.el/bootstrap.el"
+          (or (bound-and-true-p straight-base-dir)
+              user-emacs-directory)))
+        (bootstrap-version 7))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+
+  (straight-use-package 'use-package)
 #+end_src
 
 ** defun.el
@@ -97,12 +108,20 @@ This file is loaded before the package system and GUI is initialized, so in it y
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
+#+begin_src elisp :tangle init.el
+  (load (expand-file-name "defun.el" user-emacs-directory))
+#+end_src
+
 ** defvar.el
 
 /Custom elisp variables used in my configuration/
 
-#+begin_src elisp :tangle defun.el
+#+begin_src elisp :tangle defvar.el
   ;;; -*- lexical-binding: t -*-
+#+end_src
+
+#+begin_src elisp :tangle init.el
+  (load (expand-file-name "defvar.el" user-emacs-directory))
 #+end_src
 
 * Other Files
@@ -110,6 +129,14 @@ This file is loaded before the package system and GUI is initialized, so in it y
 ** custom.el
 
 /File reserved for interactive customizations made inside of emacs/
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    (setq custom-file (concat user-emacs-directory "custom.el"))
+    (when (file-exists-p (concat user-emacs-directory "custom.el"))
+      (load (concat user-emacs-directory "custom.el"))))
+#+end_src
 
 ** local.el
 
@@ -121,6 +148,174 @@ This file is loaded before the package system and GUI is initialized, so in it y
 + run =M-x tree-sitter-langs-install-latest-grammar=
 
 * Components
+
+** Organize Later
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :init                                           ;; Initialization settings that apply before the package is loaded.
+    (savehist-mode 1)                               ;; Enable saving of command history.
+    (save-place-mode 1)                             ;; Enable saving the place in files for easier return.
+
+    :custom                                         ;; Set custom variables to configure Emacs behavior.
+    (tab-always-indent 'complete) ;; TAB first tries to indent the current line, and if the line was already indented, then try to complete the thing at point.
+
+    ;; Hide commands in M-x which do not apply to the current mode.  Corfu
+    ;; commands are hidden, since they are not used via M-x. This setting is
+    ;; useful beyond Corfu.
+    (read-extended-command-predicate #'command-completion-default-include-p)
+
+    :config
+    (recentf-mode t)                                ;; Enable tracking of recently opened files.
+    (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
+    (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t)))
+    (setq vc-follow-symlinks t) ; Always follow symbolic link to a file under version control.
+    (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
+    (repeat-mode)
+
+    )
+#+end_src
+
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package eldoc
+    :diminish eldoc-mode)
+#+end_src
+
+#+begin_src elisp :tangle init.el comments link
+  (use-package expreg
+    :straight t
+    :bind (("C-+" . expreg-expand)
+  	 ("C--" . expreg-contract)))
+#+end_src
+
+** Editor Features
+
+*** File Encoding
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    ;; Set the default coding system for files to UTF-8.
+    (modify-coding-system-alist 'file "" 'utf-8))
+#+end_src
+
+*** Line Numbers, Wrapping & More
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    (setq display-line-numbers-width-start t)
+    (setq display-line-numbers-type 'relative) ; Set relative line numbers
+    )
+#+end_src
+
+**** For Programming
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :hook
+    (prog-mode . electric-pair-local-mode)
+    (prog-mode . display-line-numbers-mode)
+    (prog-mode . (lambda () (setq-local truncate-lines t)))
+    )
+#+end_src
+
+**** For Word Processing
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    (setq word-wrap t)
+
+    (defun my/enable-visual-line-mode-and-wrap ()
+      "Enable visual line mode and set word wrap in non-programming modes."
+      (visual-line-mode 1)
+      (variable-pitch-mode 1))
+    (add-hook 'org-mode-hook 'my/enable-visual-line-mode-and-wrap)
+    )
+#+end_src
+
+*** Changing annoying defaults
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    (setq
+
+     ;; Disable the audible bell
+     ring-bell-function 'ignore
+
+     ;; Use short answers in prompts (y instead of yes)
+     use-short-answers t
+
+     ;; Inhibits the default welcome to emacs startup screen
+     inhibit-startup-screen t
+
+     ;; Automatically refresh non-file buffers.
+     global-auto-revert-non-file-buffers t
+
+     )
+
+    ;; Disable the tool bar for a cleaner interface
+    (tool-bar-mode -1))
+#+end_src
+
+*** Bookmarks
+
+Bookmarks will be stored the file: =~/.emacs.d/bookmarks=, and we want it to update every time we add/remove bookmarks.
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package bookmark
+    :config
+    (setopt bookmark-save-flag 1)
+    ;; (run-at-time nil (* 5 60) #'bookmark-save)
+    )
+#+end_src
+
+*** Undo & Redo
+
+
+**** undo-fu :package:
+
+Expand builtin emacs undo system with full undo history capabilities
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package undo-fu
+    :straight t)
+#+end_src
+
+***** undo-fu-session :package:
+
+Recoverable & persistent undo histories by saving them to a file
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package undo-fu-session
+    :straight t
+    :config
+    ;; (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")
+    (undo-fu-session-global-mode))
+#+end_src
+
+**** vundo :package:
+
+Tree-style redo
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package vundo
+    :straight t
+    ;; :general
+    ;; (:keymaps 'vundo-mode-map
+    ;; 	    :states '(normal insert visual)
+    ;; 	    "<escape>" 'vundo-quit)
+    :config
+    (setq vundo-glyph-alist vundo-ascii-symbols)
+    :bind (:map vundo-mode-map
+  	      ("<escape>" . vundo-quit)))
+#+end_src
+
+
+*** TODO The TAB key
 
 ** Completions
 
@@ -134,7 +329,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /A performant and minimalistic vertical completion UI based on the default completion system/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package vertico
     :straight t
     :custom
@@ -150,7 +345,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Commands for Ido-like directory navigation/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package vertico-directory
     :after vertico
     ;; :ensure nil
@@ -167,7 +362,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Mouse support for scrolling and candidate selection/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package vertico-mouse
     :after vertico
     :config
@@ -178,7 +373,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Adds marginalia to the minibuffer completions/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package marginalia
     :straight t
     ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
@@ -200,7 +395,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Search and navigation commands for minibuffer completions/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package consult
     :straight t
     ;; Replace bindings. Lazily loaded by `use-package'.
@@ -309,7 +504,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Search and jump hl-todo keywords in buffers with consult/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package consult-todo
     :straight t
     :after (consult))
@@ -319,7 +514,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 **** corfu :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package corfu
     :straight t
     ;; Optional customizations
@@ -354,7 +549,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 **** cape :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package cape
     :straight t
     ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
@@ -380,7 +575,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 **** embark :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package embark
     :straight t
     :bind
@@ -410,11 +605,19 @@ This file is loaded before the package system and GUI is initialized, so in it y
                    (window-parameters (mode-line-format . none)))))
 #+end_src
 
+***** embark-consult :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package embark-consult
+    :after embark
+    :straight t)
+#+end_src
+
 *** Candidate selection
 
 **** orderless :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package orderless
     :straight t
     :custom
@@ -430,7 +633,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Simple but effective sorting and filtering of completion candidates/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package prescient
     :straight t)
 #+end_src
@@ -439,7 +642,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Vertico integration for prescient/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package vertico-prescient
     :straight t
     :after (prescient vertico)
@@ -452,7 +655,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Corfu integration for prescient/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package corfu-prescient
     :straight t
     :after (prescient corfu)
@@ -474,7 +677,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 + define detailed font configurations and set them on demand
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package fontaine
   :straight t
   :config
@@ -561,7 +764,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 [[https://github.com/emacs-evil/evil][evil - Github]]
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package evil
   :straight t
   :init
@@ -590,7 +793,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 [[https://github.com/emacs-evil/evil-collection][Github]]
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package evil-collection
     :straight t
     :after evil
@@ -607,7 +810,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Emulates vim-commentary by Tim Pope/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package evil-commentary
     :straight t
     :after evil-collection
@@ -620,7 +823,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Emulates surround.vim by Tim Pope/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package evil-surround
     :straight t
     :after evil-collection
@@ -633,7 +836,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Emulates vim-seek and/or vim-sneak/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package evil-snipe
     :straight t
     :after evil
@@ -655,7 +858,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 /Tree-sitter powered textobjects/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package evil-textobj-tree-sitter
     :straight t
     :after (evil evil-collection)
@@ -675,12 +878,191 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 [[https://github.com/noctuid/general.el][general.el - Github]]
 
+#+begin_src elisp :tangle init.el :comments link
+    (use-package general
+      :straight t
+      :config
+      (general-evil-setup)
+
+      (general-create-definer leader-keys
+        :states '(normal insert visual emacs)
+        :keymaps 'override
+        :prefix "SPC"
+        :global-prefix "C-SPC")
+
+      )
+#+end_src
+
+**** misc <leader> maps
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    ;; Execute / Commands
+    "<escape>" '(keyboard-escape-quit :which-key t)
+    ":" '(execute-extended-command :which-key "execute command")
+    "<tab>" '(popper-toggle :which-key "popper-toggle"))
+#+end_src
+
+**** <leader> b
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    "b" '(:ignore t :which-key "Buffer")
+    "b <escape>" '(keyboard-escape-quit :which-key t)
+    ;; "bk"  '(kill-current-buffer)
+    "bk"  '(kill-current-buffer :which-key "Kill Current")
+    "bn"  '(next-buffer :which-key "Next")
+    "bp"  '(previous-buffer :which-key "Previous")
+    "bf"  '(consult-buffer :which-key "Find"))
+#+end_src
+
+**** <leader> f
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    "f"  '(:ignore t :which-key "File")
+    "f <escape>" '(keyboard-escape-quit :which-key t)
+    "fi" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
+    "ff"  '(find-file :which-key t)
+    "fr"  '(recentf :which-key t))
+#+end_src
+
+**** <leader> g
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    "g" '(:ignore t :which-key "Toggle")
+    "g <escape>" '(keyboard-escape-quit :which-key t)
+    "gs" '(magit-status :which-key "Status")
+    ;; "gn" '(diff-hl-next-hunk :which-key "Next Hunk")
+    ;; "gp" '(diff-hl-previous-hunk :which-key "Previous Hunk")
+    )
+#+end_src
+
+**** <leader> h
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    "h" '(:ignore t :which-key "Help")
+    "h <escape>" '(keyboard-escape-quit :which-key t)
+    "hf" '(helpful-callable :which-key "Callable")
+    "hv" '(helpful-variable :which-key "Variable")
+    "hk" '(helpful-key :which-key "Key")
+    "hx" '(helpful-command :which-key "Command")
+    "hd" '(helpful-at-point :which-key "At point")
+    "hF" '(helpful-function :which-key "Function")
+    "ho" '(helpful-symbol :which-key "Symbol")
+    "hm" '(describe-mode :which-key "Major mode")
+    "hM" '(describe-minor-mode :which-key "Minor mode")
+    "hp" '(describe-package :which-key "Package"))
+#+end_src
+
+**** <leader> l
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    "l" '(:ignore t :which-key "LLM")
+    "l <escape>" '(keyboard-escape-quit :which-key t)
+    "ll" '(gptel :which-key "gptel"))
+#+end_src
+
+**** <leader> n
+
+#+begin_src elisp :tangle init.el :comment link
+  (leader-keys
+    "n" '(:ignore t :which-key "Note")
+    "n <escape>" '(keyboard-escape-quit :which-key t)
+    ;; "nj" '(denote-journal-new-or-existing-entry :which-key "journal today")
+    ;; "nn" '(denote :which-key "new")
+    ;; "nf" '(denote-open-or-create :which-key "find")
+    "nf" '(org-roam-node-find :which-key "node find")
+    "ni" '(org-roam-node-insert :which-key "node insert")
+    "nc" '(org-roam-capture :which-key "capture")
+    "ng" '(org-roam-graph :which-key "graph")
+    "nl" '(org-roam-buffer-toggle :which-key t)
+    "nj" '(org-roam-dailies-capture-today :which-key t))
+#+end_src
+
+**** <leader> p
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+     ;; Project
+    "p" '(:ignore t :which-key "Project")
+    "p <escape>" '(keyboard-escape-quit :which-key t)
+    "pf" '(project-find-file :which-key t))
+#+end_src
+
+**** <leader> r
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    ;; Bookmark / Recent
+    "r" '(:ignore t :which-key "Recent")
+    "r <escape>" '(keyboard-escape-quit :which-key t)
+    "rb" '(bookmark-jump :which-key t)
+    "rm" '(bookmark-set :which-key t)
+    "rl" '(bookmark-bmenu-list :which-key t)
+    "ru" '(vundo :which-key t))
+#+end_src
+
+**** <leader> s
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+  ;;;; general s
+    "s" '(:ignore t :which-key "Search")
+    "s <escape>" '(keyboard-escape-quit :which-key t)
+    "sr" '(consult-ripgrep :which-key "ripgrep")
+    "so" '(consult-outline :which-key "outline")
+    "sl" '(consult-line :which-key "line")
+    "su" '(vundo :which-key t "undo")
+    "st" '(consult-todo-project :which-key t "todo")
+    "sG" '(consult-git-grep :which-key t "git-grep"))
+#+end_src
+
+**** <leader> t
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    "t" '(:ignore t :which-key "Toggle")
+    "t <escape>" '(keyboard-escape-quit :which-key t)
+    "tt" '(modus-themes-toggle :which-key "Theme")
+    "tr" '(rainbow-mode  :which-key "Rainbow")
+    "tl" '(toggle-truncate-lines :which-key "truncate lines")
+    "tp" '(popper-toggle :which-key "popper-toggle")
+    "tk" '(keycast-mode-line-mode :which-key "keycast mode-line"))
+#+end_src
+
+**** <leader> w
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    "w" '(:ignore t :which-key "window")
+    "w <escape>" '(keyboard-escape-quit :which-key t)
+    "wl" '(evil-window-right :which-key "right")
+    "wh" '(evil-window-left :which-key "left")
+    "wk" '(evil-window-up :which-key "up")
+    "wj" '(evil-window-down :which-key "down")
+    "wL" '(evil-window-move-far-right :which-key "move right")
+    "wH" '(evil-window-move-far-left :which-key "move left")
+    "wK" '(evil-window-move-very-top :which-key "move top")
+    "wJ" '(evil-window-move-very-bottom :which-key "move bottom")
+    "wr" '(evil-window-rotate-downwards :which-key "rotate")
+    "ws" '(evil-window-split :which-key "split horizontally")
+    "wv" '(evil-window-vsplit :which-key "split vertically")
+    "wc" '(evil-window-delete :which-key "delete")
+    "wq" '(evil-quit :which-key "quit")
+    "wt" '(tab-new :which-key "new tab")
+    "wu" '(winner-undo :which-key "undo")
+    )
+#+end_src
 
 ** Tree-sitter
 
 *** tree-sitter-langs :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package tree-sitter-langs
     :straight t
     :config
@@ -699,7 +1081,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 *** org-roam :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package org-roam
     :straight t
     :custom
@@ -723,10 +1105,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 Emacs is an Elisp interpreter, and when running programs or packages, it can occasionally experience pauses due to garbage collection. By increasing the garbage collection threshold, we reduce these pauses during heavy operations, leading to smoother performance.
 
-#+begin_src elisp :tangle my-early-init.el
-  ;;; -*- lexical-binding: t -*-
-
-
+#+begin_src elisp :tangle early-init.el :comments link
   (setq gc-cons-threshold #x40000000)
 
   ;; Set the maximum output size for reading process output, allowing for larger data transfers.
@@ -736,15 +1115,15 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
   (setq package-enable-at-startup nil)
 
   (setq default-frame-alist
-        '((width . 100)   ; Width in characters
-          (height . 30))) ; Height in lines
+	'((width . 100)   ; Width in characters
+	  (height . 30))) ; Height in lines
 #+end_src
 
 **** gcmh :package:
 
 /Enforce a sneaky Garbage Collection strategy to minimize GC interference with user activity/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package gcmh
     :straight t
     :diminish gcmh-mode
@@ -758,7 +1137,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 + highly optimized, pixel-precise smooth scrolling which can readily keep up with the very high event rates of modern track-pads and high-precision wheel mice.
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package ultra-scroll
     :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
     :init
@@ -769,6 +1148,55 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 #+end_src
 
 ** org-mode
+
+The killer app that will save my digital life
+
+*** org :builtin:package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package org
+    :config
+    (setq org-auto-align-tags nil
+  	  org-hide-emphasis-markers t
+  	  org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
+    ;; (add-hook 'org-mode-hook #'my/org-mode-entry)
+    (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
+    (add-hook 'org-mode-hook #'my/org-mode-entry)
+    )
+#+end_src
+
+*** org-modern :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package org-modern
+    :straight t
+    :config
+    (setq org-modern-table nil
+	  org-modern-block-name nil
+	  org-modern-block-fringe nil))
+#+end_src
+
+#+begin_src elisp :tangle defun.el :comments link
+  (defun my/org-mode-entry ()
+      "Enable visual line mode and set word wrap in non-programming modes."
+      (org-modern-mode 1))
+#+end_src
+
+
+
+*** Nicer Exports
+
+Additional stuff to beautify org-mode exports.
+
+**** htmlize :package:
+
+Richer html export, f.x. syntax highlighting in code blocks.
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package htmlize
+    :straight t)
+#+end_src
+
 ** Programming
 *** Languages
 
@@ -776,7 +1204,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 ***** nix-mode :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package nix-mode
     :straight t
     :defer t
@@ -785,7 +1213,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 ***** nix-ts-mode :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package nix-ts-mode
     :straight t
     :if (treesit-language-available-p 'nix)
@@ -800,7 +1228,8 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 ***** conf-mode :builtin:package:
 
-#+begin_src elisp :tangle my-init.el
+
+#+begin_src elisp :tangle init.el :comments link
   (use-package conf-mode
     :straight nil ;; builtin
     :mode "\\.inputrc\\'"
@@ -810,11 +1239,13 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
     )
 #+end_src
 
+****** TODO move conf-mode into variable list bundle up with other programming modes
+
 **** YAML
 
 ***** yaml :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package yaml-ts-mode
     :if (treesit-language-available-p 'yaml)
     :defer t
@@ -827,7 +1258,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 ***** python :builtin:package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package python
     :init
     (if (treesit-language-available-p 'python)
@@ -839,18 +1270,29 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 *** LSP
 *** TODO Formatting
+*** TODO Programming Specific Editor Configuration
+
+#+begin_src elisp :tangle defun.el :comments link
+#+end_src
 ** Utilities
 *** rainbow-mode :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package rainbow-mode
     :straight t)
 #+end_src
 
 *** qrencode :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package qrencode
+    :straight t)
+#+end_src
+
+*** keycast :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package keycast
     :straight t)
 #+end_src
 
@@ -861,7 +1303,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 **** evil-terminal-cursor-changer :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package evil-terminal-cursor-changer
     :straight t
     :if (not (display-graphic-p))
@@ -871,7 +1313,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 **** pulsar :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package pulsar
     :straight t
     :config
@@ -888,7 +1330,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 **** spacious-padding :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package spacious-padding
     :straight t
     :config
@@ -906,7 +1348,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 **** vi-tilde-fringe :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package vi-tilde-fringe
     :straight t
     :diminish vi-tilde-fringe-mode
@@ -916,26 +1358,42 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 **** TODO modeline
 
+***** Show current project
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package project
+    :custom
+    (project-mode-line t))
+#+end_src
+
+***** Hide line/column numbers
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :init
+    (line-number-mode -1)
+    (column-number-mode -1))
+#+end_src
+
 ***** diminish :builtin:package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package diminish
     :straight t
     :config)
 #+end_src
 
 *** Icons
-
 **** nerd-icons :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package nerd-icons
     :straight t)
 #+end_src
 
 ***** nerd-icons-dired :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package nerd-icons-dired
     :straight t
     :after nerd-icons
@@ -944,7 +1402,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 ***** nerd-icons-completion :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package nerd-icons-completion
     :straight t
     :after (nerd-icons marginalia)
@@ -958,7 +1416,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 ***** nerd-icons-corfu :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package nerd-icons-corfu
     :straight t
     :config
@@ -979,19 +1437,45 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
     )
 #+end_src
 
+*** Mouse Support
+
+#+begin_src elisp :tangle init.el :comments link
+  ;; right click mouse menu
+  (context-menu-mode 1)
+#+end_src
+
 *** Theme
+
+#+begin_src elisp :tangle init.el :comments link
+  ;; Mark all themes as safe so emacs won't ask & annoy you
+  (setq custom-safe-themes t)
+#+end_src
 
 **** modus-themes :package:
 
 /Highly accessible themes by Protesilous, conforming with the highest standard for colour contrast between background and foreground values/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package modus-themes
     :straight t
     :config
     ;; Add all your customizations prior to loading the themes
     (setq modus-themes-italic-constructs t
-	modus-themes-bold-constructs t)
+  	modus-themes-bold-constructs t)
+
+    (setq modus-themes-common-palette-overrides
+  	`((fg-region unspecified)
+  	  (bg-region bg-sage)
+
+  	  ;; A nuanced accented background, combined with a suitable foreground.
+  	  (bg-prose-code bg-green-nuanced)
+          (fg-prose-code green-cooler)
+
+          (bg-prose-verbatim bg-magenta-nuanced)
+          (fg-prose-verbatim magenta-warmer)
+
+          (bg-prose-macro bg-blue-nuanced)
+          (fg-prose-macro magenta-cooler)))
 
     (setq modus-vivendi-palette-overrides
   	`((bg-main "#090909")
@@ -1008,14 +1492,50 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
             (4 . (1.14))
             (t . (monochrome))))
 
+    (add-hook 'modus-themes-after-load-theme-hook #'my/modus-themes-custom-faces)
+    (add-hook 'after-init-hook #'my/modus-themes-custom-faces)
     (load-theme 'modus-vivendi))
 #+end_src
+
+#+begin_src elisp :tangle defun.el :comments link
+  (defun my/modus-themes-custom-faces (&rest _)
+    (modus-themes-with-colors
+    (custom-set-faces
+
+     ;; Change nerd-icons folder colors
+     '(nerd-icons-folder ((t (:foreground "#008899"))))
+     '(nerd-icons-folder-open ((t (:foreground "#008899"))))
+     '(nerd-icons-completion-dir-face ((t (:foreground "#008899"))))
+
+     ;; diff-hl fringe/margin colors
+     '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
+     '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
+     '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f"))))
+
+     ;; org-mode mixed fonts
+     '(org-checkbox ((t (:inherit 'fixed-pitch))))
+     '(org-block ((t (:foreground nil :inherit 'fixed-pitch))))
+     '(org-block-begin-line ((t (:inherit 'fixed-pitch))))
+     ;; '(org-block-end-line ((t (:inherit 'fixed-pitch))))
+     '(org-table ((t (:inherit 'fixed-pitch))))
+     '(org-code ((t (:inherit 'fixed-pitch))))
+
+     ;; corfu mixed fonts
+     '(corfu-default ((t (:inherit 'fixed-pitch))))
+     
+     ;; Vundo symbol colors
+     '(vundo-saved ((t (:foreground "#008899"))))
+     '(vundo-last-saved ((t (:foreground "#900276"))))
+     )))
+#+end_src
+
+
 
 **** auto-dark :package:
 
 /Toggle between two themes in sync with system dark/light mode/
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package auto-dark
     :straight t
     :diminish auto-dark-mode
@@ -1032,7 +1552,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 **** visual-fill-column :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package visual-fill-column
     :straight t
     :defer t
@@ -1045,11 +1565,22 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
     )
 #+end_src
 
+*** Tweaks
+
+**** Disable scrollbars in the minibuffer
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    (set-window-scroll-bars (minibuffer-window) nil nil nil nil 1)
+    (set-window-parameter (get-buffer-window "*Messages*") 'vertical-scroll-bars nil))
+#+end_src
+
 ** LLM Integration
 
 *** gptel :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package gptel
     :straight t
     :config
@@ -1060,7 +1591,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 *** magit :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package magit
     :straight t)
 #+end_src
@@ -1069,7 +1600,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 *** helpful :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package helpful
     :straight t
     :config
@@ -1081,13 +1612,22 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
     (global-set-key (kbd "C-h F") #'helpful-function))
 #+end_src
 
+*** which-key :builtin:package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package which-key
+    :config
+    (which-key-mode 1))
+#+end_src
+
+
 ** Window Management
 
 *** Context grouping
 
 **** Help modes :elisp_variable:
 
-#+begin_src elisp :tangle defvar.el
+#+begin_src elisp :tangle defvar.el :comments link
   (defvar my/help-modes-list '(helpful-mode
   			     help-mode
   			     ;; pydoc-mode
@@ -1100,7 +1640,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 **** popper :package:
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (use-package popper
     :straight t
     ;; :after (setup-windows setup-project)
@@ -1114,13 +1654,21 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
     )
 #+end_src
 
+*** Layout History
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :init
+    (winner-mode 1))
+#+end_src
+
 * Custom Functions
 
 *** TODO Auto tangle on save :elisp_function:
 
 + Make case insensitive
 
-#+begin_src elisp :tangle defun.el
+#+begin_src elisp :tangle defun.el :comments link
   (defun my/org-auto-tangle ()
     "Automatically tangle Org file on save, but only if the file contains '#+auto_tangle: t'."
     (when (and (derived-mode-p 'org-mode)
@@ -1133,14 +1681,13 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
     "Enable auto-tangling for this buffer."
     (add-hook 'after-save-hook #'my/org-auto-tangle nil 'local))
 
-  (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
 #+end_src
 
 *** Hybrid line numbers :elisp_function:
 
 /Swap between regular & relative line numbers wether you're in evil insert mode or not/
 
-#+begin_src elisp :tangle defun.el
+#+begin_src elisp :tangle defun.el :comments link
   (defun my/hybrid-line-numbers-evil-insert-state-entry ()
     "Swap to regular line numbers if inside prog-mode"
     (lambda ()
@@ -1158,7 +1705,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
   	      (display-line-numbers-mode 1))))
 #+end_src
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (add-hook 'evil-insert-state-entry-hook
   	  #'my/hybrid-line-numbers-evil-insert-state-entry)
   (add-hook 'evil-insert-state-exit-hook
@@ -1169,7 +1716,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 
 /Toggle `org-hide-emphasis-markers' locally and refresh fontification./
 
-#+begin_src elisp :tangle defun.el
+#+begin_src elisp :tangle defun.el :comments link
   (defun my/org-toggle-hide-emphasis-markers ()
     "Toggle `org-hide-emphasis-markers' locally and refresh fontification."
     (interactive)
@@ -1183,7 +1730,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
     )
 #+end_src
 
-#+begin_src elisp :tangle my-init.el
+#+begin_src elisp :tangle init.el :comments link
   (define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
 #+end_src
 
@@ -1212,4 +1759,3 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 + Next-generation, purely functional package manager
 + Declare package sources from either repositories or git revisions
 + Modern lockfile capabilities
-  

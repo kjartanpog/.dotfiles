@@ -1,10 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
-;; Performance Hacks
-;; Emacs is an Elisp interpreter, and when running programs or packages,
-;; it can occasionally experience pauses due to garbage collection.
-;; By increasing the garbage collection threshold, we reduce these pauses
-;; during heavy operations, leading to smoother performance.
+;; [[file:emacs.org::*Garbage Collection][Garbage Collection:1]]
 (setq gc-cons-threshold #x40000000)
 
 ;; Set the maximum output size for reading process output, allowing for larger data transfers.
@@ -14,5 +10,6 @@
 (setq package-enable-at-startup nil)
 
 (setq default-frame-alist
-      '((width . 100)   ; Width in characters
-        (height . 30))) ; Height in lines
+	'((width . 100)   ; Width in characters
+	  (height . 30))) ; Height in lines
+;; Garbage Collection:1 ends here

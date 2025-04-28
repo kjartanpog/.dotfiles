@@ -1,4 +1,6 @@
 ;;; -*- lexical-binding: t -*-
+
+;; [[file:emacs.org::*init.el][init.el:2]]
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -16,106 +18,132 @@
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
+;; init.el:2 ends here
 
-(use-package diminish
-  :straight t
-  :config)
+(load (expand-file-name "defun.el" user-emacs-directory))
 
+(load (expand-file-name "defvar.el" user-emacs-directory))
+
+;; [[file:emacs.org::*custom.el][custom.el:1]]
+(use-package emacs
+  :config
+  (setq custom-file (concat user-emacs-directory "custom.el"))
+  (when (file-exists-p (concat user-emacs-directory "custom.el"))
+    (load (concat user-emacs-directory "custom.el"))))
+;; custom.el:1 ends here
+
+;; [[file:emacs.org::*Organize Later][Organize Later:1]]
 (use-package emacs
   :init                                           ;; Initialization settings that apply before the package is loaded.
-  (setq inhibit-startup-screen t)                 ;; Inhibits the default welcome to emacs startup screen.
-  (tool-bar-mode -1)                              ;; Disable the tool bar for a cleaner interface.
-  ;; (scroll-bar-mode -1)                            ;; Disable the scroll bar for a cleaner interface.
   (savehist-mode 1)                               ;; Enable saving of command history.
   (save-place-mode 1)                             ;; Enable saving the place in files for easier return.
-  (line-number-mode -1)                           ;; Disable display of line number in the mode-line
-  ;; (column-number-mode 1)                           ;; Disable display of column number in the mode-line
-  (winner-mode 1)                                 ;; Enable winner mode to easily undo window configuration changes.
-  (modify-coding-system-alist 'file "" 'utf-8)    ;; Set the default coding system for files to UTF-8.
 
   :custom                                         ;; Set custom variables to configure Emacs behavior.
-  (custom-safe-themes t)
-  (ring-bell-function 'ignore)                    ;; Disable the audible bell.
-  (use-short-answers t)                           ;; Use short answers in prompts for quicker responses (y instead of yes)
   (tab-always-indent 'complete) ;; TAB first tries to indent the current line, and if the line was already indented, then try to complete the thing at point.
-  (global-auto-revert-non-file-buffers t)         ;; Automatically refresh non-file buffers.
-  ;; (pixel-scroll-precision-mode t)                 ;; Enable precise pixel scrolling.
-  ;; (pixel-scroll-precision-use-momentum nil)       ;; Disable momentum scrolling for pixel precision.
 
   ;; Hide commands in M-x which do not apply to the current mode.  Corfu
   ;; commands are hidden, since they are not used via M-x. This setting is
   ;; useful beyond Corfu.
   (read-extended-command-predicate #'command-completion-default-include-p)
 
-  :hook                                           ;; Add hooks to enable specific features in certain modes.
-  (prog-mode . electric-pair-local-mode)
-  (prog-mode . display-line-numbers-mode)
-  (prog-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers in programming modes.
-
-  ;; :bind (("C-+" . text-scale-increase)
-  ;; 	 ("C--" . text-scale-decrease)
-  ;; 	 ("C-x C-r" . recentf))
-  ;; TODO - Can I get this integrated with :map ?
-  ;; (global-set-key (kbd "C-+") 'text-scale-increase)
-  ;; (global-set-key (kbd "C--") 'text-scale-decrease)
-  
   :config
-  (context-menu-mode 1)                           ;; Enable right click mouse menu.
-  ;;TODO consider evil emacs mode hook
-  ;;(cua-mode 1)                                    ;; use C-z, C-x, C-c, and C-v to undo, cut, copy, and paste
   (recentf-mode t)                                ;; Enable tracking of recently opened files.
-  (setq custom-file (concat user-emacs-directory "custom.el"))
-  (when (file-exists-p (concat user-emacs-directory "custom.el"))
-    (load (concat user-emacs-directory "custom.el")))
   (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
   (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t)))
-  (set-window-scroll-bars (minibuffer-window) nil nil nil nil 1)
-  (set-window-parameter (get-buffer-window "*Messages*") 'vertical-scroll-bars nil)
-  (setq display-line-numbers-width-start t)
-  (setq display-line-numbers-type 'relative) ; Set relative line numbers
   (setq vc-follow-symlinks t) ; Always follow symbolic link to a file under version control.
   (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
   (repeat-mode)
 
+  )
+;; Organize Later:1 ends here
+
+;; [[file:emacs.org::*Organize Later][Organize Later:2]]
+(use-package eldoc
+  :diminish eldoc-mode)
+;; Organize Later:2 ends here
+
+;; [[file:emacs.org::*File Encoding][File Encoding:1]]
+(use-package emacs
+  :config
+  ;; Set the default coding system for files to UTF-8.
+  (modify-coding-system-alist 'file "" 'utf-8))
+;; File Encoding:1 ends here
+
+;; [[file:emacs.org::*Line Numbers, Wrapping & More][Line Numbers, Wrapping & More:1]]
+(use-package emacs
+  :config
+  (setq display-line-numbers-width-start t)
+  (setq display-line-numbers-type 'relative) ; Set relative line numbers
+  )
+;; Line Numbers, Wrapping & More:1 ends here
+
+;; [[file:emacs.org::*For Programming][For Programming:1]]
+(use-package emacs
+  :hook
+  (prog-mode . electric-pair-local-mode)
+  (prog-mode . display-line-numbers-mode)
+  (prog-mode . (lambda () (setq-local truncate-lines t)))
+  )
+;; For Programming:1 ends here
+
+;; [[file:emacs.org::*For Word Processing][For Word Processing:1]]
+(use-package emacs
+  :config
   (setq word-wrap t)
 
   (defun my/enable-visual-line-mode-and-wrap ()
     "Enable visual line mode and set word wrap in non-programming modes."
     (visual-line-mode 1)
-    ;; (org-indent-mode 1)
     (variable-pitch-mode 1))
-  ;; (add-hook 'text-mode-hook 'my/enable-visual-line-mode-and-wrap)
   (add-hook 'org-mode-hook 'my/enable-visual-line-mode-and-wrap)
-  ;; (add-hook 'markdown-mode-hook 'my/enable-visual-line-mode-and-wrap)
-  ;; (add-hook 'message-mode-hook 'my/enable-visual-line-mode-and-wrap)
   )
+;; For Word Processing:1 ends here
 
-;;; Modeline
+;; [[file:emacs.org::*Changing annoying defaults][Changing annoying defaults:1]]
+(use-package emacs
+  :config
+  (setq
 
-(use-package project
-  :custom
-  (project-mode-line t))
+   ;; Disable the audible bell
+   ring-bell-function 'ignore
 
-(use-package eldoc
-  :diminish eldoc-mode)
+   ;; Use short answers in prompts (y instead of yes)
+   use-short-answers t
 
-;;; Bookmarks, History & Undo
+   ;; Inhibits the default welcome to emacs startup screen
+   inhibit-startup-screen t
 
+   ;; Automatically refresh non-file buffers.
+   global-auto-revert-non-file-buffers t
+
+   )
+
+  ;; Disable the tool bar for a cleaner interface
+  (tool-bar-mode -1))
+;; Changing annoying defaults:1 ends here
+
+;; [[file:emacs.org::*Bookmarks][Bookmarks:1]]
 (use-package bookmark
- :config
- (setopt bookmark-save-flag 1)
- ;; (run-at-time nil (* 5 60) #'bookmark-save)
- )
+  :config
+  (setopt bookmark-save-flag 1)
+  ;; (run-at-time nil (* 5 60) #'bookmark-save)
+  )
+;; Bookmarks:1 ends here
 
+;; [[file:emacs.org::*undo-fu][undo-fu:1]]
 (use-package undo-fu
   :straight t)
+;; undo-fu:1 ends here
 
+;; [[file:emacs.org::*undo-fu-session][undo-fu-session:1]]
 (use-package undo-fu-session
   :straight t
   :config
   ;; (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")
   (undo-fu-session-global-mode))
+;; undo-fu-session:1 ends here
 
+;; [[file:emacs.org::*vundo][vundo:1]]
 (use-package vundo
   :straight t
   ;; :general
@@ -126,9 +154,9 @@
   (setq vundo-glyph-alist vundo-ascii-symbols)
   :bind (:map vundo-mode-map
 	      ("<escape>" . vundo-quit)))
+;; vundo:1 ends here
 
-;;; Minibuffer
-
+;; [[file:emacs.org::*vertico][vertico:1]]
 (use-package vertico
   :straight t
   :custom
@@ -138,7 +166,9 @@
   (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
   :init
   (vertico-mode))
+;; vertico:1 ends here
 
+;; [[file:emacs.org::*vertico-directory][vertico-directory:1]]
 (use-package vertico-directory
   :after vertico
   ;; :ensure nil
@@ -149,30 +179,23 @@
               ("M-DEL" . vertico-directory-delete-word))
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+;; vertico-directory:1 ends here
 
+;; [[file:emacs.org::*vertico-mouse][vertico-mouse:1]]
 (use-package vertico-mouse
   :after vertico
   :config
   (vertico-mouse-mode t))
-  
+;; vertico-mouse:1 ends here
 
-(use-package orderless
-  :straight t
-  :custom
-  ;; Configure a custom style dispatcher (see the Consult wiki)
-  ;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
-  ;; (orderless-component-separator #'orderless-escapable-split-on-space)
-  (completion-styles '(orderless basic))
-  (completion-category-defaults nil)
-  (completion-category-overrides '((file (styles partial-completion)))))
-
+;; [[file:emacs.org::*marginalia][marginalia:1]]
 (use-package marginalia
   :straight t
   ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
   ;; available in the *Completions* buffer, add it to the
   ;; `completion-list-mode-map'.
   :bind (:map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
+	      ("M-A" . marginalia-cycle))
 
   ;; The :init section is always executed.
   :init
@@ -181,365 +204,9 @@
   ;; the mode gets enabled right away. Note that this forces loading the
   ;; package.
   (marginalia-mode))
+;; marginalia:1 ends here
 
-(use-package prescient
-  :straight t)
-
-(use-package vertico-prescient
-  :straight t
-  :after (prescient vertico)
-  :config
-  (vertico-prescient-mode t))
-
-(use-package corfu-prescient
-  :straight t
-  :after (prescient corfu)
-  :config
-  (corfu-prescient-mode t))
-
-
-;;; Keymaps
-
-(use-package which-key
-  :ensure nil
-  :diminish which-key-mode
-  :init
-  (setq which-key-idle-delay 0.5)
-  :config
-  (which-key-mode t))
-
-;;;; evil
-(use-package evil
-  :straight t
-  :init
-  (setq evil-want-keybinding nil) ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
-  (setq evil-want-integration t)
-  (setq evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
-  :custom
-  (evil-want-C-u-scroll t)                 ;; Makes ‘C-u’ scroll up (like Vim).
-  (evil-want-C-u-delete t)                 ;; Makes ‘C-u’ delete on insert mode
-  (evil-split-window-below t)              ;; Horizontally split windows are created below.
-  (evil-vsplit-window-right t)             ;; Vertically split windows with are created to the right.
-  (evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
-  (evil-undo-system 'undo-fu)
-  (evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
-  :config
-  (evil-mode t)
-  (with-eval-after-load 'dired
-    (evil-define-key 'normal dired-mode-map "h" 'dired-up-directory)
-    (evil-define-key 'normal dired-mode-map "l" 'dired-find-alternate-file))
-  (add-hook 'evil-insert-state-entry-hook
-	    (lambda ()
-	      (when (derived-mode-p 'prog-mode)
-		(setq display-line-numbers-type t)
-		;; (hl-line-mode -1)
-		(display-line-numbers-mode -1)
-		(display-line-numbers-mode 1))))
-  (add-hook 'evil-insert-state-exit-hook
-	    (lambda ()
-	      (when (derived-mode-p 'prog-mode)
-		(setq display-line-numbers-type 'relative)
-		;; (hl-line-mode 1)
-		(display-line-numbers-mode -1)
-		(display-line-numbers-mode 1)))))
-
-(use-package evil-collection
-  :straight t
-  :after evil
-  :diminish evil-collection-unimpaired-mode
-  :custom
-  (evil-collection-setup-minibuffer t) ;; Setup ‘evil’ bindings in the ‘minibuffer’
-  (evil-collection-which-key-setup t) ;; Setup ‘evil’ bindings for ‘which-key’.
-  :config
-  (setq evil-collection-unimpaired-want-repeat-mode-integration t)
-  (evil-collection-init))
-
-(use-package evil-commentary
-  :straight t
-  :after evil-collection
-  :diminish evil-commentary-mode
-  :config
-  (evil-commentary-mode t))
-
-(use-package evil-surround
-  :straight t
-  :after evil-collection
-  :diminish global-evil-surround-mode
-  :config
-  (global-evil-surround-mode t))
-
-(use-package evil-snipe
-  :straight t
-  :after evil
-  :diminish (evil-snipe-local-mode)
-  :config
-  (evil-snipe-mode +1)
-  (evil-snipe-override-mode +1)
-
-  ;; and disable in specific modes
-  ;; (push 'python-mode evil-snipe-disabled-modes)
-
-  ;; or disable it manually
-  ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-mode)
-  ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-override-mode)
-  )
-
-(use-package evil-textobj-tree-sitter
-  :straight t
-  :after (evil evil-collection)
-  :config
-  (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
-  (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
-  (define-key evil-outer-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
-  (define-key evil-inner-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "comment.inner"))
-  )
-  
-;;;; general
-(use-package general
-  :straight t
-  :config
-  (general-evil-setup)
-
-  (general-create-definer leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC"
-    :global-prefix "C-SPC")
-
-  (leader-keys
-    ;; Execute / Commands
-    "<escape>" '(keyboard-escape-quit :which-key t)
-    ":" '(execute-extended-command :which-key "execute command")
-
-    ;; File Searching
-    "f"  '(:ignore t :which-key "File")
-    "f <escape>" '(keyboard-escape-quit :which-key t)
-    "fi" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
-    "ff"  '(find-file :which-key t)
-    "fr"  '(recentf :which-key t)
-
-    ;; Buffer
-    "b" '(:ignore t :which-key "Buffer")
-    "b <escape>" '(keyboard-escape-quit :which-key t)
-    ;; "bk"  '(kill-current-buffer)
-    "bk"  '(kill-current-buffer :which-key "Kill Current")
-    "bn"  '(next-buffer :which-key "Next")
-    "bp"  '(previous-buffer :which-key "Previous")
-    "bf"  '(consult-buffer :which-key "Find")
-
-;;;; general s
-    "s" '(:ignore t :which-key "Search")
-    "s <escape>" '(keyboard-escape-quit :which-key t)
-    "sr" '(consult-ripgrep :which-key "ripgrep")
-    "so" '(consult-outline :which-key "outline")
-    "sl" '(consult-line :which-key "line")
-    "su" '(vundo :which-key t "undo")
-    "st" '(consult-todo-project :which-key t "todo")
-
-    ;; Window Navigation
-    "w" '(:ignore t :which-key "window")
-    "w <escape>" '(keyboard-escape-quit :which-key t)
-    "wl" '(evil-window-right :which-key "right")
-    "wh" '(evil-window-left :which-key "left")
-    "wk" '(evil-window-up :which-key "up")
-    "wj" '(evil-window-down :which-key "down")
-    "wL" '(evil-window-move-far-right :which-key "move right")
-    "wH" '(evil-window-move-far-left :which-key "move left")
-    "wK" '(evil-window-move-very-top :which-key "move top")
-    "wJ" '(evil-window-move-very-bottom :which-key "move bottom")
-    "wr" '(evil-window-rotate-downwards :which-key "rotate")
-    "ws" '(evil-window-split :which-key "split horizontally")
-    "wv" '(evil-window-vsplit :which-key "split vertically")
-    "wc" '(evil-window-delete :which-key "delete")
-    "wq" '(evil-quit :which-key "quit")
-    "wt" '(tab-new :which-key "new tab")
-    "wu" '(winner-undo :which-key "undo")
-
-     ;; Help
-    "h" '(:ignore t :which-key "Help")
-    "h <escape>" '(keyboard-escape-quit :which-key t)
-    "hf" '(helpful-callable :which-key "Callable")
-    "hv" '(helpful-variable :which-key "Variable")
-    "hk" '(helpful-key :which-key "Key")
-    "hx" '(helpful-command :which-key "Command")
-    "hd" '(helpful-at-point :which-key "At point")
-    "hF" '(helpful-function :which-key "Function")
-    "ho" '(helpful-symbol :which-key "Symbol")
-    "hm" '(describe-mode :which-key "Major mode")
-    "hM" '(describe-minor-mode :which-key "Minor mode")
-    "hp" '(describe-package :which-key "Package")
-
-     ;; Bookmark / Recent
-    "r" '(:ignore t :which-key "Recent")
-    "r <escape>" '(keyboard-escape-quit :which-key t)
-    "rb" '(bookmark-jump :which-key t)
-    "rm" '(bookmark-set :which-key t)
-    "rl" '(bookmark-bmenu-list :which-key t)
-    "ru" '(vundo :which-key t)
-
-     ;; Project
-    "p" '(:ignore t :which-key "Project")
-    "p <escape>" '(keyboard-escape-quit :which-key t)
-    "pf" '(project-find-file :which-key t)
-
-    ;; LLM
-    "l" '(:ignore t :which-key "LLM")
-    "l <escape>" '(keyboard-escape-quit :which-key t)
-    "ll" '(gptel :which-key "gptel")
-
-;;;; general n
-    "n" '(:ignore t :which-key "Note")
-    "n <escape>" '(keyboard-escape-quit :which-key t)
-    ;; "nj" '(denote-journal-new-or-existing-entry :which-key "journal today")
-    ;; "nn" '(denote :which-key "new")
-    ;; "nf" '(denote-open-or-create :which-key "find")
-    "nf" '(org-roam-node-find :which-key "node find")
-    "ni" '(org-roam-node-insert :which-key "node insert")
-    "nc" '(org-roam-capture :which-key "capture")
-    "ng" '(org-roam-graph :which-key "graph")
-    "nl" '(org-roam-buffer-toggle :which-key t)
-    "nj" '(org-roam-dailies-capture-today :which-key t)
-
-;;;; general t
-    "t" '(:ignore t :which-key "Toggle")
-    "t <escape>" '(keyboard-escape-quit :which-key t)
-    "tt" '(modus-themes-toggle :which-key "Theme")
-    "tr" '(rainbow-mode  :which-key "Rainbow")
-    "tl" '(toggle-truncate-lines :which-key "truncate lines")
-    "tp" '(popper-toggle :which-key "popper-toggle")
-
-;;;; general g
-    "g" '(:ignore t :which-key "Toggle")
-    "g <escape>" '(keyboard-escape-quit :which-key t)
-    "gs" '(magit-status :which-key "Status")
-    ;; "gn" '(diff-hl-next-hunk :which-key "Next Hunk")
-    ;; "gp" '(diff-hl-previous-hunk :which-key "Previous Hunk")
-
-    "<tab>" '(popper-toggle :which-key "popper-toggle")
-  ))
-
-(use-package expreg
-  :straight t
-  :bind (("C-+" . expreg-expand)
-	 ("C--" . expreg-contract)))
-
-(use-package rainbow-mode
-  :straight t)
-
-(use-package spacious-padding
-  :straight t
-  :config
-  (setq spacious-padding-widths
-      '( :internal-border-width 15
-         :header-line-width 4
-         :mode-line-width 2
-         :tab-width 4
-         :right-divider-width 30
-         :scroll-bar-width 8
-         :fringe-width 8))
-  (spacious-padding-mode 1)
-  )
-
-(use-package visual-fill-column
-  :straight t
-  :defer t
-  :custom
-  (visual-fill-column-width 100)
-  :hook (org-mode . (lambda ()
-		      (visual-fill-column-mode)
-		      ;; (visual-line-fill-column-mode)
-		      (visual-fill-column-toggle-center-text)))
-  )
-
-(use-package vi-tilde-fringe
-  :straight t
-  :diminish vi-tilde-fringe-mode
-  :hook (prog-mode-hook . vi-tilde-fringe-mode))
-
- 
-
-
-
-;; Info / Documentation
-
-(use-package helpful
-  :straight t
-  :config
-  (global-set-key (kbd "C-h f") #'helpful-callable)
-  (global-set-key (kbd "C-h v") #'helpful-variable)
-  (global-set-key (kbd "C-h k") #'helpful-key)
-  (global-set-key (kbd "C-h x") #'helpful-command)
-  (global-set-key (kbd "C-c C-d") #'helpful-at-point)
-  (global-set-key (kbd "C-h F") #'helpful-function))
-
-;; Performance
-
-(use-package gcmh
-  :straight t
-  :diminish gcmh-mode
-  :hook
-  (after-init-hook . gcmh-mode))
-
-;; Completions
-
-    ;; In buffer
-
-(use-package corfu
-  :straight t
-  ;; Optional customizations
-  :custom
-  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-  (corfu-preselect 'first)
-  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-  :bind
-  (:map corfu-map
-        ("TAB" . corfu-next) ;; Use TAB for cycling to the next candidate
-        ([tab] . corfu-next) ;; Ensure both TAB and [tab] work
-        ("S-TAB" . corfu-previous) ;; Use Shift-TAB for cycling to the previous candidate
-        ([backtab] . corfu-previous)
-	("SPC" . corfu-insert-separator))
-
-  ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
-  ;; :hook ((prog-mode . corfu-mode)
-  ;;        (shell-mode . corfu-mode)
-  ;;        (eshell-mode . corfu-mode))
-
-  ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
-  ;; be used globally (M-/).  See also the customization variable
-  ;; `global-corfu-modes' to exclude certain modes.
-  :init
-  (global-corfu-mode)
-  (corfu-popupinfo-mode))
-
-(use-package cape
-  :straight t
-  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-  ;; Press C-c p ? to for help.
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
-  ;; Alternatively bind Cape commands individually.
-  ;; :bind (("C-c p d" . cape-dabbrev)
-  ;;        ("C-c p h" . cape-history)
-  ;;        ("C-c p f" . cape-file)
-  ;;        ...)
-  :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-  ;; ...
-)
-
-    ;; Minibuffer
-
-;; Example configuration for Consult
+;; [[file:emacs.org::*consult][consult:1]]
 (use-package consult
   :straight t
   ;; Replace bindings. Lazily loaded by `use-package'.
@@ -642,11 +309,72 @@
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
 )
+;; consult:1 ends here
 
+;; [[file:emacs.org::*consult-todo][consult-todo:1]]
 (use-package consult-todo
   :straight t
   :after (consult))
+;; consult-todo:1 ends here
 
+;; [[file:emacs.org::*corfu][corfu:1]]
+(use-package corfu
+  :straight t
+  ;; Optional customizations
+  :custom
+  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
+  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+  (corfu-preselect 'first)
+  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  :bind
+  (:map corfu-map
+	  ("TAB" . corfu-next) ;; Use TAB for cycling to the next candidate
+	  ([tab] . corfu-next) ;; Ensure both TAB and [tab] work
+	  ("S-TAB" . corfu-previous) ;; Use Shift-TAB for cycling to the previous candidate
+	  ([backtab] . corfu-previous)
+	  ("SPC" . corfu-insert-separator))
+
+  ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
+  ;; :hook ((prog-mode . corfu-mode)
+  ;;        (shell-mode . corfu-mode)
+  ;;        (eshell-mode . corfu-mode))
+
+  ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
+  ;; be used globally (M-/).  See also the customization variable
+  ;; `global-corfu-modes' to exclude certain modes.
+  :init
+  (global-corfu-mode)
+  (corfu-popupinfo-mode))
+;; corfu:1 ends here
+
+;; [[file:emacs.org::*cape][cape:1]]
+(use-package cape
+  :straight t
+  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+  ;; Press C-c p ? to for help.
+  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+  ;; Alternatively bind Cape commands individually.
+  ;; :bind (("C-c p d" . cape-dabbrev)
+  ;;        ("C-c p h" . cape-history)
+  ;;        ("C-c p f" . cape-file)
+  ;;        ...)
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
+  ;; ...
+  )
+;; cape:1 ends here
+
+;; [[file:emacs.org::*embark][embark:1]]
 (use-package embark
   :straight t
   :bind
@@ -674,162 +402,53 @@
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
                  (window-parameters (mode-line-format . none)))))
+;; embark:1 ends here
 
-;; Consult users will also want the embark-consult package.
+;; [[file:emacs.org::*embark-consult][embark-consult:1]]
 (use-package embark-consult
-  :straight t
-  :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
-
-
-;; Treesitter Programming Modes & More
-
-(use-package treesit
-  ;; :after tree-sitter-langs
-  :config
-  (setq treesit-language-source-alist
-   '((nix . ("https://github.com/nix-community/tree-sitter-nix" "v0.0.2"))))
-  ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
-  )
-
-(use-package tree-sitter-langs
-  ;; :disabled
-  :straight t
-  ;; :after treesit
-  :config
-  (setq treesit-load-name-override-list
-	'((python "python" "tree_sitter_python")
-	  (nix "nix" "tree_sitter_nix")
-	  (json "json" "tree_sitter_json")
-	  (yaml "yaml" "tree_sitter_yaml")))
-  (setq treesit-extra-load-path
-	(list tree-sitter-langs--dir
-	      (concat tree-sitter-langs--dir "bin/")))
-
-  ;; (setq treesit-load-name-override-list
-  ;;     (list (list "python" "python" "python")))
-)
-
-(use-package nix-mode
-  :straight t
-  :defer t
-  :mode "\\.nix\\'")
-
-(use-package nix-ts-mode
-  :straight t
-  :if (treesit-language-available-p 'nix)
-  :defer t
-  :init
-  (setq major-mode-remap-alist
-	(append major-mode-remap-alist
-		'((nix-mode . nix-ts-mode)))))
-
-(use-package conf-mode
-  :straight nil ;; builtin
-  :mode "\\.inputrc\\'"
-  :hook
-  (conf-mode . display-line-numbers-mode)
-  (conf-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers 
-  )
-
-(use-package yaml-ts-mode
-  :if (treesit-language-available-p 'yaml)
-  :defer t
-  :mode (("\\.ya?ml\\'" . yaml-ts-mode))
-  :hook ((yaml-ts-mode . (lambda () (setq-local tab-width 2))))
-  )
-
-
-(use-package python
-  :init
-  (if (treesit-language-available-p 'python)
-      (setq major-mode-remap-alist
-	    (append major-mode-remap-alist
-		    '((python-mode . python-ts-mode))))))
-
-;; Org Mode
-
-(use-package org-roam
-  :straight t
-  :custom
-  (org-roam-directory "~/org/roam")
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n g" . org-roam-graph)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture)
-         ;; Dailies
-         ("C-c n j" . org-roam-dailies-capture-today))
-  :config
-  ;; If you're using a vertical completion framework, you might want a more informative completion interface
-  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-  (org-roam-db-autosync-mode))
-
-;; Terminal Emacs
-
-(use-package evil-terminal-cursor-changer
-  :straight t
-  :if (not (display-graphic-p))
-  :config
-  (evil-terminal-cursor-changer-activate))
-
-;; (use-package combobulate
-;;   :straight (combobulate :type git :host github :repo "mickeynp/combobulate")
-;;   :defer t
-;;   )
-
-;; AI
-
-(use-package gptel
-  :straight t
-  :config
-  (setq gptel-default-mode #'org-mode))
-
-(use-package indent-bars
-  :straight t
-  :custom
-  (indent-bars-no-descend-lists t) ; no extra bars in continued func arg lists
-  (indent-bars-treesit-support t)
-  (indent-bars-treesit-ignore-blank-lines-types '("module"))
-  ;; Add other languages as needed
-  (indent-bars-treesit-scope '((python function_definition class_definition for_statement
-	  if_statement with_statement while_statement)))
-  ;; Note: wrap may not be needed if no-descend-list is enough
-  ;;(indent-bars-treesit-wrap '((python argument_list parameters ; for python, as an example
-  ;;				      list list_comprehension
-  ;;				      dictionary dictionary_comprehension
-  ;;				      parenthesized_expression subscript)))
-  ;; :hook ((python-ts-mode yaml-mode) . indent-bars-mode)
-  :hook (((python-base-mode yaml-mode) . indent-bars-mode)
-	 (nix-ts-mode . indent-bars-mode)))
-
-(use-package treesit-fold
-  :straight t
-  :config
-  (setq treesit-fold-line-count-show t
-	treesit-fold-line-count-format " <%d lines> ")
-  (global-treesit-fold-mode))
-
-
-;; Version Control
-(use-package magit
+  :after embark
   :straight t)
+;; embark-consult:1 ends here
 
-(use-package diff-hl 
+;; [[file:emacs.org::*orderless][orderless:1]]
+(use-package orderless
   :straight t
-  :after (magit)
-  :config
-  (global-diff-hl-mode)
-  (global-diff-hl-show-hunk-mouse-mode)
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-  
-)
+  :custom
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
+  ;; (orderless-component-separator #'orderless-escapable-split-on-space)
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+;; orderless:1 ends here
 
+;; [[file:emacs.org::*prescient][prescient:1]]
+(use-package prescient
+  :straight t)
+;; prescient:1 ends here
+
+;; [[file:emacs.org::*vertico-prescient][vertico-prescient:1]]
+(use-package vertico-prescient
+  :straight t
+  :after (prescient vertico)
+  :config
+  (vertico-prescient-mode t))
+;; vertico-prescient:1 ends here
+
+;; [[file:emacs.org::*corfu-prescient][corfu-prescient:1]]
+(use-package corfu-prescient
+  :straight t
+  :after (prescient corfu)
+  :config
+  (corfu-prescient-mode t))
+;; corfu-prescient:1 ends here
+
+;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
-  :straight t
-  :config
-  (locate-user-emacs-file "fontaine-latest-state.eld")
-  (setq fontaine-presets
+:straight t
+:config
+(locate-user-emacs-file "fontaine-latest-state.eld")
+(setq fontaine-presets
 	'((small
 	   :default-family "Aporetic Serif Mono"
 	   :default-height 80
@@ -852,86 +471,514 @@
 	   :default-weight regular
 	   :default-height 140
 
-           :fixed-pitch-family nil ; falls back to :default-family
-           :fixed-pitch-weight nil ; falls back to :default-weight
-           :fixed-pitch-height 1.0
+         :fixed-pitch-family nil ; falls back to :default-family
+         :fixed-pitch-weight nil ; falls back to :default-weight
+         :fixed-pitch-height 1.0
 
-           :fixed-pitch-serif-family nil ; falls back to :default-family
-           :fixed-pitch-serif-weight nil ; falls back to :default-weight
-           :fixed-pitch-serif-height 1.0
+         :fixed-pitch-serif-family nil ; falls back to :default-family
+         :fixed-pitch-serif-weight nil ; falls back to :default-weight
+         :fixed-pitch-serif-height 1.0
 
-           :variable-pitch-family "Aporetic Serif"
-           :variable-pitch-weight nil
-           :variable-pitch-height 1.0
+         :variable-pitch-family "Aporetic Serif"
+         :variable-pitch-weight nil
+         :variable-pitch-height 1.0
 
-           :mode-line-active-family nil ; falls back to :default-family
-           :mode-line-active-weight nil ; falls back to :default-weight
-           :mode-line-active-height 0.9
+         :mode-line-active-family nil ; falls back to :default-family
+         :mode-line-active-weight nil ; falls back to :default-weight
+         :mode-line-active-height 0.9
 
-           :mode-line-inactive-family nil ; falls back to :default-family
-           :mode-line-inactive-weight nil ; falls back to :default-weight
-           :mode-line-inactive-height 0.9
+         :mode-line-inactive-family nil ; falls back to :default-family
+         :mode-line-inactive-weight nil ; falls back to :default-weight
+         :mode-line-inactive-height 0.9
 
-           :header-line-family nil ; falls back to :default-family
-           :header-line-weight nil ; falls back to :default-weight
-           :header-line-height 0.9
+         :header-line-family nil ; falls back to :default-family
+         :header-line-weight nil ; falls back to :default-weight
+         :header-line-height 0.9
 
-           :line-number-family nil ; falls back to :default-family
-           :line-number-weight nil ; falls back to :default-weight
-           :line-number-height 0.9
+         :line-number-family nil ; falls back to :default-family
+         :line-number-weight nil ; falls back to :default-weight
+         :line-number-height 0.9
 
-           :tab-bar-family nil ; falls back to :default-family
-           :tab-bar-weight nil ; falls back to :default-weight
-           :tab-bar-height 1.0
+         :tab-bar-family nil ; falls back to :default-family
+         :tab-bar-weight nil ; falls back to :default-weight
+         :tab-bar-height 1.0
 
-           :tab-line-family nil ; falls back to :default-family
-           :tab-line-weight nil ; falls back to :default-weight
-           :tab-line-height 1.0
+         :tab-line-family nil ; falls back to :default-family
+         :tab-line-weight nil ; falls back to :default-weight
+         :tab-line-height 1.0
 
-           :bold-family nil ; use whatever the underlying face has
-           :bold-weight bold
+         :bold-family nil ; use whatever the underlying face has
+         :bold-weight bold
 
-           :italic-family nil
-           :italic-slant italic
+         :italic-family nil
+         :italic-slant italic
 
-           :line-spacing nil)))
+         :line-spacing nil)))
 
-  ;; Set the last preset or fall back to desired style from `fontaine-presets'
-  ;; (the `regular' in this case).
-  (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+;; Set the last preset or fall back to desired style from `fontaine-presets'
+;; (the `regular' in this case).
+(fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
 
-  ;; Persist the latest font preset when closing/starting Emacs and
-  ;; while switching between themes.
-  (fontaine-mode 1))
+;; Persist the latest font preset when closing/starting Emacs and
+;; while switching between themes.
+(fontaine-mode 1))
+;; [[https://github.com/protesilaos/fontaine][fontaine]]:1 ends here
 
-(use-package org-download
+;; [[file:emacs.org::*evil][evil:1]]
+(use-package evil
+:straight t
+:init
+(setq evil-want-keybinding nil) ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
+(setq evil-want-integration t)
+(setq evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
+:custom
+(evil-want-C-u-scroll t)                 ;; Makes ‘C-u’ scroll up (like Vim).
+(evil-want-C-u-delete t)                 ;; Makes ‘C-u’ delete on insert mode
+(evil-split-window-below t)              ;; Horizontally split windows are created below.
+(evil-vsplit-window-right t)             ;; Vertically split windows with are created to the right.
+(evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
+(evil-undo-system 'undo-fu)
+(evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
+:config
+(evil-mode t)
+(with-eval-after-load 'dired
+  (evil-define-key 'normal dired-mode-map "h" 'dired-up-directory)
+  (evil-define-key 'normal dired-mode-map "l" 'dired-find-alternate-file))
+)
+;; evil:1 ends here
+
+;; [[file:emacs.org::*evil-collection][evil-collection:1]]
+(use-package evil-collection
+  :straight t
+  :after evil
+  :diminish evil-collection-unimpaired-mode
+  :custom
+  (evil-collection-setup-minibuffer t) ;; Setup ‘evil’ bindings in the ‘minibuffer’
+  (evil-collection-which-key-setup t) ;; Setup ‘evil’ bindings for ‘which-key’.
+  :config
+  (setq evil-collection-unimpaired-want-repeat-mode-integration t)
+  (evil-collection-init))
+;; evil-collection:1 ends here
+
+;; [[file:emacs.org::*evil-commentary][evil-commentary:1]]
+(use-package evil-commentary
+  :straight t
+  :after evil-collection
+  :diminish evil-commentary-mode
+  :config
+  (evil-commentary-mode t))
+;; evil-commentary:1 ends here
+
+;; [[file:emacs.org::*evil-surround][evil-surround:1]]
+(use-package evil-surround
+  :straight t
+  :after evil-collection
+  :diminish global-evil-surround-mode
+  :config
+  (global-evil-surround-mode t))
+;; evil-surround:1 ends here
+
+;; [[file:emacs.org::*evil-snipe][evil-snipe:1]]
+(use-package evil-snipe
+  :straight t
+  :after evil
+  :diminish (evil-snipe-local-mode)
+  :config
+  (evil-snipe-mode +1)
+  (evil-snipe-override-mode +1)
+
+  ;; and disable in specific modes
+  ;; (push 'python-mode evil-snipe-disabled-modes)
+
+  ;; or disable it manually
+  ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-mode)
+  ;; (add-hook 'python-mode-hook #'turn-off-evil-snipe-override-mode)
+  )
+;; evil-snipe:1 ends here
+
+;; [[file:emacs.org::*evil-textobj-tree-sitter][evil-textobj-tree-sitter:1]]
+(use-package evil-textobj-tree-sitter
+  :straight t
+  :after (evil evil-collection)
+  :config
+  (define-key evil-outer-text-objects-map
+	      "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+  (define-key evil-inner-text-objects-map
+	      "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
+  (define-key evil-outer-text-objects-map
+	      "c" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+  (define-key evil-inner-text-objects-map
+	      "c" (evil-textobj-tree-sitter-get-textobj "comment.inner"))
+  )
+;; evil-textobj-tree-sitter:1 ends here
+
+;; [[file:emacs.org::*general.el][general.el:1]]
+(use-package general
   :straight t
   :config
+  (general-evil-setup)
 
-  ;; Drag-and-drop to `dired`
-  (add-hook 'dired-mode-hook 'org-download-enable)
-  (add-hook 'org-mode-hook 'org-download-enable)
+  (general-create-definer leader-keys
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
   )
+;; general.el:1 ends here
 
-(use-package org-mouse
-  :after org)
+;; [[file:emacs.org::*misc <leader> maps][misc <leader> maps:1]]
+(leader-keys
+  ;; Execute / Commands
+  "<escape>" '(keyboard-escape-quit :which-key t)
+  ":" '(execute-extended-command :which-key "execute command")
+  "<tab>" '(popper-toggle :which-key "popper-toggle"))
+;; misc <leader> maps:1 ends here
 
+;; [[file:emacs.org::*<leader> b][<leader> b:1]]
+(leader-keys
+  "b" '(:ignore t :which-key "Buffer")
+  "b <escape>" '(keyboard-escape-quit :which-key t)
+  ;; "bk"  '(kill-current-buffer)
+  "bk"  '(kill-current-buffer :which-key "Kill Current")
+  "bn"  '(next-buffer :which-key "Next")
+  "bp"  '(previous-buffer :which-key "Previous")
+  "bf"  '(consult-buffer :which-key "Find"))
+;; <leader> b:1 ends here
+
+;; [[file:emacs.org::*<leader> f][<leader> f:1]]
+(leader-keys
+  "f"  '(:ignore t :which-key "File")
+  "f <escape>" '(keyboard-escape-quit :which-key t)
+  "fi" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
+  "ff"  '(find-file :which-key t)
+  "fr"  '(recentf :which-key t))
+;; <leader> f:1 ends here
+
+;; [[file:emacs.org::*<leader> g][<leader> g:1]]
+(leader-keys
+  "g" '(:ignore t :which-key "Toggle")
+  "g <escape>" '(keyboard-escape-quit :which-key t)
+  "gs" '(magit-status :which-key "Status")
+  ;; "gn" '(diff-hl-next-hunk :which-key "Next Hunk")
+  ;; "gp" '(diff-hl-previous-hunk :which-key "Previous Hunk")
+  )
+;; <leader> g:1 ends here
+
+;; [[file:emacs.org::*<leader> h][<leader> h:1]]
+(leader-keys
+  "h" '(:ignore t :which-key "Help")
+  "h <escape>" '(keyboard-escape-quit :which-key t)
+  "hf" '(helpful-callable :which-key "Callable")
+  "hv" '(helpful-variable :which-key "Variable")
+  "hk" '(helpful-key :which-key "Key")
+  "hx" '(helpful-command :which-key "Command")
+  "hd" '(helpful-at-point :which-key "At point")
+  "hF" '(helpful-function :which-key "Function")
+  "ho" '(helpful-symbol :which-key "Symbol")
+  "hm" '(describe-mode :which-key "Major mode")
+  "hM" '(describe-minor-mode :which-key "Minor mode")
+  "hp" '(describe-package :which-key "Package"))
+;; <leader> h:1 ends here
+
+;; [[file:emacs.org::*<leader> l][<leader> l:1]]
+(leader-keys
+  "l" '(:ignore t :which-key "LLM")
+  "l <escape>" '(keyboard-escape-quit :which-key t)
+  "ll" '(gptel :which-key "gptel"))
+;; <leader> l:1 ends here
+
+(leader-keys
+  "n" '(:ignore t :which-key "Note")
+  "n <escape>" '(keyboard-escape-quit :which-key t)
+  ;; "nj" '(denote-journal-new-or-existing-entry :which-key "journal today")
+  ;; "nn" '(denote :which-key "new")
+  ;; "nf" '(denote-open-or-create :which-key "find")
+  "nf" '(org-roam-node-find :which-key "node find")
+  "ni" '(org-roam-node-insert :which-key "node insert")
+  "nc" '(org-roam-capture :which-key "capture")
+  "ng" '(org-roam-graph :which-key "graph")
+  "nl" '(org-roam-buffer-toggle :which-key t)
+  "nj" '(org-roam-dailies-capture-today :which-key t))
+
+;; [[file:emacs.org::*<leader> p][<leader> p:1]]
+(leader-keys
+   ;; Project
+  "p" '(:ignore t :which-key "Project")
+  "p <escape>" '(keyboard-escape-quit :which-key t)
+  "pf" '(project-find-file :which-key t))
+;; <leader> p:1 ends here
+
+;; [[file:emacs.org::*<leader> r][<leader> r:1]]
+(leader-keys
+  ;; Bookmark / Recent
+  "r" '(:ignore t :which-key "Recent")
+  "r <escape>" '(keyboard-escape-quit :which-key t)
+  "rb" '(bookmark-jump :which-key t)
+  "rm" '(bookmark-set :which-key t)
+  "rl" '(bookmark-bmenu-list :which-key t)
+  "ru" '(vundo :which-key t))
+;; <leader> r:1 ends here
+
+;; [[file:emacs.org::*<leader> s][<leader> s:1]]
+(leader-keys
+;;;; general s
+  "s" '(:ignore t :which-key "Search")
+  "s <escape>" '(keyboard-escape-quit :which-key t)
+  "sr" '(consult-ripgrep :which-key "ripgrep")
+  "so" '(consult-outline :which-key "outline")
+  "sl" '(consult-line :which-key "line")
+  "su" '(vundo :which-key t "undo")
+  "st" '(consult-todo-project :which-key t "todo")
+  "sG" '(consult-git-grep :which-key t "git-grep"))
+;; <leader> s:1 ends here
+
+;; [[file:emacs.org::*<leader> t][<leader> t:1]]
+(leader-keys
+  "t" '(:ignore t :which-key "Toggle")
+  "t <escape>" '(keyboard-escape-quit :which-key t)
+  "tt" '(modus-themes-toggle :which-key "Theme")
+  "tr" '(rainbow-mode  :which-key "Rainbow")
+  "tl" '(toggle-truncate-lines :which-key "truncate lines")
+  "tp" '(popper-toggle :which-key "popper-toggle")
+  "tk" '(keycast-mode-line-mode :which-key "keycast mode-line"))
+;; <leader> t:1 ends here
+
+;; [[file:emacs.org::*<leader> w][<leader> w:1]]
+(leader-keys
+  "w" '(:ignore t :which-key "window")
+  "w <escape>" '(keyboard-escape-quit :which-key t)
+  "wl" '(evil-window-right :which-key "right")
+  "wh" '(evil-window-left :which-key "left")
+  "wk" '(evil-window-up :which-key "up")
+  "wj" '(evil-window-down :which-key "down")
+  "wL" '(evil-window-move-far-right :which-key "move right")
+  "wH" '(evil-window-move-far-left :which-key "move left")
+  "wK" '(evil-window-move-very-top :which-key "move top")
+  "wJ" '(evil-window-move-very-bottom :which-key "move bottom")
+  "wr" '(evil-window-rotate-downwards :which-key "rotate")
+  "ws" '(evil-window-split :which-key "split horizontally")
+  "wv" '(evil-window-vsplit :which-key "split vertically")
+  "wc" '(evil-window-delete :which-key "delete")
+  "wq" '(evil-quit :which-key "quit")
+  "wt" '(tab-new :which-key "new tab")
+  "wu" '(winner-undo :which-key "undo")
+  )
+;; <leader> w:1 ends here
+
+;; [[file:emacs.org::*tree-sitter-langs][tree-sitter-langs:1]]
+(use-package tree-sitter-langs
+  :straight t
+  :config
+  (setq treesit-load-name-override-list
+	  '((python "python" "tree_sitter_python")
+	    (nix "nix" "tree_sitter_nix")
+	    (json "json" "tree_sitter_json")
+	    (yaml "yaml" "tree_sitter_yaml")))
+  (setq treesit-extra-load-path
+	  (list tree-sitter-langs--dir
+		(concat tree-sitter-langs--dir "bin/")))
+  )
+;; tree-sitter-langs:1 ends here
+
+;; [[file:emacs.org::*org-roam][org-roam:1]]
+(use-package org-roam
+  :straight t
+  :custom
+  (org-roam-directory "~/org/roam")
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+	   ("C-c n f" . org-roam-node-find)
+	   ("C-c n g" . org-roam-graph)
+	   ("C-c n i" . org-roam-node-insert)
+	   ("C-c n c" . org-roam-capture)
+	   ;; Dailies
+	   ("C-c n j" . org-roam-dailies-capture-today))
+  :config
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode))
+;; org-roam:1 ends here
+
+;; [[file:emacs.org::*gcmh][gcmh:1]]
+(use-package gcmh
+  :straight t
+  :diminish gcmh-mode
+  :hook
+  (after-init-hook . gcmh-mode))
+;; gcmh:1 ends here
+
+;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
   (setq scroll-conservatively 101 ; important!
-        scroll-margin 0) 
+	  scroll-margin 0) 
   :config
   (ultra-scroll-mode 1))
+;; [[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1 ends here
 
+;; [[file:emacs.org::*org][org:1]]
+(use-package org
+  :config
+  (setq org-auto-align-tags nil
+	  org-hide-emphasis-markers t
+	  org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
+  ;; (add-hook 'org-mode-hook #'my/org-mode-entry)
+  (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
+  (add-hook 'org-mode-hook #'my/org-mode-entry)
+  )
+;; org:1 ends here
+
+;; [[file:emacs.org::*org-modern][org-modern:1]]
+(use-package org-modern
+  :straight t
+  :config
+  (setq org-modern-table nil
+	  org-modern-block-name nil
+	  org-modern-block-fringe nil))
+;; org-modern:1 ends here
+
+;; [[file:emacs.org::*htmlize][htmlize:1]]
+(use-package htmlize
+  :straight t)
+;; htmlize:1 ends here
+
+;; [[file:emacs.org::*nix-mode][nix-mode:1]]
+(use-package nix-mode
+  :straight t
+  :defer t
+  :mode "\\.nix\\'")
+;; nix-mode:1 ends here
+
+;; [[file:emacs.org::*nix-ts-mode][nix-ts-mode:1]]
+(use-package nix-ts-mode
+  :straight t
+  :if (treesit-language-available-p 'nix)
+  :defer t
+  :init
+  (setq major-mode-remap-alist
+	(append major-mode-remap-alist
+		'((nix-mode . nix-ts-mode)))))
+;; nix-ts-mode:1 ends here
+
+;; [[file:emacs.org::*conf-mode][conf-mode:1]]
+(use-package conf-mode
+  :straight nil ;; builtin
+  :mode "\\.inputrc\\'"
+  :hook
+  (conf-mode . display-line-numbers-mode)
+  (conf-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers 
+  )
+;; conf-mode:1 ends here
+
+;; [[file:emacs.org::*yaml][yaml:1]]
+(use-package yaml-ts-mode
+  :if (treesit-language-available-p 'yaml)
+  :defer t
+  :mode (("\\.ya?ml\\'" . yaml-ts-mode))
+  :hook ((yaml-ts-mode . (lambda () (setq-local tab-width 2))))
+  )
+;; yaml:1 ends here
+
+;; [[file:emacs.org::*python][python:1]]
+(use-package python
+  :init
+  (if (treesit-language-available-p 'python)
+      (setq major-mode-remap-alist
+	    (append major-mode-remap-alist
+		    '((python-mode . python-ts-mode))))))
+;; python:1 ends here
+
+;; [[file:emacs.org::*rainbow-mode][rainbow-mode:1]]
+(use-package rainbow-mode
+  :straight t)
+;; rainbow-mode:1 ends here
+
+;; [[file:emacs.org::*qrencode][qrencode:1]]
+(use-package qrencode
+  :straight t)
+;; qrencode:1 ends here
+
+;; [[file:emacs.org::*keycast][keycast:1]]
+(use-package keycast
+  :straight t)
+;; keycast:1 ends here
+
+;; [[file:emacs.org::*evil-terminal-cursor-changer][evil-terminal-cursor-changer:1]]
+(use-package evil-terminal-cursor-changer
+  :straight t
+  :if (not (display-graphic-p))
+  :config
+  (evil-terminal-cursor-changer-activate))
+;; evil-terminal-cursor-changer:1 ends here
+
+;; [[file:emacs.org::*pulsar][pulsar:1]]
+(use-package pulsar
+  :straight t
+  :config
+  ;; (add-to-list 'pulsar-pulse-region-functions 'evil-yank)
+  ;; (add-to-list 'pulsar-pulse-functions 'evil-yank)
+  (add-to-list 'pulsar-pulse-functions 'evil-jump-backward)
+  (setq pulsar-pulse-functions (remove 'evil-scroll-up pulsar-pulse-functions))
+  (setq pulsar-pulse-functions (remove 'evil-scroll-down pulsar-pulse-functions))
+  (pulsar-global-mode))
+;; pulsar:1 ends here
+
+;; [[file:emacs.org::*spacious-padding][spacious-padding:1]]
+(use-package spacious-padding
+  :straight t
+  :config
+  (setq spacious-padding-widths
+	'( :internal-border-width 15
+	     :header-line-width 4
+	     :mode-line-width 2
+	     :tab-width 4
+	     :right-divider-width 30
+	     :scroll-bar-width 8
+	     :fringe-width 8))
+  (spacious-padding-mode 1)
+  )
+;; spacious-padding:1 ends here
+
+;; [[file:emacs.org::*vi-tilde-fringe][vi-tilde-fringe:1]]
+(use-package vi-tilde-fringe
+  :straight t
+  :diminish vi-tilde-fringe-mode
+  :hook (prog-mode-hook . vi-tilde-fringe-mode))
+;; vi-tilde-fringe:1 ends here
+
+;; [[file:emacs.org::*Show current project][Show current project:1]]
+(use-package project
+  :custom
+  (project-mode-line t))
+;; Show current project:1 ends here
+
+;; [[file:emacs.org::*Hide line/column numbers][Hide line/column numbers:1]]
+(use-package emacs
+  :init
+  (line-number-mode -1)
+  (column-number-mode -1))
+;; Hide line/column numbers:1 ends here
+
+;; [[file:emacs.org::*diminish][diminish:1]]
+(use-package diminish
+  :straight t
+  :config)
+;; diminish:1 ends here
+
+;; [[file:emacs.org::*nerd-icons][nerd-icons:1]]
 (use-package nerd-icons
   :straight t)
+;; nerd-icons:1 ends here
 
+;; [[file:emacs.org::*nerd-icons-dired][nerd-icons-dired:1]]
 (use-package nerd-icons-dired
   :straight t
   :after nerd-icons
   :hook (dired-mode . nerd-icons-dired-mode))
+;; nerd-icons-dired:1 ends here
 
+;; [[file:emacs.org::*nerd-icons-completion][nerd-icons-completion:1]]
 (use-package nerd-icons-completion
   :straight t
   :after (nerd-icons marginalia)
@@ -939,7 +986,9 @@
   (nerd-icons-completion-mode)
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
   )
+;; nerd-icons-completion:1 ends here
 
+;; [[file:emacs.org::*nerd-icons-corfu][nerd-icons-corfu:1]]
 (use-package nerd-icons-corfu
   :straight t
   :config
@@ -958,144 +1007,19 @@
 
   ;; The Custom interface is also supported for tuning the variable above.
   )
+;; nerd-icons-corfu:1 ends here
 
+;; [[file:emacs.org::*Mouse Support][Mouse Support:1]]
+;; right click mouse menu
+(context-menu-mode 1)
+;; Mouse Support:1 ends here
 
-(use-package pulsar
-  :straight t
-  :config
-  ;; (add-to-list 'pulsar-pulse-region-functions 'evil-yank)
-  ;; (add-to-list 'pulsar-pulse-functions 'evil-yank)
-  (add-to-list 'pulsar-pulse-functions 'evil-jump-backward)
-  (setq pulsar-pulse-functions (remove 'evil-scroll-up pulsar-pulse-functions))
-  (setq pulsar-pulse-functions (remove 'evil-scroll-down pulsar-pulse-functions))
-  (pulsar-global-mode))
+;; [[file:emacs.org::*Theme][Theme:1]]
+;; Mark all themes as safe so emacs won't ask & annoy you
+(setq custom-safe-themes t)
+;; Theme:1 ends here
 
-(diminish 'auto-revert-mode)
-;; (load "./custom.el")
-(progn
-
-  ;; set font for emoji
-  ;; if before emacs 28, this should come after setting symbols, because emacs 28 now has 'emoji . before, emoji is part of 'symbol
-
-  (set-fontset-font
-   t
-   (if (< emacs-major-version 28)
-       '(#x1f300 . #x1fad0)
-     'emoji
-     )
-   (cond
-    ((member "Apple Color Emoji" (font-family-list)) "Apple Color Emoji")
-    ((member "Noto Color Emoji" (font-family-list)) "Noto Color Emoji")
-    ((member "Noto Emoji" (font-family-list)) "Noto Emoji")
-    ((member "Segoe UI Emoji" (font-family-list)) "Segoe UI Emoji")
-    ((member "Symbola" (font-family-list)) "Symbola"))))
-
-(use-package qrencode
-  :straight t) 
-
-(use-package eglot
-  :config
-  (add-hook 'nix-ts-mode-hook 'eglot-ensure)
-  (add-hook 'python-ts-mode-hook 'eglot-ensure)
-
-  (add-to-list 'eglot-server-programs
-	       '((python-mode) . ("pyright-langserver" "--stdio")))
-
-  (defun my-cape-complete-eglot ()
-    (when (and (eglot-managed-p) (bound-and-true-p eglot--current-server))
-      (eglot-completion-at-point)))
-
-  ;; Add Eglot completions to cape
-  (add-to-list 'completion-at-point-functions #'my-cape-complete-eglot)
-  )
-
-;;; Get shit done
-(use-package hl-todo
-  :straight t
-  :config
-  (global-hl-todo-mode))
-
-(defun my/org-toggle-hide-emphasis-markers ()
-  "Toggle `org-hide-emphasis-markers' locally and refresh fontification."
-  (interactive)
-  (if (bound-and-true-p org-hide-emphasis-markers)
-      (setq-local org-hide-emphasis-markers nil)
-    (setq-local org-hide-emphasis-markers t))
-  ;; Refresh fontification
-  (font-lock-flush)
-  (font-lock-ensure)
-  ;; (message "org-hide-emphasis-markers is now %s" org-hide-emphasis-markers)
-  )
-
-(define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
-
-(diminish 'auto-revert-mode)
-(diminish 'treesit-fold-mode)
-(diminish 'outline-minor-mode)
-(put 'dired-find-alternate-file 'disabled nil)
-
-(defun my/org-auto-tangle ()
-  "Automatically tangle Org file on save, but only if the file contains '#+AUTO_TANGLE: t'."
-  (when (and (derived-mode-p 'org-mode)
-             (save-excursion
-               (goto-char (point-min))
-               (re-search-forward "^#\\+auto_tangle: t" nil t)))
-    (org-babel-tangle)))
-
-(defun my/org-auto-tangle-enable ()
-  "Enable auto-tangling for this buffer."
-  (add-hook 'after-save-hook #'my/org-auto-tangle nil 'local))
-
-(add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
-
-(use-package org-modern
-  :straight t
-  :config
-  (setq org-modern-table nil
-	org-modern-block-name nil
-	org-modern-block-fringe nil))
-
-;; (use-package org-modern-indent
-;;   :straight (org-modern-indent :type git :host github :repo "https://github.com/jdtsmith/org-modern-indent"))
-
-(defun my/org-mode-entry ()
-    "Enable visual line mode and set word wrap in non-programming modes."
-    (org-modern-mode 1))
-
-(use-package org
-  :config
-  (setq org-auto-align-tags nil
-	org-hide-emphasis-markers t
-	org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
-  (add-hook 'org-mode-hook 'my/org-mode-entry))
-
-(defun my/modus-themes-custom-faces (&rest _)
-  (modus-themes-with-colors
-    (custom-set-faces
-
-     ;; Change nerd-icons folder colors
-     '(nerd-icons-folder ((t (:foreground "#008899"))))
-     '(nerd-icons-folder-open ((t (:foreground "#008899"))))
-     '(nerd-icons-completion-dir-face ((t (:foreground "#008899"))))
-
-     ;; diff-hl fringe/margin colors
-     '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
-     '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
-     '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f"))))
-
-     ;; org-mode mixed fonts
-     '(org-checkbox ((t (:inherit 'fixed-pitch))))
-     '(org-block ((t (:foreground nil :inherit 'fixed-pitch))))
-     '(org-block-begin-line ((t (:inherit 'fixed-pitch))))
-     ;; '(org-block-end-line ((t (:inherit 'fixed-pitch))))
-     '(org-table ((t (:inherit 'fixed-pitch))))
-     '(org-code ((t (:inherit 'fixed-pitch))))
-     
-     ;; Vundo symbol colors
-     '(vundo-saved ((t (:foreground "#008899"))))
-     '(vundo-last-saved ((t (:foreground "#900276"))))
-     )))
-
+;; [[file:emacs.org::*modus-themes][modus-themes:1]]
 (use-package modus-themes
   :straight t
   :config
@@ -1109,21 +1033,20 @@
 
 	  ;; A nuanced accented background, combined with a suitable foreground.
 	  (bg-prose-code bg-green-nuanced)
-          (fg-prose-code green-cooler)
+        (fg-prose-code green-cooler)
 
-          (bg-prose-verbatim bg-magenta-nuanced)
-          (fg-prose-verbatim magenta-warmer)
+        (bg-prose-verbatim bg-magenta-nuanced)
+        (fg-prose-verbatim magenta-warmer)
 
-          (bg-prose-macro bg-blue-nuanced)
-          (fg-prose-macro magenta-cooler)))
+        (bg-prose-macro bg-blue-nuanced)
+        (fg-prose-macro magenta-cooler)))
 
   (setq modus-vivendi-palette-overrides
 	`((bg-main "#090909")
-	  (fg-heading-1 magenta-faint)
-	  (bg-region bg-lavender)))
+	  (fg-heading-1 magenta-faint)))
 
   (setq modus-operandi-palette-overrides
-        '((fg-heading-1 "#2f5f9f")))
+	'((fg-heading-1 "#2f5f9f")))
 
   (setq modus-themes-headings
 	'((0 . (1.35))
@@ -1132,19 +1055,76 @@
           (3 . (semibold 1.17))
           (4 . (1.14))
           (t . (monochrome))))
-  
+
   (add-hook 'modus-themes-after-load-theme-hook #'my/modus-themes-custom-faces)
-  ;; (load-theme 'modus-vivendi)
-  (load-theme 'modus-operandi)
+  (add-hook 'after-init-hook #'my/modus-themes-custom-faces)
+  (load-theme 'modus-vivendi))
+;; modus-themes:1 ends here
+
+;; [[file:emacs.org::*auto-dark][auto-dark:1]]
+(use-package auto-dark
+  :straight t
+  :diminish auto-dark-mode
+  :if (display-graphic-p)
+  :custom
+  (auto-dark-themes '((modus-vivendi) (modus-operandi)))
+  (auto-dark-polling-interval-seconds 5)
+  (auto-dark-allow-osascript nil)
+  (auto-dark-allow-powershell nil)
+  :init (auto-dark-mode))
+;; auto-dark:1 ends here
+
+;; [[file:emacs.org::*visual-fill-column][visual-fill-column:1]]
+(use-package visual-fill-column
+  :straight t
+  :defer t
+  :custom
+  (visual-fill-column-width 100)
+  :hook (org-mode . (lambda ()
+			(visual-fill-column-mode)
+			;; (visual-line-fill-column-mode)
+			(visual-fill-column-toggle-center-text)))
   )
+;; visual-fill-column:1 ends here
 
-(defvar my/help-modes-list '(helpful-mode
-			     help-mode
-			     ;; pydoc-mode
-			     ;; TeX-special-mode
-			     )
-  "List of major-modes used in documentation buffers")
+;; [[file:emacs.org::*Disable scrollbars in the minibuffer][Disable scrollbars in the minibuffer:1]]
+(use-package emacs
+  :config
+  (set-window-scroll-bars (minibuffer-window) nil nil nil nil 1)
+  (set-window-parameter (get-buffer-window "*Messages*") 'vertical-scroll-bars nil))
+;; Disable scrollbars in the minibuffer:1 ends here
 
+;; [[file:emacs.org::*gptel][gptel:1]]
+(use-package gptel
+  :straight t
+  :config
+  (setq gptel-default-mode #'org-mode))
+;; gptel:1 ends here
+
+;; [[file:emacs.org::*magit][magit:1]]
+(use-package magit
+  :straight t)
+;; magit:1 ends here
+
+;; [[file:emacs.org::*helpful][helpful:1]]
+(use-package helpful
+  :straight t
+  :config
+  (global-set-key (kbd "C-h f") #'helpful-callable)
+  (global-set-key (kbd "C-h v") #'helpful-variable)
+  (global-set-key (kbd "C-h k") #'helpful-key)
+  (global-set-key (kbd "C-h x") #'helpful-command)
+  (global-set-key (kbd "C-c C-d") #'helpful-at-point)
+  (global-set-key (kbd "C-h F") #'helpful-function))
+;; helpful:1 ends here
+
+;; [[file:emacs.org::*which-key][which-key:1]]
+(use-package which-key
+  :config
+  (which-key-mode 1))
+;; which-key:1 ends here
+
+;; [[file:emacs.org::*popper][popper:1]]
 (use-package popper
   :straight t
   ;; :after (setup-windows setup-project)
@@ -1156,23 +1136,21 @@
   (setq popper-reference-buffers
 	(append my/help-modes-list))
   )
+;; popper:1 ends here
 
-;; (use-package auto-dark
-;;   :straight t
-;;   :after (modus-themes)
-;;   :diminish auto-dark-mode
-;;   :if (display-graphic-p)
-;;   :custom
-;;   (auto-dark-themes '((modus-vivendi) (modus-operandi)))
-;;   (auto-dark-polling-interval-seconds 5)
-;;   (auto-dark-allow-osascript nil)
-;;   (auto-dark-allow-powershell nil)
-;;   :init (auto-dark-mode))
+;; [[file:emacs.org::*Layout History][Layout History:1]]
+(use-package emacs
+  :init
+  (winner-mode 1))
+;; Layout History:1 ends here
 
-;; (use-package ledger-mode
-;;   :straight t
-;;   :init
-;;   (setq ledger-clear-whole-transactions 1)
-;;   :config
-;;   (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
-;;   :mode "\\.dat\\")
+;; [[file:emacs.org::*Hybrid line numbers][Hybrid line numbers:2]]
+(add-hook 'evil-insert-state-entry-hook
+	  #'my/hybrid-line-numbers-evil-insert-state-entry)
+(add-hook 'evil-insert-state-exit-hook
+	  #'my/hybrid-line-numbers-evil-insert-state-exit)
+;; Hybrid line numbers:2 ends here
+
+;; [[file:emacs.org::*Toggle org-mode emphasis markers][Toggle org-mode emphasis markers:2]]
+(define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
+;; Toggle org-mode emphasis markers:2 ends here
