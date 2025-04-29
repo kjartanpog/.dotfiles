@@ -1,4 +1,4 @@
-+title: My Literate Emacs Configuration
+#+title: My Literate Emacs Configuration
 #+author: Kjartan Másson
 #+options: toc:nil
 #+auto_tangle: t
@@ -58,6 +58,7 @@ My literate emacs configuration
 + drag-drop org-mode images
 + org-mode inline code font
 + length indicator
++ Mousescroll in in-buffer completion tooltips
 
 ** TODO Tweaks
 
@@ -149,46 +150,6 @@ This file is loaded before the package system and GUI is initialized, so in it y
 
 * Components
 
-** Organize Later
-
-#+begin_src elisp :tangle init.el :comments link
-  (use-package emacs
-    :init                                           ;; Initialization settings that apply before the package is loaded.
-    (savehist-mode 1)                               ;; Enable saving of command history.
-    (save-place-mode 1)                             ;; Enable saving the place in files for easier return.
-
-    :custom                                         ;; Set custom variables to configure Emacs behavior.
-    (tab-always-indent 'complete) ;; TAB first tries to indent the current line, and if the line was already indented, then try to complete the thing at point.
-
-    ;; Hide commands in M-x which do not apply to the current mode.  Corfu
-    ;; commands are hidden, since they are not used via M-x. This setting is
-    ;; useful beyond Corfu.
-    (read-extended-command-predicate #'command-completion-default-include-p)
-
-    :config
-    (recentf-mode t)                                ;; Enable tracking of recently opened files.
-    (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
-    (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t)))
-    (setq vc-follow-symlinks t) ; Always follow symbolic link to a file under version control.
-    (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
-    (repeat-mode)
-
-    )
-#+end_src
-
-
-#+begin_src elisp :tangle init.el :comments link
-  (use-package eldoc
-    :diminish eldoc-mode)
-#+end_src
-
-#+begin_src elisp :tangle init.el comments link
-  (use-package expreg
-    :straight t
-    :bind (("C-+" . expreg-expand)
-  	 ("C--" . expreg-contract)))
-#+end_src
-
 ** Editor Features
 
 *** File Encoding
@@ -207,7 +168,37 @@ This file is loaded before the package system and GUI is initialized, so in it y
     :config
     (setq display-line-numbers-width-start t)
     (setq display-line-numbers-type 'relative) ; Set relative line numbers
+    (add-hook 'prog-mode-hook '(lambda () (hl-line-mode 1)))
     )
+#+end_src
+
+**** Hybrid line numbers :elisp_function:
+
+/Swap between regular & relative line numbers wether you're in evil insert mode or not/
+
+#+begin_src elisp :tangle init.el :comments link
+  (defun my/hybrid-line-numbers-evil-insert-state-entry ()
+    "Swap to regular line numbers if inside prog-mode"
+    (when (derived-mode-p 'prog-mode)
+      (setq display-line-numbers-type t)
+      (display-line-numbers-mode -1)
+      (display-line-numbers-mode 1)
+      (hl-line-mode -1)))
+
+  (defun my/hybrid-line-numbers-evil-insert-state-exit ()
+    "Swap to relative line numbers if inside prog-mode"
+    (when (derived-mode-p 'prog-mode)
+      (setq display-line-numbers-type 'relative)
+      (display-line-numbers-mode -1)
+      (display-line-numbers-mode 1)
+      (hl-line-mode 1)))
+#+end_src
+
+#+begin_src elisp :tangle init.el :comments link
+  (add-hook 'evil-insert-state-entry-hook
+  	  #'my/hybrid-line-numbers-evil-insert-state-entry)
+  (add-hook 'evil-insert-state-exit-hook
+  	  #'my/hybrid-line-numbers-evil-insert-state-exit)
 #+end_src
 
 **** For Programming
@@ -275,7 +266,6 @@ Bookmarks will be stored the file: =~/.emacs.d/bookmarks=, and we want it to upd
 
 *** Undo & Redo
 
-
 **** undo-fu :package:
 
 Expand builtin emacs undo system with full undo history capabilities
@@ -314,8 +304,60 @@ Tree-style redo
   	      ("<escape>" . vundo-quit)))
 #+end_src
 
+*** History
+
+Track recent files, locations & more.
+
+**** Minibuffer
+
+The default location of =`savehist-file'= is ="~/.emacs.d/history"=
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :init
+    ;; Save minibuffer history to `savehist-file' periodically and when exiting Emacs.
+    (savehist-mode 1))
+#+end_src
+
+**** Remember last location in file
+
+The default location of =`save-place-file'= is ="~/.emacs.d/places"=
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :init
+    ;; Enable saving the place in files for easier return
+    (save-place-mode 1))
+#+end_src
+
+**** Recently opened files
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    ;; Enable tracking of recently opened files.
+    (recentf-mode t))
+#+end_src
+
+**** Automatic backups
+
+I want all automatic backups to be stored in =~/.emacs.d/backups/=
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
+    (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t))))
+#+end_src
 
 *** TODO The TAB key
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    ;; TAB first tries to indent, then complete thing at point
+    :config
+    (setq tab-always-indent 'complete))
+#+end_src
 
 ** Completions
 
@@ -508,6 +550,17 @@ Tree-style redo
   (use-package consult-todo
     :straight t
     :after (consult))
+#+end_src
+
+**** Mode-specific context
+
+Hide commands in =M-x= which do not apply to the current mode.
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    ;; Hide commands in M-x which do not apply to the current mode.
+    (setq read-extended-command-predicate #'command-completion-default-include-p))
 #+end_src
 
 *** At-point
@@ -796,8 +849,8 @@ Tree-style redo
 #+begin_src elisp :tangle init.el :comments link
   (use-package evil-collection
     :straight t
-    :after evil
-    :diminish evil-collection-unimpaired-mode
+    :after (evil diminish)
+    :diminish (evil-collection-unimpaired-mode)
     :custom
     (evil-collection-setup-minibuffer t) ;; Setup ‘evil’ bindings in the ‘minibuffer’
     (evil-collection-which-key-setup t) ;; Setup ‘evil’ bindings for ‘which-key’.
@@ -813,7 +866,7 @@ Tree-style redo
 #+begin_src elisp :tangle init.el :comments link
   (use-package evil-commentary
     :straight t
-    :after evil-collection
+    :after (evil-collection diminish)
     :diminish evil-commentary-mode
     :config
     (evil-commentary-mode t))
@@ -839,7 +892,7 @@ Tree-style redo
 #+begin_src elisp :tangle init.el :comments link
   (use-package evil-snipe
     :straight t
-    :after evil
+    :after (evil diminish)
     :diminish (evil-snipe-local-mode)
     :config
     (evil-snipe-mode +1)
@@ -900,7 +953,8 @@ Tree-style redo
     ;; Execute / Commands
     "<escape>" '(keyboard-escape-quit :which-key t)
     ":" '(execute-extended-command :which-key "execute command")
-    "<tab>" '(popper-toggle :which-key "popper-toggle"))
+    "<SPC>" '(popper-toggle :which-key "popper-toggle")
+    "<tab>" '(popper-cycle :which-key "popper-cycle"))
 #+end_src
 
 **** <leader> b
@@ -909,7 +963,6 @@ Tree-style redo
   (leader-keys
     "b" '(:ignore t :which-key "Buffer")
     "b <escape>" '(keyboard-escape-quit :which-key t)
-    ;; "bk"  '(kill-current-buffer)
     "bk"  '(kill-current-buffer :which-key "Kill Current")
     "bn"  '(next-buffer :which-key "Next")
     "bp"  '(previous-buffer :which-key "Previous")
@@ -1058,6 +1111,25 @@ Tree-style redo
     )
 #+end_src
 
+*** Repeat keys
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    (repeat-mode 1))
+#+end_src
+
+*** Expand region
+
+**** expreg :package:
+
+#+begin_src elisp :tangle init.el comments link
+  (use-package expreg
+    :straight t
+    :bind (("C-+" . expreg-expand)
+  	 ("C--" . expreg-contract)))
+#+end_src
+
 ** Tree-sitter
 
 *** tree-sitter-langs :package:
@@ -1126,6 +1198,7 @@ Emacs is an Elisp interpreter, and when running programs or packages, it can occ
 #+begin_src elisp :tangle init.el :comments link
   (use-package gcmh
     :straight t
+    :after (diminish)
     :diminish gcmh-mode
     :hook
     (after-init-hook . gcmh-mode))
@@ -1156,6 +1229,9 @@ The killer app that will save my digital life
 #+begin_src elisp :tangle init.el :comments link
   (use-package org
     :config
+    (setq org-blank-before-new-entry
+      '((heading . always)
+        (plain-list-item . auto)))
     (setq org-auto-align-tags nil
   	  org-hide-emphasis-markers t
   	  org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
@@ -1198,7 +1274,17 @@ Richer html export, f.x. syntax highlighting in code blocks.
 #+end_src
 
 ** Programming
+
 *** Languages
+
+**** elisp
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    ;; Enable the use of outline-mode when editing elisp files.
+    (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode))
+#+end_src
 
 **** Nix
 
@@ -1315,6 +1401,7 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 #+begin_src elisp :tangle init.el :comments link
   (use-package pulsar
+    :disabled
     :straight t
     :config
     ;; (add-to-list 'pulsar-pulse-region-functions 'evil-yank)
@@ -1377,10 +1464,15 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 ***** diminish :builtin:package:
 
+I various =use-package= package declarations in my configuration, you can see a =:diminish= clause. This will prevent the display of declared minor modes being displayed in the modeline.
+
 #+begin_src elisp :tangle init.el :comments link
   (use-package diminish
     :straight t
-    :config)
+    :config
+    ;; (diminish 'buffer-face-mode)
+    ;; (diminish 'BufFace)
+    )
 #+end_src
 
 *** Icons
@@ -1465,7 +1557,8 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
     (setq modus-themes-common-palette-overrides
   	`((fg-region unspecified)
-  	  (bg-region bg-sage)
+  	  ;; (bg-region bg-sage)
+  	  (bg-region "#c0deff")
 
   	  ;; A nuanced accented background, combined with a suitable foreground.
   	  (bg-prose-code bg-green-nuanced)
@@ -1589,6 +1682,15 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 ** Version Control
 
+*** Follow symlinks
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package emacs
+    :config
+    ;; Always follow symbolic link to a file under version control.
+    (setq vc-follow-symlinks t))
+#+end_src
+
 *** magit :package:
 
 #+begin_src elisp :tangle init.el :comments link
@@ -1616,10 +1718,19 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 #+begin_src elisp :tangle init.el :comments link
   (use-package which-key
+    :after (diminish)
+    :diminish (which-key-mode)
     :config
     (which-key-mode 1))
 #+end_src
 
+*** eldoc :builtin:package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package eldoc
+    :after (diminish)
+    :diminish eldoc-mode)
+#+end_src
 
 ** Window Management
 
@@ -1683,34 +1794,6 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 #+end_src
 
-*** Hybrid line numbers :elisp_function:
-
-/Swap between regular & relative line numbers wether you're in evil insert mode or not/
-
-#+begin_src elisp :tangle defun.el :comments link
-  (defun my/hybrid-line-numbers-evil-insert-state-entry ()
-    "Swap to regular line numbers if inside prog-mode"
-    (lambda ()
-      (when (derived-mode-p 'prog-mode)
-        (setq display-line-numbers-type t)
-        (display-line-numbers-mode -1)
-        (display-line-numbers-mode 1))))
-
-  (defun my/hybrid-line-numbers-evil-insert-state-exit ()
-    "Swap to relative line numbers if inside prog-mode"
-  	  (lambda ()
-  	    (when (derived-mode-p 'prog-mode)
-  	      (setq display-line-numbers-type 'relative)
-  	      (display-line-numbers-mode -1)
-  	      (display-line-numbers-mode 1))))
-#+end_src
-
-#+begin_src elisp :tangle init.el :comments link
-  (add-hook 'evil-insert-state-entry-hook
-  	  #'my/hybrid-line-numbers-evil-insert-state-entry)
-  (add-hook 'evil-insert-state-exit-hook
-  	  #'my/hybrid-line-numbers-evil-insert-state-exit)
-#+end_src
 
 *** Toggle org-mode emphasis markers :elisp_function:
 
