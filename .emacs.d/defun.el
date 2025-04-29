@@ -56,24 +56,6 @@
   (add-hook 'after-save-hook #'my/org-auto-tangle nil 'local))
 ;; Auto tangle on save:1 ends here
 
-;; [[file:emacs.org::*Hybrid line numbers][Hybrid line numbers:1]]
-(defun my/hybrid-line-numbers-evil-insert-state-entry ()
-  "Swap to regular line numbers if inside prog-mode"
-  (lambda ()
-    (when (derived-mode-p 'prog-mode)
-      (setq display-line-numbers-type t)
-      (display-line-numbers-mode -1)
-      (display-line-numbers-mode 1))))
-
-(defun my/hybrid-line-numbers-evil-insert-state-exit ()
-  "Swap to relative line numbers if inside prog-mode"
-	  (lambda ()
-	    (when (derived-mode-p 'prog-mode)
-	      (setq display-line-numbers-type 'relative)
-	      (display-line-numbers-mode -1)
-	      (display-line-numbers-mode 1))))
-;; Hybrid line numbers:1 ends here
-
 ;; [[file:emacs.org::*Toggle org-mode emphasis markers][Toggle org-mode emphasis markers:1]]
 (defun my/org-toggle-hide-emphasis-markers ()
   "Toggle `org-hide-emphasis-markers' locally and refresh fontification."

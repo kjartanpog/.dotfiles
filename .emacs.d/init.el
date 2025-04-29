@@ -32,36 +32,6 @@
     (load (concat user-emacs-directory "custom.el"))))
 ;; custom.el:1 ends here
 
-;; [[file:emacs.org::*Organize Later][Organize Later:1]]
-(use-package emacs
-  :init                                           ;; Initialization settings that apply before the package is loaded.
-  (savehist-mode 1)                               ;; Enable saving of command history.
-  (save-place-mode 1)                             ;; Enable saving the place in files for easier return.
-
-  :custom                                         ;; Set custom variables to configure Emacs behavior.
-  (tab-always-indent 'complete) ;; TAB first tries to indent the current line, and if the line was already indented, then try to complete the thing at point.
-
-  ;; Hide commands in M-x which do not apply to the current mode.  Corfu
-  ;; commands are hidden, since they are not used via M-x. This setting is
-  ;; useful beyond Corfu.
-  (read-extended-command-predicate #'command-completion-default-include-p)
-
-  :config
-  (recentf-mode t)                                ;; Enable tracking of recently opened files.
-  (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
-  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t)))
-  (setq vc-follow-symlinks t) ; Always follow symbolic link to a file under version control.
-  (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
-  (repeat-mode)
-
-  )
-;; Organize Later:1 ends here
-
-;; [[file:emacs.org::*Organize Later][Organize Later:2]]
-(use-package eldoc
-  :diminish eldoc-mode)
-;; Organize Later:2 ends here
-
 ;; [[file:emacs.org::*File Encoding][File Encoding:1]]
 (use-package emacs
   :config
@@ -74,8 +44,34 @@
   :config
   (setq display-line-numbers-width-start t)
   (setq display-line-numbers-type 'relative) ; Set relative line numbers
+  (add-hook 'prog-mode-hook '(lambda () (hl-line-mode 1)))
   )
 ;; Line Numbers, Wrapping & More:1 ends here
+
+;; [[file:emacs.org::*Hybrid line numbers][Hybrid line numbers:1]]
+(defun my/hybrid-line-numbers-evil-insert-state-entry ()
+  "Swap to regular line numbers if inside prog-mode"
+  (when (derived-mode-p 'prog-mode)
+    (setq display-line-numbers-type t)
+    (display-line-numbers-mode -1)
+    (display-line-numbers-mode 1)
+    (hl-line-mode -1)))
+
+(defun my/hybrid-line-numbers-evil-insert-state-exit ()
+  "Swap to relative line numbers if inside prog-mode"
+  (when (derived-mode-p 'prog-mode)
+    (setq display-line-numbers-type 'relative)
+    (display-line-numbers-mode -1)
+    (display-line-numbers-mode 1)
+    (hl-line-mode 1)))
+;; Hybrid line numbers:1 ends here
+
+;; [[file:emacs.org::*Hybrid line numbers][Hybrid line numbers:2]]
+(add-hook 'evil-insert-state-entry-hook
+	  #'my/hybrid-line-numbers-evil-insert-state-entry)
+(add-hook 'evil-insert-state-exit-hook
+	  #'my/hybrid-line-numbers-evil-insert-state-exit)
+;; Hybrid line numbers:2 ends here
 
 ;; [[file:emacs.org::*For Programming][For Programming:1]]
 (use-package emacs
@@ -155,6 +151,41 @@
   :bind (:map vundo-mode-map
 	      ("<escape>" . vundo-quit)))
 ;; vundo:1 ends here
+
+;; [[file:emacs.org::*Minibuffer][Minibuffer:1]]
+(use-package emacs
+  :init
+  ;; Save minibuffer history to `savehist-file' periodically and when exiting Emacs.
+  (savehist-mode 1))
+;; Minibuffer:1 ends here
+
+;; [[file:emacs.org::*Remember last location in file][Remember last location in file:1]]
+(use-package emacs
+  :init
+  ;; Enable saving the place in files for easier return
+  (save-place-mode 1))
+;; Remember last location in file:1 ends here
+
+;; [[file:emacs.org::*Recently opened files][Recently opened files:1]]
+(use-package emacs
+  :config
+  ;; Enable tracking of recently opened files.
+  (recentf-mode t))
+;; Recently opened files:1 ends here
+
+;; [[file:emacs.org::*Automatic backups][Automatic backups:1]]
+(use-package emacs
+  :config
+  (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups/"))))
+  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups/") t))))
+;; Automatic backups:1 ends here
+
+;; [[file:emacs.org::*The TAB key][The TAB key:1]]
+(use-package emacs
+  ;; TAB first tries to indent, then complete thing at point
+  :config
+  (setq tab-always-indent 'complete))
+;; The TAB key:1 ends here
 
 ;; [[file:emacs.org::*vertico][vertico:1]]
 (use-package vertico
@@ -316,6 +347,13 @@
   :straight t
   :after (consult))
 ;; consult-todo:1 ends here
+
+;; [[file:emacs.org::*Mode-specific context][Mode-specific context:1]]
+(use-package emacs
+  :config
+  ;; Hide commands in M-x which do not apply to the current mode.
+  (setq read-extended-command-predicate #'command-completion-default-include-p))
+;; Mode-specific context:1 ends here
 
 ;; [[file:emacs.org::*corfu][corfu:1]]
 (use-package corfu
@@ -550,8 +588,8 @@
 ;; [[file:emacs.org::*evil-collection][evil-collection:1]]
 (use-package evil-collection
   :straight t
-  :after evil
-  :diminish evil-collection-unimpaired-mode
+  :after (evil diminish)
+  :diminish (evil-collection-unimpaired-mode)
   :custom
   (evil-collection-setup-minibuffer t) ;; Setup ‘evil’ bindings in the ‘minibuffer’
   (evil-collection-which-key-setup t) ;; Setup ‘evil’ bindings for ‘which-key’.
@@ -563,7 +601,7 @@
 ;; [[file:emacs.org::*evil-commentary][evil-commentary:1]]
 (use-package evil-commentary
   :straight t
-  :after evil-collection
+  :after (evil-collection diminish)
   :diminish evil-commentary-mode
   :config
   (evil-commentary-mode t))
@@ -581,7 +619,7 @@
 ;; [[file:emacs.org::*evil-snipe][evil-snipe:1]]
 (use-package evil-snipe
   :straight t
-  :after evil
+  :after (evil diminish)
   :diminish (evil-snipe-local-mode)
   :config
   (evil-snipe-mode +1)
@@ -632,14 +670,14 @@
   ;; Execute / Commands
   "<escape>" '(keyboard-escape-quit :which-key t)
   ":" '(execute-extended-command :which-key "execute command")
-  "<tab>" '(popper-toggle :which-key "popper-toggle"))
+  "<SPC>" '(popper-toggle :which-key "popper-toggle")
+  "<tab>" '(popper-cycle :which-key "popper-cycle"))
 ;; misc <leader> maps:1 ends here
 
 ;; [[file:emacs.org::*<leader> b][<leader> b:1]]
 (leader-keys
   "b" '(:ignore t :which-key "Buffer")
   "b <escape>" '(keyboard-escape-quit :which-key t)
-  ;; "bk"  '(kill-current-buffer)
   "bk"  '(kill-current-buffer :which-key "Kill Current")
   "bn"  '(next-buffer :which-key "Next")
   "bp"  '(previous-buffer :which-key "Previous")
@@ -766,6 +804,12 @@
   )
 ;; <leader> w:1 ends here
 
+;; [[file:emacs.org::*Repeat keys][Repeat keys:1]]
+(use-package emacs
+  :config
+  (repeat-mode 1))
+;; Repeat keys:1 ends here
+
 ;; [[file:emacs.org::*tree-sitter-langs][tree-sitter-langs:1]]
 (use-package tree-sitter-langs
   :straight t
@@ -802,6 +846,7 @@
 ;; [[file:emacs.org::*gcmh][gcmh:1]]
 (use-package gcmh
   :straight t
+  :after (diminish)
   :diminish gcmh-mode
   :hook
   (after-init-hook . gcmh-mode))
@@ -820,6 +865,9 @@
 ;; [[file:emacs.org::*org][org:1]]
 (use-package org
   :config
+  (setq org-blank-before-new-entry
+    '((heading . always)
+      (plain-list-item . auto)))
   (setq org-auto-align-tags nil
 	  org-hide-emphasis-markers t
 	  org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
@@ -842,6 +890,13 @@
 (use-package htmlize
   :straight t)
 ;; htmlize:1 ends here
+
+;; [[file:emacs.org::*elisp][elisp:1]]
+(use-package emacs
+  :config
+  ;; Enable the use of outline-mode when editing elisp files.
+  (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode))
+;; elisp:1 ends here
 
 ;; [[file:emacs.org::*nix-mode][nix-mode:1]]
 (use-package nix-mode
@@ -914,6 +969,7 @@
 
 ;; [[file:emacs.org::*pulsar][pulsar:1]]
 (use-package pulsar
+  :disabled
   :straight t
   :config
   ;; (add-to-list 'pulsar-pulse-region-functions 'evil-yank)
@@ -963,7 +1019,10 @@
 ;; [[file:emacs.org::*diminish][diminish:1]]
 (use-package diminish
   :straight t
-  :config)
+  :config
+  ;; (diminish 'buffer-face-mode)
+  ;; (diminish 'BufFace)
+  )
 ;; diminish:1 ends here
 
 ;; [[file:emacs.org::*nerd-icons][nerd-icons:1]]
@@ -1029,7 +1088,8 @@
 
   (setq modus-themes-common-palette-overrides
 	`((fg-region unspecified)
-	  (bg-region bg-sage)
+	  ;; (bg-region bg-sage)
+	  (bg-region "#c0deff")
 
 	  ;; A nuanced accented background, combined with a suitable foreground.
 	  (bg-prose-code bg-green-nuanced)
@@ -1101,6 +1161,13 @@
   (setq gptel-default-mode #'org-mode))
 ;; gptel:1 ends here
 
+;; [[file:emacs.org::*Follow symlinks][Follow symlinks:1]]
+(use-package emacs
+  :config
+  ;; Always follow symbolic link to a file under version control.
+  (setq vc-follow-symlinks t))
+;; Follow symlinks:1 ends here
+
 ;; [[file:emacs.org::*magit][magit:1]]
 (use-package magit
   :straight t)
@@ -1120,9 +1187,17 @@
 
 ;; [[file:emacs.org::*which-key][which-key:1]]
 (use-package which-key
+  :after (diminish)
+  :diminish (which-key-mode)
   :config
   (which-key-mode 1))
 ;; which-key:1 ends here
+
+;; [[file:emacs.org::*eldoc][eldoc:1]]
+(use-package eldoc
+  :after (diminish)
+  :diminish eldoc-mode)
+;; eldoc:1 ends here
 
 ;; [[file:emacs.org::*popper][popper:1]]
 (use-package popper
@@ -1143,13 +1218,6 @@
   :init
   (winner-mode 1))
 ;; Layout History:1 ends here
-
-;; [[file:emacs.org::*Hybrid line numbers][Hybrid line numbers:2]]
-(add-hook 'evil-insert-state-entry-hook
-	  #'my/hybrid-line-numbers-evil-insert-state-entry)
-(add-hook 'evil-insert-state-exit-hook
-	  #'my/hybrid-line-numbers-evil-insert-state-exit)
-;; Hybrid line numbers:2 ends here
 
 ;; [[file:emacs.org::*Toggle org-mode emphasis markers][Toggle org-mode emphasis markers:2]]
 (define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
