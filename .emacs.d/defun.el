@@ -10,6 +10,15 @@
 
 ;; Programming Specific Editor Configuration:1 ends here
 
+;; [[file:emacs.org::*dired][dired:1]]
+(defun my/transient-menu ()
+  "Toggle transient menus based on derived modes."
+  (interactive)
+  (when (derived-mode-p 'dired-mode)
+    (casual-dired-tmenu))
+  )
+;; dired:1 ends here
+
 ;; [[file:emacs.org::*modus-themes][modus-themes:2]]
 (defun my/modus-themes-custom-faces (&rest _)
   (modus-themes-with-colors
@@ -19,6 +28,8 @@
    '(nerd-icons-folder ((t (:foreground "#008899"))))
    '(nerd-icons-folder-open ((t (:foreground "#008899"))))
    '(nerd-icons-completion-dir-face ((t (:foreground "#008899"))))
+   '(nerd-icons-dired-dir-face ((t (:foreground "#008899"))))
+
 
    ;; diff-hl fringe/margin colors
    '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))

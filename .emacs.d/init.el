@@ -24,6 +24,8 @@
 
 (load (expand-file-name "defvar.el" user-emacs-directory))
 
+(load (expand-file-name "org-latex-preview.el" user-emacs-directory))
+
 ;; [[file:emacs.org::*custom.el][custom.el:1]]
 (use-package emacs
   :config
@@ -38,6 +40,26 @@
   ;; Set the default coding system for files to UTF-8.
   (modify-coding-system-alist 'file "" 'utf-8))
 ;; File Encoding:1 ends here
+
+;; [[file:emacs.org::*indent-bars][indent-bars:1]]
+(use-package indent-bars
+  :straight t
+  :custom
+  (indent-bars-no-descend-lists t) ; no extra bars in continued func arg lists
+  (indent-bars-treesit-support t)
+  (indent-bars-treesit-ignore-blank-lines-types '("module"))
+  ;; Add other languages as needed
+  (indent-bars-treesit-scope '((python function_definition class_definition for_statement
+				       if_statement with_statement while_statement)))
+  ;; Note: wrap may not be needed if no-descend-list is enough
+  ;;(indent-bars-treesit-wrap '((python argument_list parameters ; for python, as an example
+  ;;				      list list_comprehension
+  ;;				      dictionary dictionary_comprehension
+  ;;				      parenthesized_expression subscript)))
+  ;; :hook ((python-ts-mode yaml-mode) . indent-bars-mode)
+  :hook (((python-base-mode yaml-mode) . indent-bars-mode)
+	 (nix-ts-mode . indent-bars-mode)))
+;; indent-bars:1 ends here
 
 ;; [[file:emacs.org::*Line Numbers, Wrapping & More][Line Numbers, Wrapping & More:1]]
 (use-package emacs
@@ -462,11 +484,13 @@
 
 ;; [[file:emacs.org::*prescient][prescient:1]]
 (use-package prescient
+  :disabled t
   :straight t)
 ;; prescient:1 ends here
 
 ;; [[file:emacs.org::*vertico-prescient][vertico-prescient:1]]
 (use-package vertico-prescient
+  :disabled t
   :straight t
   :after (prescient vertico)
   :config
@@ -475,6 +499,7 @@
 
 ;; [[file:emacs.org::*corfu-prescient][corfu-prescient:1]]
 (use-package corfu-prescient
+  :disabled t
   :straight t
   :after (prescient corfu)
   :config
@@ -684,6 +709,13 @@
   "bf"  '(consult-buffer :which-key "Find"))
 ;; <leader> b:1 ends here
 
+;; [[file:emacs.org::*<leader> e][<leader> e:1]]
+(leader-keys
+  "e" '(:ignore t :which-key "eglot")
+  "e <escape>" '(keyboard-escape-quit :which-key t)
+  "ea"  '(eglot-code-actions :which-key "eglot-code-actions"))
+;; <leader> e:1 ends here
+
 ;; [[file:emacs.org::*<leader> f][<leader> f:1]]
 (leader-keys
   "f"  '(:ignore t :which-key "File")
@@ -716,7 +748,8 @@
   "ho" '(helpful-symbol :which-key "Symbol")
   "hm" '(describe-mode :which-key "Major mode")
   "hM" '(describe-minor-mode :which-key "Minor mode")
-  "hp" '(describe-package :which-key "Package"))
+  "hp" '(describe-package :which-key "Package")
+  "ht" '(my/transient-menu :which-key "Package"))
 ;; <leader> h:1 ends here
 
 ;; [[file:emacs.org::*<leader> l][<leader> l:1]]
@@ -765,6 +798,7 @@
   "s <escape>" '(keyboard-escape-quit :which-key t)
   "sr" '(consult-ripgrep :which-key "ripgrep")
   "so" '(consult-outline :which-key "outline")
+  "sh" '(consult-org-heading :which-key "heading")
   "sl" '(consult-line :which-key "line")
   "su" '(vundo :which-key t "undo")
   "st" '(consult-todo-project :which-key t "todo")
@@ -800,6 +834,8 @@
   "wc" '(evil-window-delete :which-key "delete")
   "wq" '(evil-quit :which-key "quit")
   "wt" '(tab-new :which-key "new tab")
+  "wgt" '(evil-tab-next :which-key "next tab")
+  "wgT" '(tab-bar-switch-to-prev-tab :which-key "previous tab")
   "wu" '(winner-undo :which-key "undo")
   )
 ;; <leader> w:1 ends here
@@ -818,12 +854,28 @@
 	  '((python "python" "tree_sitter_python")
 	    (nix "nix" "tree_sitter_nix")
 	    (json "json" "tree_sitter_json")
-	    (yaml "yaml" "tree_sitter_yaml")))
+	    (yaml "yaml" "tree_sitter_yaml")
+	    (elisp "elisp" "tree_sitter_elisp")
+	    (markdown "markdown" "tree_sitter_markdown")
+	    (markdown-inline "markdown-inline" "tree_sitter_markdown_inline")
+	    ))
   (setq treesit-extra-load-path
 	  (list tree-sitter-langs--dir
 		(concat tree-sitter-langs--dir "bin/")))
   )
 ;; tree-sitter-langs:1 ends here
+
+;; [[file:emacs.org::*treesit-fold][treesit-fold:1]]
+(use-package treesit-fold
+  :straight t
+  :config
+  (setq treesit-fold-line-count-show t
+	treesit-fold-line-count-format " <%d lines> ")
+
+  ;; Add support for non-ts modes
+  ;; (add-hook 'emacs-lisp-mode-hook (lambda () (treesit-parser-create 'elisp)))
+  (global-treesit-fold-mode))
+;; treesit-fold:1 ends here
 
 ;; [[file:emacs.org::*org-roam][org-roam:1]]
 (use-package org-roam
@@ -876,6 +928,12 @@
   (add-hook 'org-mode-hook #'my/org-mode-entry)
   )
 ;; org:1 ends here
+
+;; [[file:emacs.org::*org-mouse][org-mouse:1]]
+(use-package org-mouse
+  :config
+  (require 'org-mouse))
+;; org-mouse:1 ends here
 
 ;; [[file:emacs.org::*org-modern][org-modern:1]]
 (use-package org-modern
@@ -979,6 +1037,11 @@
   (setq pulsar-pulse-functions (remove 'evil-scroll-down pulsar-pulse-functions))
   (pulsar-global-mode))
 ;; pulsar:1 ends here
+
+;; [[file:emacs.org::*Casual][Casual:1]]
+(use-package casual
+  :straight t)
+;; Casual:1 ends here
 
 ;; [[file:emacs.org::*spacious-padding][spacious-padding:1]]
 (use-package spacious-padding
@@ -1084,32 +1147,34 @@
   :config
   ;; Add all your customizations prior to loading the themes
   (setq modus-themes-italic-constructs t
-	modus-themes-bold-constructs t)
+  	modus-themes-bold-constructs t)
 
   (setq modus-themes-common-palette-overrides
 	`((fg-region unspecified)
-	  ;; (bg-region bg-sage)
-	  (bg-region "#c0deff")
-
+	  (bg-region bg-sage)
+	  
 	  ;; A nuanced accented background, combined with a suitable foreground.
 	  (bg-prose-code bg-green-nuanced)
-        (fg-prose-code green-cooler)
-
-        (bg-prose-verbatim bg-magenta-nuanced)
-        (fg-prose-verbatim magenta-warmer)
-
-        (bg-prose-macro bg-blue-nuanced)
-        (fg-prose-macro magenta-cooler)))
-
+	  (fg-prose-code green-cooler)
+	  
+	  (bg-prose-verbatim bg-magenta-nuanced)
+	  (fg-prose-verbatim magenta-warmer)
+	  
+	  (bg-prose-macro bg-blue-nuanced)
+	  (fg-prose-macro magenta-cooler)))
+  
   (setq modus-vivendi-palette-overrides
 	`((bg-main "#090909")
-	  (fg-heading-1 magenta-faint)))
-
+	  (fg-heading-1 magenta-faint)
+	  (bg-line-number-active "#2f3849")))
+  
   (setq modus-operandi-palette-overrides
-	'((fg-heading-1 "#2f5f9f")))
+	'((fg-heading-1 "#2f5f9f")
+	  (bg-region "#c0deff")
+	  (bg-line-number-active "#dae5ec")))
 
   (setq modus-themes-headings
-	'((0 . (1.35))
+  	'((0 . (1.35))
           (1 . (1.30))
           (2 . (1.24))
           (3 . (semibold 1.17))
