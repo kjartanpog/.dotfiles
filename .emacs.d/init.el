@@ -706,7 +706,8 @@
   "bk"  '(kill-current-buffer :which-key "Kill Current")
   "bn"  '(next-buffer :which-key "Next")
   "bp"  '(previous-buffer :which-key "Previous")
-  "bf"  '(consult-buffer :which-key "Find"))
+  "bf"  '(consult-buffer :which-key "Find")
+  "bs"  '(scratch-buffer :which-key "Scratch Buffer"))
 ;; <leader> b:1 ends here
 
 ;; [[file:emacs.org::*<leader> e][<leader> e:1]]
@@ -721,8 +722,9 @@
   "f"  '(:ignore t :which-key "File")
   "f <escape>" '(keyboard-escape-quit :which-key t)
   "fi" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
-  "ff"  '(find-file :which-key t)
-  "fr"  '(recentf :which-key t))
+  "ff"  '(find-file :which-key "Find")
+  "fr"  '(recentf :which-key "Recent")
+  "fp"  '(project-find-file :which-key "Project"))
 ;; <leader> f:1 ends here
 
 ;; [[file:emacs.org::*<leader> g][<leader> g:1]]
