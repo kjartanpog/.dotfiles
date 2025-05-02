@@ -20,11 +20,22 @@
 (straight-use-package 'use-package)
 ;; init.el:2 ends here
 
-(load (expand-file-name "defun.el" user-emacs-directory))
+;; [[file:emacs.org::*defun.el][defun.el:2]]
+;; (load (expand-file-name "defun.el" user-emacs-directory))
+(load (expand-file-name "defun.el"
+                        (file-name-directory load-file-name)))
+;; defun.el:2 ends here
 
-(load (expand-file-name "defvar.el" user-emacs-directory))
+;; [[file:emacs.org::*defvar.el][defvar.el:2]]
+;; (load (expand-file-name "defvar.el" user-emacs-directory))
+(load (expand-file-name "defvar.el"
+                        (file-name-directory load-file-name)))
+;; defvar.el:2 ends here
 
-(load (expand-file-name "org-latex-preview.el" user-emacs-directory))
+;; (load (expand-file-name "org-latex-preview.el" user-emacs-directory))
+;; (load (expand-file-name "org-latex-preview.el"
+;;                        (file-name-directory load-file-name)))
+(use-package org)
 
 ;; [[file:emacs.org::*custom.el][custom.el:1]]
 (use-package emacs
@@ -396,15 +407,6 @@
 	  ("S-TAB" . corfu-previous) ;; Use Shift-TAB for cycling to the previous candidate
 	  ([backtab] . corfu-previous)
 	  ("SPC" . corfu-insert-separator))
-
-  ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
-  ;; :hook ((prog-mode . corfu-mode)
-  ;;        (shell-mode . corfu-mode)
-  ;;        (eshell-mode . corfu-mode))
-
-  ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
-  ;; be used globally (M-/).  See also the customization variable
-  ;; `global-corfu-modes' to exclude certain modes.
   :init
   (global-corfu-mode)
   (corfu-popupinfo-mode))
@@ -506,7 +508,7 @@
   (corfu-prescient-mode t))
 ;; corfu-prescient:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
 :config
@@ -787,10 +789,10 @@
   ;; Bookmark / Recent
   "r" '(:ignore t :which-key "Recent")
   "r <escape>" '(keyboard-escape-quit :which-key t)
-  "rb" '(bookmark-jump :which-key t)
-  "rm" '(bookmark-set :which-key t)
-  "rl" '(bookmark-bmenu-list :which-key t)
-  "ru" '(vundo :which-key t))
+  "rb" '(bookmark-jump :which-key "bookmark-jump")
+  "rm" '(bookmark-set :which-key "bookmark-set")
+  "rl" '(bookmark-bmenu-list :which-key "bookmark-bmenu-list")
+  "ru" '(vundo :which-key "Undo tree"))
 ;; <leader> r:1 ends here
 
 ;; [[file:emacs.org::*<leader> s][<leader> s:1]]
@@ -906,7 +908,7 @@
   (after-init-hook . gcmh-mode))
 ;; gcmh:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/jdtsmith/ultra-scroll/]/[ultra-scroll/]/]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
@@ -940,7 +942,7 @@
 ;; [[file:emacs.org::*org-modern][org-modern:1]]
 (use-package org-modern
   :straight t
-  :config
+:config
   (setq org-modern-table nil
 	  org-modern-block-name nil
 	  org-modern-block-fringe nil))
@@ -1240,10 +1242,27 @@
   :straight t)
 ;; magit:1 ends here
 
+;; [[file:emacs.org::*Handled backends][Handled backends:1]]
+(use-package vc
+  :config
+  (setq vc-handled-backends '(Git)))
+;; Handled backends:1 ends here
+
+;; [[file:emacs.org::*diff-hl][diff-hl:1]]
+(use-package diff-hl
+  :straight t
+  :after (magit)
+  :config
+  (global-diff-hl-mode 1)
+  (global-diff-hl-show-hunk-mouse-mode 1)
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+)
+;; diff-hl:1 ends here
+
 ;; [[file:emacs.org::*helpful][helpful:1]]
 (use-package helpful
   :straight t
-  :config
+:config
   (global-set-key (kbd "C-h f") #'helpful-callable)
   (global-set-key (kbd "C-h v") #'helpful-variable)
   (global-set-key (kbd "C-h k") #'helpful-key)

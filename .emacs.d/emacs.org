@@ -109,8 +109,10 @@ This file is loaded before the package system and GUI is initialized, so in it y
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
-#+begin_src elisp :tangle init.el
-  (load (expand-file-name "defun.el" user-emacs-directory))
+#+begin_src elisp :tangle init.el :comments link
+  ;; (load (expand-file-name "defun.el" user-emacs-directory))
+  (load (expand-file-name "defun.el"
+                          (file-name-directory load-file-name)))
 #+end_src
 
 ** defvar.el
@@ -121,8 +123,10 @@ This file is loaded before the package system and GUI is initialized, so in it y
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
-#+begin_src elisp :tangle init.el
-  (load (expand-file-name "defvar.el" user-emacs-directory))
+#+begin_src elisp :tangle init.el :comments link
+  ;; (load (expand-file-name "defvar.el" user-emacs-directory))
+  (load (expand-file-name "defvar.el"
+                          (file-name-directory load-file-name)))
 #+end_src
 
 ** org-latex-preview
@@ -157,7 +161,10 @@ This file is loaded before the package system and GUI is initialized, so in it y
 #+end_src
 
 #+begin_src elisp :tangle init.el
-  (load (expand-file-name "org-latex-preview.el" user-emacs-directory))
+  ;; (load (expand-file-name "org-latex-preview.el" user-emacs-directory))
+  ;; (load (expand-file-name "org-latex-preview.el"
+  ;;                        (file-name-directory load-file-name)))
+  (use-package org)  
 #+end_src
 
 
@@ -656,15 +663,6 @@ Hide commands in =M-x= which do not apply to the current mode.
 	  ("S-TAB" . corfu-previous) ;; Use Shift-TAB for cycling to the previous candidate
 	  ([backtab] . corfu-previous)
 	  ("SPC" . corfu-insert-separator))
-
-    ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
-    ;; :hook ((prog-mode . corfu-mode)
-    ;;        (shell-mode . corfu-mode)
-    ;;        (eshell-mode . corfu-mode))
-
-    ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
-    ;; be used globally (M-/).  See also the customization variable
-    ;; `global-corfu-modes' to exclude certain modes.
     :init
     (global-corfu-mode)
     (corfu-popupinfo-mode))
@@ -1138,10 +1136,10 @@ Hide commands in =M-x= which do not apply to the current mode.
     ;; Bookmark / Recent
     "r" '(:ignore t :which-key "Recent")
     "r <escape>" '(keyboard-escape-quit :which-key t)
-    "rb" '(bookmark-jump :which-key t)
-    "rm" '(bookmark-set :which-key t)
-    "rl" '(bookmark-bmenu-list :which-key t)
-    "ru" '(vundo :which-key t))
+    "rb" '(bookmark-jump :which-key "bookmark-jump")
+    "rm" '(bookmark-set :which-key "bookmark-set")
+    "rl" '(bookmark-bmenu-list :which-key "bookmark-bmenu-list")
+    "ru" '(vundo :which-key "Undo tree"))
 #+end_src
 
 **** <leader> s
@@ -1362,7 +1360,7 @@ Builtin additional mouse support for org-mode
 #+begin_src elisp :tangle init.el :comments link
   (use-package org-modern
     :straight t
-    :config
+  :config
     (setq org-modern-table nil
 	  org-modern-block-name nil
 	  org-modern-block-fringe nil))
@@ -1839,6 +1837,31 @@ I various =use-package= package declarations in my configuration, you can see a 
     :straight t)
 #+end_src
 
+*** Handled backends
+
+I've only ever used Git for version control, and I've heard that focusing the scope of allowed version control backends can have positive performance implications.
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package vc
+    :config
+    (setq vc-handled-backends '(Git)))  
+#+end_src
+
+*** diff-hl :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package diff-hl
+    :straight t
+    :after (magit)
+    :config
+    (global-diff-hl-mode 1)
+    (global-diff-hl-show-hunk-mouse-mode 1)
+    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  )
+#+end_src
+
+Highlight uncommitted changes on the sides of a buffer window.
+
 ** Help, Information & Documentation
 
 *** helpful :package:
@@ -1846,7 +1869,7 @@ I various =use-package= package declarations in my configuration, you can see a 
 #+begin_src elisp :tangle init.el :comments link
   (use-package helpful
     :straight t
-    :config
+  :config
     (global-set-key (kbd "C-h f") #'helpful-callable)
     (global-set-key (kbd "C-h v") #'helpful-variable)
     (global-set-key (kbd "C-h k") #'helpful-key)
