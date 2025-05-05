@@ -789,6 +789,10 @@
   "nl" '(org-roam-buffer-toggle :which-key t)
   "nj" '(org-roam-dailies-capture-today :which-key t))
 
+(leader-keys
+  "o" '(:ignore t :which-key "Open")
+  "o <escape>" '(keyboard-escape-quit :which-key t))
+
 ;; [[file:emacs.org::*<leader> p][<leader> p:1]]
 (leader-keys
    ;; Project
@@ -1062,7 +1066,10 @@
     (progn
 	(require 'vterm)
 	(use-package vterm
+	  :after (general)
 	  :config
+	(leader-keys
+	  "ot" '(vterm-other-window :which-key t))
 	  ;; Make vterm more responsive
 	  (setq vterm-timer-delay 0.01)))
   (error

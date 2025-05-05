@@ -1136,6 +1136,14 @@ Display evil-mode markers in the Emacs fringe
     "nj" '(org-roam-dailies-capture-today :which-key t))
 #+end_src
 
+**** <leader> o
+
+#+begin_src elisp :tangle init.el :comment link
+  (leader-keys
+    "o" '(:ignore t :which-key "Open")
+    "o <escape>" '(keyboard-escape-quit :which-key t))
+#+end_src
+
 **** <leader> p
 
 #+begin_src elisp :tangle init.el :comments link
@@ -1546,7 +1554,10 @@ Probably the best & most performant traditional terminal emulation/experiance yo
       (progn
 	(require 'vterm)
 	(use-package vterm
+	  :after (general)
 	  :config
+	(leader-keys
+	  "ot" '(vterm-other-window :which-key t))
 	  ;; Make vterm more responsive
 	  (setq vterm-timer-delay 0.01)))
     (error
