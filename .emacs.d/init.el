@@ -791,7 +791,8 @@
 
 (leader-keys
   "o" '(:ignore t :which-key "Open")
-  "o <escape>" '(keyboard-escape-quit :which-key t))
+  "o <escape>" '(keyboard-escape-quit :which-key t)
+  "oo" '(:ignore t :which-key "Other Window"))
 
 ;; [[file:emacs.org::*<leader> p][<leader> p:1]]
 (leader-keys
@@ -1068,8 +1069,9 @@
 	(use-package vterm
 	  :after (general)
 	  :config
-	(leader-keys
-	  "ot" '(vterm-other-window :which-key t))
+	  (leader-keys
+	    "ot" '(vterm :which-key "vterm")
+	    "oot" '(vterm-other-window :which-key "vterm"))
 	  ;; Make vterm more responsive
 	  (setq vterm-timer-delay 0.01)))
   (error

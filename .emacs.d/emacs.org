@@ -1141,7 +1141,8 @@ Display evil-mode markers in the Emacs fringe
 #+begin_src elisp :tangle init.el :comment link
   (leader-keys
     "o" '(:ignore t :which-key "Open")
-    "o <escape>" '(keyboard-escape-quit :which-key t))
+    "o <escape>" '(keyboard-escape-quit :which-key t)
+    "oo" '(:ignore t :which-key "Other Window"))
 #+end_src
 
 **** <leader> p
@@ -1556,8 +1557,9 @@ Probably the best & most performant traditional terminal emulation/experiance yo
 	(use-package vterm
 	  :after (general)
 	  :config
-	(leader-keys
-	  "ot" '(vterm-other-window :which-key t))
+	  (leader-keys
+	    "ot" '(vterm :which-key "vterm")
+	    "oot" '(vterm-other-window :which-key "vterm"))
 	  ;; Make vterm more responsive
 	  (setq vterm-timer-delay 0.01)))
     (error
