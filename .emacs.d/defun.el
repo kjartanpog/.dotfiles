@@ -53,6 +53,14 @@
    )))
 ;; modus-themes:2 ends here
 
+;; [[file:emacs.org::*Fullscreen][Fullscreen:1]]
+(defun my/toggle-menu-bar-in-fullscreen ()
+  "Toggle `menu-bar-mode' when entering or exiting fullscreen."
+  (if (eq (frame-parameter nil 'fullscreen) 'fullboth)
+	(menu-bar-mode -1)  ; Turn off menu bar in fullscreen
+    (menu-bar-mode 1)))   ; Turn on menu bar when not in fullscreen
+;; Fullscreen:1 ends here
+
 ;; [[file:emacs.org::*Auto tangle on save][Auto tangle on save:1]]
 (defun my/org-auto-tangle ()
   "Automatically tangle Org file on save, but only if the file contains '#+auto_tangle: t'."

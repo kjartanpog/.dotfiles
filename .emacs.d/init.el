@@ -766,7 +766,8 @@
   "hm" '(describe-mode :which-key "Major mode")
   "hM" '(describe-minor-mode :which-key "Minor mode")
   "hp" '(describe-package :which-key "Package")
-  "ht" '(my/transient-menu :which-key "Package"))
+  "ht" '(my/transient-menu :which-key "Transient")
+  "hi" '(consult-info :which-key "Information"))
 ;; <leader> h:1 ends here
 
 ;; [[file:emacs.org::*<leader> l][<leader> l:1]]
@@ -867,6 +868,21 @@
   :config
   (repeat-mode 1))
 ;; Repeat keys:1 ends here
+
+;; [[file:emacs.org::*expreg][expreg:1]]
+(use-package expreg
+  :straight t
+  :bind (("C-+" . expreg-expand)
+	 ("C--" . expreg-contract)))
+;; expreg:1 ends here
+
+;; [[file:emacs.org::*Icelandic vim keys][Icelandic vim keys:1]]
+(use-package emacs
+  :after (evil)
+  :config
+  (evil-global-set-key 'normal "þ" 'evil-search-forward)
+  (evil-global-set-key 'normal "Þ" 'evil-search-backward))
+;; Icelandic vim keys:1 ends here
 
 ;; [[file:emacs.org::*tree-sitter-langs][tree-sitter-langs:1]]
 (use-package tree-sitter-langs
@@ -1067,13 +1083,14 @@
     (progn
 	(require 'vterm)
 	(use-package vterm
-	  :after (general)
-	  :config
-	  (leader-keys
-	    "ot" '(vterm :which-key "vterm")
-	    "oot" '(vterm-other-window :which-key "vterm"))
-	  ;; Make vterm more responsive
-	  (setq vterm-timer-delay 0.01)))
+	:after (general)
+	:config
+	(leader-keys
+	  "ot" '(vterm :which-key "vterm")
+	  "oot" '(vterm-other-window :which-key "vterm"))
+	;; Make vterm more responsive
+	(setq vterm-timer-delay 0.01)
+	(setq vterm-kill-buffer-on-exit t)))
   (error
    (message "Failed to load vterm")))
 ;; vterm:1 ends here
@@ -1225,7 +1242,7 @@
 	  (fg-prose-macro magenta-cooler)))
   
   (setq modus-vivendi-palette-overrides
-	`((bg-main "#090909")
+	`((bg-main "#000000")
 	  (fg-heading-1 magenta-faint)
 	  (bg-line-number-active "#2f3849")))
   
@@ -1280,6 +1297,18 @@
   (set-window-parameter (get-buffer-window "*Messages*") 'vertical-scroll-bars nil))
 ;; Disable scrollbars in the minibuffer:1 ends here
 
+;; [[file:emacs.org::*Fullscreen][Fullscreen:2]]
+(use-package emacs
+  :config
+  (add-hook 'after-make-frame-functions
+	      (lambda (frame) 
+			(with-selected-frame frame
+		  (my/toggle-menu-bar-in-fullscreen))))
+
+  (add-hook 'window-configuration-change-hook
+	    'my/toggle-menu-bar-in-fullscreen))
+;; Fullscreen:2 ends here
+
 ;; [[file:emacs.org::*gptel][gptel:1]]
 (use-package gptel
   :straight t
@@ -1313,7 +1342,10 @@
   (global-diff-hl-mode 1)
   (global-diff-hl-show-hunk-mouse-mode 1)
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-)
+  ;; Re-center the window around curser after jumping hunks
+  (advice-add 'diff-hl-next-hunk :after (lambda (&rest _args) (recenter)))
+  (advice-add 'diff-hl-previous-hunk :after (lambda (&rest _args) (recenter)))
+  )
 ;; diff-hl:1 ends here
 
 ;; [[file:emacs.org::*helpful][helpful:1]]
@@ -1343,18 +1375,31 @@
 ;; eldoc:1 ends here
 
 ;; [[file:emacs.org::*popper][popper:1]]
+(defun my/max-window-height ()
+  "Return the maximum of the output of `popper--fit-window-height` and 10."
+  (max (popper--fit-window-height) 10))
+;; popper:1 ends here
+
+;; [[file:emacs.org::*popper][popper:2]]
 (use-package popper
   :straight t
   ;; :after (setup-windows setup-project)
   :commands popper-mode
   :init
   (if (boundp 'elpaca-after-init-hook)
-      (add-hook 'elpaca-after-init-hook #'popper-mode)
+	(add-hook 'elpaca-after-init-hook #'popper-mode)
     (add-hook 'emacs-startup-hook #'popper-mode))
+  (setq popper-window-height 'my/max-window-height)
   (setq popper-reference-buffers
-	(append my/help-modes-list))
+	  (append my/help-modes-list
+		  ;; Match eshell, shell, term and/or vterm buffers
+		  '("^\\*eshell.*\\*$" eshell-mode ;eshell as a popup
+		    "^\\*shell.*\\*$"  shell-mode  ;shell as a popup
+		    "^\\*term.*\\*$"   term-mode   ;term as a popup
+		    "^\\*vterm.*\\*$"  vterm-mode  ;vterm as a popup
+		    )))
   )
-;; popper:1 ends here
+;; popper:2 ends here
 
 ;; [[file:emacs.org::*Layout History][Layout History:1]]
 (use-package emacs
