@@ -17,6 +17,7 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(straight-use-package 'org)
 (straight-use-package 'use-package)
 ;; init.el:2 ends here
 
@@ -35,7 +36,8 @@
 ;; (load (expand-file-name "org-latex-preview.el" user-emacs-directory))
 ;; (load (expand-file-name "org-latex-preview.el"
 ;;                        (file-name-directory load-file-name)))
-(use-package org)
+;; (use-package org)  
+;; (require 'org)
 
 ;; [[file:emacs.org::*custom.el][custom.el:1]]
 (use-package emacs
@@ -508,7 +510,7 @@
   (corfu-prescient-mode t))
 ;; corfu-prescient:1 ends here
 
-;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
+;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
 :config
@@ -528,6 +530,10 @@
 	   :default-height 150)
 	  (presentation
 	   :default-height 180)
+	  (adwaita
+	   :default-family "AdwaitaMono Nerd Font Mono"
+	   :fixed-pitch-family "AdwaitaMono Nerd Font Mono"
+	   :variable-pitch-family "Adwaita Sans")
 	  (t
 	   ;; I keep all properties for didactic purposes, but most can be
 	   ;; omitted.  See the fontaine manual for the technicalities:
@@ -676,6 +682,13 @@
 	      "c" (evil-textobj-tree-sitter-get-textobj "comment.inner"))
   )
 ;; evil-textobj-tree-sitter:1 ends here
+
+;; [[file:emacs.org::*evil-fringe-mark][evil-fringe-mark:1]]
+(use-package evil-fringe-mark
+  :straight t
+  :config
+  (global-evil-fringe-mark-mode))
+;; evil-fringe-mark:1 ends here
 
 ;; [[file:emacs.org::*general.el][general.el:1]]
 (use-package general
@@ -884,6 +897,7 @@
 ;; [[file:emacs.org::*org-roam][org-roam:1]]
 (use-package org-roam
   :straight t
+  :after (org)
   :custom
   (org-roam-directory "~/org/roam")
   :bind (("C-c n l" . org-roam-buffer-toggle)
@@ -908,7 +922,7 @@
   (after-init-hook . gcmh-mode))
 ;; gcmh:1 ends here
 
-;; [[file:emacs.org::*/[/[https:/github.com/jdtsmith/ultra-scroll/]/[ultra-scroll/]/]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
+;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
@@ -935,6 +949,7 @@
 
 ;; [[file:emacs.org::*org-mouse][org-mouse:1]]
 (use-package org-mouse
+  :after (org)
   :config
   (require 'org-mouse))
 ;; org-mouse:1 ends here
@@ -942,7 +957,8 @@
 ;; [[file:emacs.org::*org-modern][org-modern:1]]
 (use-package org-modern
   :straight t
-:config
+  :after (org)
+  :config
   (setq org-modern-table nil
 	  org-modern-block-name nil
 	  org-modern-block-fringe nil))
@@ -1006,6 +1022,26 @@
 		    '((python-mode . python-ts-mode))))))
 ;; python:1 ends here
 
+;; [[file:emacs.org::*LSP][LSP:1]]
+(use-package eglot
+  :defer t
+  :config
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+		 `(nix-ts-mode . ("nixd" :initializationOptions
+				 (:formatting (:command "alejandra")))))
+    (add-to-list 'eglot-server-programs
+		 `(nix-mode . ("nixd" :initializationOptions
+				 (:formatting (:command "alejandra"))))))
+  )
+
+;; (with-eval-after-load 'eglot
+;;   (add-to-list 'eglot-server-programs
+;; 		   `((nix-mode . ("nixd" :initializationOptions
+;; 				     (:formatting (:command "nixfmt")))))))
+;; )
+;; LSP:1 ends here
+
 ;; [[file:emacs.org::*rainbow-mode][rainbow-mode:1]]
 (use-package rainbow-mode
   :straight t)
@@ -1020,6 +1056,18 @@
 (use-package keycast
   :straight t)
 ;; keycast:1 ends here
+
+;; [[file:emacs.org::*vterm][vterm:1]]
+(condition-case nil
+    (progn
+	(require 'vterm)
+	(use-package vterm
+	  :config
+	  ;; Make vterm more responsive
+	  (setq vterm-timer-delay 0.01)))
+  (error
+   (message "Failed to load vterm")))
+;; vterm:1 ends here
 
 ;; [[file:emacs.org::*evil-terminal-cursor-changer][evil-terminal-cursor-changer:1]]
 (use-package evil-terminal-cursor-changer

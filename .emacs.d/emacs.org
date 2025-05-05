@@ -98,6 +98,7 @@ This file is loaded before the package system and GUI is initialized, so in it y
         (eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
 
+  (straight-use-package 'org)
   (straight-use-package 'use-package)
 #+end_src
 
@@ -164,7 +165,8 @@ This file is loaded before the package system and GUI is initialized, so in it y
   ;; (load (expand-file-name "org-latex-preview.el" user-emacs-directory))
   ;; (load (expand-file-name "org-latex-preview.el"
   ;;                        (file-name-directory load-file-name)))
-  (use-package org)  
+  ;; (use-package org)  
+  ;; (require 'org)
 #+end_src
 
 
@@ -821,6 +823,10 @@ Hide commands in =M-x= which do not apply to the current mode.
   	   :default-height 150)
   	  (presentation
   	   :default-height 180)
+  	  (adwaita
+  	   :default-family "AdwaitaMono Nerd Font Mono"
+  	   :fixed-pitch-family "AdwaitaMono Nerd Font Mono"
+  	   :variable-pitch-family "Adwaita Sans")
   	  (t
   	   ;; I keep all properties for didactic purposes, but most can be
   	   ;; omitted.  See the fontaine manual for the technicalities:
@@ -996,6 +1002,17 @@ Hide commands in =M-x= which do not apply to the current mode.
     (define-key evil-inner-text-objects-map
   	      "c" (evil-textobj-tree-sitter-get-textobj "comment.inner"))
     )
+#+end_src
+
+**** evil-fringe-mark :package:
+
+Display evil-mode markers in the Emacs fringe 
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package evil-fringe-mark
+    :straight t
+    :config
+    (global-evil-fringe-mark-mode))
 #+end_src
 
 *** TODO general.el :package:
@@ -1260,15 +1277,16 @@ Hide commands in =M-x= which do not apply to the current mode.
 #+begin_src elisp :tangle init.el :comments link
   (use-package org-roam
     :straight t
+    :after (org)
     :custom
     (org-roam-directory "~/org/roam")
     :bind (("C-c n l" . org-roam-buffer-toggle)
-	   ("C-c n f" . org-roam-node-find)
-	   ("C-c n g" . org-roam-graph)
-	   ("C-c n i" . org-roam-node-insert)
-	   ("C-c n c" . org-roam-capture)
-	   ;; Dailies
-	   ("C-c n j" . org-roam-dailies-capture-today))
+  	   ("C-c n f" . org-roam-node-find)
+  	   ("C-c n g" . org-roam-graph)
+  	   ("C-c n i" . org-roam-node-insert)
+  	   ("C-c n c" . org-roam-capture)
+  	   ;; Dailies
+  	   ("C-c n j" . org-roam-dailies-capture-today))
     :config
     ;; If you're using a vertical completion framework, you might want a more informative completion interface
     (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
@@ -1351,6 +1369,7 @@ Builtin additional mouse support for org-mode
 
 #+begin_src elisp :tangle init.el :comments link
   (use-package org-mouse
+    :after (org)
     :config
     (require 'org-mouse))
 #+end_src
@@ -1360,10 +1379,11 @@ Builtin additional mouse support for org-mode
 #+begin_src elisp :tangle init.el :comments link
   (use-package org-modern
     :straight t
-  :config
+    :after (org)
+    :config
     (setq org-modern-table nil
-	  org-modern-block-name nil
-	  org-modern-block-fringe nil))
+  	  org-modern-block-name nil
+  	  org-modern-block-fringe nil))
 #+end_src
 
 #+begin_src elisp :tangle defun.el :comments link
@@ -1469,6 +1489,27 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 
 *** LSP
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package eglot
+    :defer t
+    :config
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+  		 `(nix-ts-mode . ("nixd" :initializationOptions
+  				 (:formatting (:command "alejandra")))))
+      (add-to-list 'eglot-server-programs
+  		 `(nix-mode . ("nixd" :initializationOptions
+  				 (:formatting (:command "alejandra"))))))
+    )
+
+  ;; (with-eval-after-load 'eglot
+  ;;   (add-to-list 'eglot-server-programs
+  ;; 		   `((nix-mode . ("nixd" :initializationOptions
+  ;; 				     (:formatting (:command "nixfmt")))))))
+  ;; )
+#+end_src
+
 *** TODO Formatting
 *** TODO Programming Specific Editor Configuration
 
@@ -1496,6 +1537,21 @@ Richer html export, f.x. syntax highlighting in code blocks.
     :straight t)
 #+end_src
 
+*** vterm :package:
+
+Probably the best & most performant traditional terminal emulation/experiance you can get with Emacs. It's however non-trivial to install beyond just grabbing the package, thus I opt to install it outside of this configuration & call/configure the package only when it's available.
+
+#+begin_src elisp :tangle init.el :comments link
+  (condition-case nil
+      (progn
+	(require 'vterm)
+	(use-package vterm
+	  :config
+	  ;; Make vterm more responsive
+	  (setq vterm-timer-delay 0.01)))
+    (error
+     (message "Failed to load vterm")))
+#+end_src
 
 ** User Interface
 
