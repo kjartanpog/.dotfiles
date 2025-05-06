@@ -510,7 +510,7 @@
   (corfu-prescient-mode t))
 ;; corfu-prescient:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
 :config
@@ -787,8 +787,9 @@
   "ni" '(org-roam-node-insert :which-key "node insert")
   "nc" '(org-roam-capture :which-key "capture")
   "ng" '(org-roam-graph :which-key "graph")
-  "nl" '(org-roam-buffer-toggle :which-key t)
-  "nj" '(org-roam-dailies-capture-today :which-key t))
+  "nl" '(org-roam-buffer-toggle :which-key "toggle")
+  "nj" '(org-roam-dailies-capture-today :which-key "capture today")
+  "nt" '(org-roam-dailies-goto-today :which-key "today"))
 
 (leader-keys
   "o" '(:ignore t :which-key "Open")
@@ -943,7 +944,7 @@
   (after-init-hook . gcmh-mode))
 ;; gcmh:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/jdtsmith/ultra-scroll/]/[ultra-scroll/]/]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init

@@ -1133,8 +1133,9 @@ Display evil-mode markers in the Emacs fringe
     "ni" '(org-roam-node-insert :which-key "node insert")
     "nc" '(org-roam-capture :which-key "capture")
     "ng" '(org-roam-graph :which-key "graph")
-    "nl" '(org-roam-buffer-toggle :which-key t)
-    "nj" '(org-roam-dailies-capture-today :which-key t))
+    "nl" '(org-roam-buffer-toggle :which-key "toggle")
+    "nj" '(org-roam-dailies-capture-today :which-key "capture today")
+    "nt" '(org-roam-dailies-goto-today :which-key "today"))
 #+end_src
 
 **** <leader> o
