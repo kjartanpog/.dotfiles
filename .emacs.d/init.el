@@ -985,7 +985,9 @@
   (setq org-modern-table nil
 	  org-modern-block-name nil
 	  org-modern-block-fringe nil
-          org-modern-star 'replace))
+	  org-modern-star 'replace
+        ;; org-modern-replace-stars "◉○◈◇✳"
+        org-modern-replace-stars "§◉○◈◇"))
 ;; org-modern:1 ends here
 
 ;; [[file:emacs.org::*htmlize][htmlize:1]]

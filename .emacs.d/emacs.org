@@ -7,7 +7,7 @@ My literate emacs configuration
 
 #+toc: headlines 8 insert TOC here, with eight headline levels
 
-** Motivation & Goals
+* Motivation & Goals
 
 + Main focus on keyboard driven workflow, but fully embrace & integrate the convenience of mouse specific functionality
 
@@ -1405,9 +1405,11 @@ Builtin additional mouse support for org-mode
     :after (org)
     :config
     (setq org-modern-table nil
-  	  org-modern-block-name nil
-  	  org-modern-block-fringe nil
-            org-modern-star 'replace))
+	  org-modern-block-name nil
+	  org-modern-block-fringe nil
+	  org-modern-star 'replace
+          ;; org-modern-replace-stars "◉○◈◇✳"
+          org-modern-replace-stars "§◉○◈◇"))
 #+end_src
 
 #+begin_src elisp :tangle defun.el :comments link
