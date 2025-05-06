@@ -711,6 +711,7 @@
   "<escape>" '(keyboard-escape-quit :which-key t)
   ":" '(execute-extended-command :which-key "execute command")
   "<SPC>" '(popper-toggle :which-key "popper-toggle")
+  (kbd "C-SPC") '(popper-toggle :which-key "popper-toggle")
   "<tab>" '(popper-cycle :which-key "popper-cycle"))
 ;; misc <leader> maps:1 ends here
 
@@ -983,7 +984,8 @@
   :config
   (setq org-modern-table nil
 	  org-modern-block-name nil
-	  org-modern-block-fringe nil))
+	  org-modern-block-fringe nil
+          org-modern-star 'replace))
 ;; org-modern:1 ends here
 
 ;; [[file:emacs.org::*htmlize][htmlize:1]]
