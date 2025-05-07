@@ -965,6 +965,8 @@
 	  org-hide-emphasis-markers t
 	  org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
   ;; (add-hook 'org-mode-hook #'my/org-mode-entry)
+  ;; Adjusts the scaling of latex previews, perhaps only needed on Windows?  
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
   (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
   (add-hook 'org-mode-hook #'my/org-mode-entry)
   )
