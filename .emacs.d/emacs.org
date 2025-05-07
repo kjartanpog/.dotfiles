@@ -1145,6 +1145,7 @@ Display evil-mode markers in the Emacs fringe
   (leader-keys
     "o" '(:ignore t :which-key "Open")
     "o <escape>" '(keyboard-escape-quit :which-key t)
+    "oe" '(eshell :which-key "eshell")
     "oo" '(:ignore t :which-key "Other Window"))
 #+end_src
 

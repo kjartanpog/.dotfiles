@@ -795,6 +795,7 @@
 (leader-keys
   "o" '(:ignore t :which-key "Open")
   "o <escape>" '(keyboard-escape-quit :which-key t)
+  "oe" '(eshell :which-key "eshell")
   "oo" '(:ignore t :which-key "Other Window"))
 
 ;; [[file:emacs.org::*<leader> p][<leader> p:1]]
