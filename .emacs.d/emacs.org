@@ -1533,12 +1533,34 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 *** LSP
 
+**** eglot :package:
+
 #+begin_src elisp :tangle init.el :comments link
   (use-package eglot
+    :init
+    (add-hook 'nix-mode-hook 'eglot-ensure)
+    (add-hook 'nix-ts-mode-hook 'eglot-ensure)
     :defer t)
 #+end_src
 
 *** TODO Formatting
+
+**** format-all :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package format-all
+    :straight t
+    :commands format-all-mode
+    :hook (prog-mode . format-all-mode)
+    :config
+    (setq-default format-all-formatters
+  		  '(("C"     (astyle "--mode=c"))
+  		    ("Shell" (shfmt "-i" "4" "-ci"))
+  		    ;; ("Nix" (alejandra "--quiet"))
+  		    ))
+    (add-hook 'format-all-mode-hook 'format-all-ensure-formatter))
+#+end_src
+
 *** TODO Programming Specific Editor Configuration
 
 #+begin_src elisp :tangle defun.el :comments link

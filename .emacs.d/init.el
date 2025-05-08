@@ -1061,10 +1061,27 @@
 		    '((python-mode . python-ts-mode))))))
 ;; python:1 ends here
 
-;; [[file:emacs.org::*LSP][LSP:1]]
+;; [[file:emacs.org::*eglot][eglot:1]]
 (use-package eglot
+  :init
+  (add-hook 'nix-mode-hook 'eglot-ensure)
+  (add-hook 'nix-ts-mode-hook 'eglot-ensure)
   :defer t)
-;; LSP:1 ends here
+;; eglot:1 ends here
+
+;; [[file:emacs.org::*format-all][format-all:1]]
+(use-package format-all
+  :straight t
+  :commands format-all-mode
+  :hook (prog-mode . format-all-mode)
+  :config
+  (setq-default format-all-formatters
+		  '(("C"     (astyle "--mode=c"))
+		    ("Shell" (shfmt "-i" "4" "-ci"))
+		    ;; ("Nix" (alejandra "--quiet"))
+		    ))
+  (add-hook 'format-all-mode-hook 'format-all-ensure-formatter))
+;; format-all:1 ends here
 
 ;; [[file:emacs.org::*rainbow-mode][rainbow-mode:1]]
 (use-package rainbow-mode
