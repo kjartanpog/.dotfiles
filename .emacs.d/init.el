@@ -183,6 +183,8 @@
   ;; 	    "<escape>" 'vundo-quit)
   :config
   (setq vundo-glyph-alist vundo-ascii-symbols)
+  (advice-add 'vundo-forward :after (lambda (&rest _args) (recenter)))
+  (advice-add 'vundo-backward :after (lambda (&rest _args) (recenter)))
   :bind (:map vundo-mode-map
 	      ("<escape>" . vundo-quit)))
 ;; vundo:1 ends here
