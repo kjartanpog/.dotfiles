@@ -43,6 +43,7 @@
    ;; '(org-block-end-line ((t (:inherit 'fixed-pitch))))
    '(org-table ((t (:inherit 'fixed-pitch))))
    '(org-code ((t (:inherit 'fixed-pitch))))
+   ;; '(org-verbatim ((t (:inherit 'fixed-pitch))))
 
    ;; corfu mixed fonts
    '(corfu-default ((t (:inherit 'fixed-pitch))))

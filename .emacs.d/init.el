@@ -510,7 +510,7 @@
   (corfu-prescient-mode t))
 ;; corfu-prescient:1 ends here
 
-;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
+;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
 :config
@@ -946,7 +946,7 @@
   (after-init-hook . gcmh-mode))
 ;; gcmh:1 ends here
 
-;; [[file:emacs.org::*/[/[https:/github.com/jdtsmith/ultra-scroll/]/[ultra-scroll/]/]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
+;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
@@ -1005,6 +1005,16 @@
   (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode))
 ;; elisp:1 ends here
 
+;; [[file:emacs.org::*auctex][auctex:1]]
+(use-package auctex
+  :straight t
+  :defer t
+  :config
+  (setq TeX-auto-save t
+	TeX-parse-self t)
+  )
+;; auctex:1 ends here
+
 ;; [[file:emacs.org::*nix-mode][nix-mode:1]]
 (use-package nix-mode
   :straight t
@@ -1053,22 +1063,7 @@
 
 ;; [[file:emacs.org::*LSP][LSP:1]]
 (use-package eglot
-  :defer t
-  :config
-  (with-eval-after-load 'eglot
-    (add-to-list 'eglot-server-programs
-		 `(nix-ts-mode . ("nixd" :initializationOptions
-				 (:formatting (:command "alejandra")))))
-    (add-to-list 'eglot-server-programs
-		 `(nix-mode . ("nixd" :initializationOptions
-				 (:formatting (:command "alejandra"))))))
-  )
-
-;; (with-eval-after-load 'eglot
-;;   (add-to-list 'eglot-server-programs
-;; 		   `((nix-mode . ("nixd" :initializationOptions
-;; 				     (:formatting (:command "nixfmt")))))))
-;; )
+  :defer t)
 ;; LSP:1 ends here
 
 ;; [[file:emacs.org::*rainbow-mode][rainbow-mode:1]]
@@ -1398,6 +1393,8 @@
 	(add-hook 'elpaca-after-init-hook #'popper-mode)
     (add-hook 'emacs-startup-hook #'popper-mode))
   (setq popper-window-height 'my/max-window-height)
+  ;; (setq popper-display-function #'display-buffer-pop-up-window)
+  ;; (setq popper-display-function #'display-buffer-in-child-frame)
   (setq popper-reference-buffers
 	  (append my/help-modes-list
 		  ;; Match eshell, shell, term and/or vterm buffers

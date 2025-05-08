@@ -1449,6 +1449,20 @@ Richer html export, f.x. syntax highlighting in code blocks.
     (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode))
 #+end_src
 
+**** LaTeX
+
+***** auctex :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package auctex
+    :straight t
+    :defer t
+    :config
+    (setq TeX-auto-save t
+  	TeX-parse-self t)
+    )
+#+end_src
+
 **** Nix
 
 ***** nix-mode :package:
@@ -1521,22 +1535,7 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 #+begin_src elisp :tangle init.el :comments link
   (use-package eglot
-    :defer t
-    :config
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-  		 `(nix-ts-mode . ("nixd" :initializationOptions
-  				 (:formatting (:command "alejandra")))))
-      (add-to-list 'eglot-server-programs
-  		 `(nix-mode . ("nixd" :initializationOptions
-  				 (:formatting (:command "alejandra"))))))
-    )
-
-  ;; (with-eval-after-load 'eglot
-  ;;   (add-to-list 'eglot-server-programs
-  ;; 		   `((nix-mode . ("nixd" :initializationOptions
-  ;; 				     (:formatting (:command "nixfmt")))))))
-  ;; )
+    :defer t)
 #+end_src
 
 *** TODO Formatting
@@ -1843,6 +1842,7 @@ I various =use-package= package declarations in my configuration, you can see a 
      ;; '(org-block-end-line ((t (:inherit 'fixed-pitch))))
      '(org-table ((t (:inherit 'fixed-pitch))))
      '(org-code ((t (:inherit 'fixed-pitch))))
+     ;; '(org-verbatim ((t (:inherit 'fixed-pitch))))
 
      ;; corfu mixed fonts
      '(corfu-default ((t (:inherit 'fixed-pitch))))
@@ -2047,6 +2047,8 @@ Highlight uncommitted changes on the sides of a buffer window.
 	(add-hook 'elpaca-after-init-hook #'popper-mode)
       (add-hook 'emacs-startup-hook #'popper-mode))
     (setq popper-window-height 'my/max-window-height)
+    ;; (setq popper-display-function #'display-buffer-pop-up-window)
+    ;; (setq popper-display-function #'display-buffer-in-child-frame)
     (setq popper-reference-buffers
 	  (append my/help-modes-list
 		  ;; Match eshell, shell, term and/or vterm buffers
