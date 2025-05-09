@@ -1114,8 +1114,21 @@
 	(setq vterm-timer-delay 0.01)
 	(setq vterm-kill-buffer-on-exit t)))
   (error
-   (message "Failed to load vterm")))
+   (message "vterm not installed")))
 ;; vterm:1 ends here
+
+;; [[file:emacs.org::*jinx][jinx:1]]
+(condition-case nil
+    (progn
+      (require 'jinx)
+      (use-package jinx
+	:after (general)
+	:config
+	(leader-keys
+	  "ts" '(jinx-mode :which-key "jinx"))))
+  (error
+   (message "vterm not installed")))
+;; jinx:1 ends here
 
 ;; [[file:emacs.org::*evil-terminal-cursor-changer][evil-terminal-cursor-changer:1]]
 (use-package evil-terminal-cursor-changer

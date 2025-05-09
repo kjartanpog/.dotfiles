@@ -1591,7 +1591,7 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 *** vterm :package:
 
-Probably the best & most performant traditional terminal emulation/experiance you can get with Emacs. It's however non-trivial to install beyond just grabbing the package, thus I opt to install it outside of this configuration & call/configure the package only when it's available.
+Probably the best & most performant traditional terminal emulation/experience you can get with Emacs. It's however non-trivial to install beyond just grabbing the package, thus I opt to install it outside of this configuration & call/configure the package only when it's available.
 
 #+begin_src elisp :tangle init.el :comments link
   (condition-case nil
@@ -1607,7 +1607,24 @@ Probably the best & most performant traditional terminal emulation/experiance yo
 	(setq vterm-timer-delay 0.01)
 	(setq vterm-kill-buffer-on-exit t)))
     (error
-     (message "Failed to load vterm")))
+     (message "vterm not installed")))
+#+end_src
+
+*** jinx :package:
+
+I think this is the best modern spell checker for emacs?
+
+#+begin_src elisp :tangle init.el :comments link
+  (condition-case nil
+      (progn
+        (require 'jinx)
+        (use-package jinx
+  	:after (general)
+  	:config
+  	(leader-keys
+  	  "ts" '(jinx-mode :which-key "jinx"))))
+    (error
+     (message "vterm not installed")))
 #+end_src
 
 ** User Interface
