@@ -1203,6 +1203,14 @@ Display evil-mode markers in the Emacs fringe
     "tk" '(keycast-mode-line-mode :which-key "keycast mode-line"))
 #+end_src
 
+**** <leader> u
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+  "u" '(universal-argument :which-key "universal argument"))
+#+end_src
+
+
 **** <leader> w
 
 #+begin_src elisp :tangle init.el :comments link
@@ -1625,6 +1633,20 @@ I think this is the best modern spell checker for emacs?
   	  "ts" '(jinx-mode :which-key "jinx"))))
     (error
      (message "vterm not installed")))
+#+end_src
+
+*** scratch :package:
+
+Scratch is an extension to Emacs that enables one to create scratch buffers that are in the same mode as the current buffer. This is notably useful when working on code in some language; you may grab code into a scratch buffer, and, by virtue of this extension, do so using the Emacs formatting rules for that language.
+
+#+begin_src elisp :tangle init.el :comments link
+(use-package scratch
+  :straight t
+  :config
+  (leader-keys
+    "os" '((lambda () (interactive)
+	    (let ((current-prefix-arg '(4))) ; Equivalent to C-u
+	      (call-interactively 'scratch))) :which-key "scratch")))
 #+end_src
 
 ** User Interface

@@ -512,7 +512,7 @@
   (corfu-prescient-mode t))
 ;; corfu-prescient:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
 :config
@@ -844,6 +844,11 @@
   "tk" '(keycast-mode-line-mode :which-key "keycast mode-line"))
 ;; <leader> t:1 ends here
 
+;; [[file:emacs.org::*<leader> u][<leader> u:1]]
+(leader-keys
+"u" '(universal-argument :which-key "universal argument"))
+;; <leader> u:1 ends here
+
 ;; [[file:emacs.org::*<leader> w][<leader> w:1]]
 (leader-keys
   "w" '(:ignore t :which-key "window")
@@ -948,7 +953,7 @@
   (after-init-hook . gcmh-mode))
 ;; gcmh:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/jdtsmith/ultra-scroll/]/[ultra-scroll/]/]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
@@ -1129,6 +1134,16 @@
   (error
    (message "vterm not installed")))
 ;; jinx:1 ends here
+
+;; [[file:emacs.org::*scratch][scratch:1]]
+(use-package scratch
+  :straight t
+  :config
+  (leader-keys
+    "os" '((lambda () (interactive)
+	    (let ((current-prefix-arg '(4))) ; Equivalent to C-u
+	      (call-interactively 'scratch))) :which-key "scratch")))
+;; scratch:1 ends here
 
 ;; [[file:emacs.org::*evil-terminal-cursor-changer][evil-terminal-cursor-changer:1]]
 (use-package evil-terminal-cursor-changer
