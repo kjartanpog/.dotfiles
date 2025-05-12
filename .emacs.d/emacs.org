@@ -1632,7 +1632,7 @@ I think this is the best modern spell checker for emacs?
   	(leader-keys
   	  "ts" '(jinx-mode :which-key "jinx"))))
     (error
-     (message "vterm not installed")))
+     (message "jinx not installed")))
 #+end_src
 
 *** scratch :package:

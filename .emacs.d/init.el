@@ -1132,7 +1132,7 @@
 	(leader-keys
 	  "ts" '(jinx-mode :which-key "jinx"))))
   (error
-   (message "vterm not installed")))
+   (message "jinx not installed")))
 ;; jinx:1 ends here
 
 ;; [[file:emacs.org::*scratch][scratch:1]]
