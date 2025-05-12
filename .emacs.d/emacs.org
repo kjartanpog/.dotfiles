@@ -1171,7 +1171,9 @@ Display evil-mode markers in the Emacs fringe
     "rb" '(bookmark-jump :which-key "bookmark-jump")
     "rm" '(bookmark-set :which-key "bookmark-set")
     "rl" '(bookmark-bmenu-list :which-key "bookmark-bmenu-list")
-    "ru" '(vundo :which-key "Undo tree"))
+    "ru" '(vundo :which-key "Undo tree")
+    "rf" '(consult-bookmark :which-key "find bookmark")
+    "rd" '(bookmark-delete :which-key "bookmark delete"))
 #+end_src
 
 **** <leader> s
