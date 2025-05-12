@@ -1139,6 +1139,13 @@
 (use-package scratch
   :straight t
   :config
+
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (when scratch-buffer
+                (save-excursion
+                  (goto-char (point-min))
+                  (insert "#+TITLE: Scratch Buffer\n\n")))))
   (leader-keys
     "os" '((lambda () (interactive)
 	    (let ((current-prefix-arg '(4))) ; Equivalent to C-u
