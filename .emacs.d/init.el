@@ -36,7 +36,7 @@
 ;; (load (expand-file-name "org-latex-preview.el" user-emacs-directory))
 ;; (load (expand-file-name "org-latex-preview.el"
 ;;                        (file-name-directory load-file-name)))
-;; (use-package org)  
+;; (use-package org)
 ;; (require 'org)
 
 ;; [[file:emacs.org::*custom.el][custom.el:1]]
@@ -376,7 +376,7 @@
   ;; Optionally make narrowing help available in the minibuffer.
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-)
+  )
 ;; consult:1 ends here
 
 ;; [[file:emacs.org::*consult-todo][consult-todo:1]]
@@ -406,11 +406,11 @@
   ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   :bind
   (:map corfu-map
-	  ("TAB" . corfu-next) ;; Use TAB for cycling to the next candidate
-	  ([tab] . corfu-next) ;; Ensure both TAB and [tab] work
-	  ("S-TAB" . corfu-previous) ;; Use Shift-TAB for cycling to the previous candidate
-	  ([backtab] . corfu-previous)
-	  ("SPC" . corfu-insert-separator))
+	("TAB" . corfu-next) ;; Use TAB for cycling to the next candidate
+	([tab] . corfu-next) ;; Ensure both TAB and [tab] work
+	("S-TAB" . corfu-previous) ;; Use Shift-TAB for cycling to the previous candidate
+	([backtab] . corfu-previous)
+	("SPC" . corfu-insert-separator))
   :init
   (global-corfu-mode)
   (corfu-popupinfo-mode))
@@ -522,10 +522,10 @@
 
 ;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
-:straight t
-:config
-(locate-user-emacs-file "fontaine-latest-state.eld")
-(setq fontaine-presets
+  :straight t
+  :config
+  (locate-user-emacs-file "fontaine-latest-state.eld")
+  (setq fontaine-presets
 	'((small
 	   :default-family "Aporetic Serif Mono"
 	   :default-height 80
@@ -552,80 +552,80 @@
 	   :default-weight regular
 	   :default-height 140
 
-         :fixed-pitch-family nil ; falls back to :default-family
-         :fixed-pitch-weight nil ; falls back to :default-weight
-         :fixed-pitch-height 1.0
+           :fixed-pitch-family nil ; falls back to :default-family
+           :fixed-pitch-weight nil ; falls back to :default-weight
+           :fixed-pitch-height 1.0
 
-         :fixed-pitch-serif-family nil ; falls back to :default-family
-         :fixed-pitch-serif-weight nil ; falls back to :default-weight
-         :fixed-pitch-serif-height 1.0
+           :fixed-pitch-serif-family nil ; falls back to :default-family
+           :fixed-pitch-serif-weight nil ; falls back to :default-weight
+           :fixed-pitch-serif-height 1.0
 
-         :variable-pitch-family "Aporetic Serif"
-         :variable-pitch-weight nil
-         :variable-pitch-height 1.0
+           :variable-pitch-family "Aporetic Serif"
+           :variable-pitch-weight nil
+           :variable-pitch-height 1.0
 
-         :mode-line-active-family nil ; falls back to :default-family
-         :mode-line-active-weight nil ; falls back to :default-weight
-         :mode-line-active-height 0.9
+           :mode-line-active-family nil ; falls back to :default-family
+           :mode-line-active-weight nil ; falls back to :default-weight
+           :mode-line-active-height 0.9
 
-         :mode-line-inactive-family nil ; falls back to :default-family
-         :mode-line-inactive-weight nil ; falls back to :default-weight
-         :mode-line-inactive-height 0.9
+           :mode-line-inactive-family nil ; falls back to :default-family
+           :mode-line-inactive-weight nil ; falls back to :default-weight
+           :mode-line-inactive-height 0.9
 
-         :header-line-family nil ; falls back to :default-family
-         :header-line-weight nil ; falls back to :default-weight
-         :header-line-height 0.9
+           :header-line-family nil ; falls back to :default-family
+           :header-line-weight nil ; falls back to :default-weight
+           :header-line-height 0.9
 
-         :line-number-family nil ; falls back to :default-family
-         :line-number-weight nil ; falls back to :default-weight
-         :line-number-height 0.9
+           :line-number-family nil ; falls back to :default-family
+           :line-number-weight nil ; falls back to :default-weight
+           :line-number-height 0.9
 
-         :tab-bar-family nil ; falls back to :default-family
-         :tab-bar-weight nil ; falls back to :default-weight
-         :tab-bar-height 1.0
+           :tab-bar-family nil ; falls back to :default-family
+           :tab-bar-weight nil ; falls back to :default-weight
+           :tab-bar-height 1.0
 
-         :tab-line-family nil ; falls back to :default-family
-         :tab-line-weight nil ; falls back to :default-weight
-         :tab-line-height 1.0
+           :tab-line-family nil ; falls back to :default-family
+           :tab-line-weight nil ; falls back to :default-weight
+           :tab-line-height 1.0
 
-         :bold-family nil ; use whatever the underlying face has
-         :bold-weight bold
+           :bold-family nil ; use whatever the underlying face has
+           :bold-weight bold
 
-         :italic-family nil
-         :italic-slant italic
+           :italic-family nil
+           :italic-slant italic
 
-         :line-spacing nil)))
+           :line-spacing nil)))
 
-;; Set the last preset or fall back to desired style from `fontaine-presets'
-;; (the `regular' in this case).
-(fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+  ;; Set the last preset or fall back to desired style from `fontaine-presets'
+  ;; (the `regular' in this case).
+  (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
 
-;; Persist the latest font preset when closing/starting Emacs and
-;; while switching between themes.
-(fontaine-mode 1))
+  ;; Persist the latest font preset when closing/starting Emacs and
+  ;; while switching between themes.
+  (fontaine-mode 1))
 ;; [[https://github.com/protesilaos/fontaine][fontaine]]:1 ends here
 
 ;; [[file:emacs.org::*evil][evil:1]]
 (use-package evil
-:straight t
-:init
-(setq evil-want-keybinding nil) ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
-(setq evil-want-integration t)
-(setq evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
-:custom
-(evil-want-C-u-scroll t)                 ;; Makes ‘C-u’ scroll up (like Vim).
-(evil-want-C-u-delete t)                 ;; Makes ‘C-u’ delete on insert mode
-(evil-split-window-below t)              ;; Horizontally split windows are created below.
-(evil-vsplit-window-right t)             ;; Vertically split windows with are created to the right.
-(evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
-(evil-undo-system 'undo-fu)
-(evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
-:config
-(evil-mode t)
-(with-eval-after-load 'dired
-  (evil-define-key 'normal dired-mode-map "h" 'dired-up-directory)
-  (evil-define-key 'normal dired-mode-map "l" 'dired-find-alternate-file))
-)
+  :straight t
+  :init
+  (setq evil-want-keybinding nil) ;; Disable loading a set of keybindings for evil in other modes (using evil-collection instead)
+  (setq evil-want-integration t)
+  (setq evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
+  :custom
+  (evil-want-C-u-scroll t)                 ;; Makes ‘C-u’ scroll up (like Vim).
+  (evil-want-C-u-delete t)                 ;; Makes ‘C-u’ delete on insert mode
+  (evil-split-window-below t)              ;; Horizontally split windows are created below.
+  (evil-vsplit-window-right t)             ;; Vertically split windows with are created to the right.
+  (evil-respect-visual-line-mode t)        ;; Whether movement commands respect ‘visual-line-mode’.
+  (evil-undo-system 'undo-fu)
+  (evil-toggle-key "C-M-z")           ;; Toggle between emacs and vim bindings with ‘C-u’
+  :config
+  (evil-mode t)
+  (with-eval-after-load 'dired
+    (evil-define-key 'normal dired-mode-map "h" 'dired-up-directory)
+    (evil-define-key 'normal dired-mode-map "l" 'dired-find-alternate-file))
+  )
 ;; evil:1 ends here
 
 ;; [[file:emacs.org::*evil-collection][evil-collection:1]]
@@ -811,7 +811,7 @@
 
 ;; [[file:emacs.org::*<leader> p][<leader> p:1]]
 (leader-keys
-   ;; Project
+  ;; Project
   "p" '(:ignore t :which-key "Project")
   "p <escape>" '(keyboard-escape-quit :which-key t)
   "pf" '(project-find-file :which-key t))
@@ -857,7 +857,7 @@
 
 ;; [[file:emacs.org::*<leader> u][<leader> u:1]]
 (leader-keys
-"u" '(universal-argument :which-key "universal argument"))
+  "u" '(universal-argument :which-key "universal argument"))
 ;; <leader> u:1 ends here
 
 ;; [[file:emacs.org::*<leader> w][<leader> w:1]]
@@ -910,17 +910,17 @@
   :straight t
   :config
   (setq treesit-load-name-override-list
-	  '((python "python" "tree_sitter_python")
-	    (nix "nix" "tree_sitter_nix")
-	    (json "json" "tree_sitter_json")
-	    (yaml "yaml" "tree_sitter_yaml")
-	    (elisp "elisp" "tree_sitter_elisp")
-	    (markdown "markdown" "tree_sitter_markdown")
-	    (markdown-inline "markdown-inline" "tree_sitter_markdown_inline")
-	    ))
+	'((python "python" "tree_sitter_python")
+	  (nix "nix" "tree_sitter_nix")
+	  (json "json" "tree_sitter_json")
+	  (yaml "yaml" "tree_sitter_yaml")
+	  (elisp "elisp" "tree_sitter_elisp")
+	  (markdown "markdown" "tree_sitter_markdown")
+	  (markdown-inline "markdown-inline" "tree_sitter_markdown_inline")
+	  ))
   (setq treesit-extra-load-path
-	  (list tree-sitter-langs--dir
-		(concat tree-sitter-langs--dir "bin/")))
+	(list tree-sitter-langs--dir
+	      (concat tree-sitter-langs--dir "bin/")))
   )
 ;; tree-sitter-langs:1 ends here
 
@@ -943,12 +943,12 @@
   :custom
   (org-roam-directory "~/org/roam")
   :bind (("C-c n l" . org-roam-buffer-toggle)
-	   ("C-c n f" . org-roam-node-find)
-	   ("C-c n g" . org-roam-graph)
-	   ("C-c n i" . org-roam-node-insert)
-	   ("C-c n c" . org-roam-capture)
-	   ;; Dailies
-	   ("C-c n j" . org-roam-dailies-capture-today))
+	 ("C-c n f" . org-roam-node-find)
+	 ("C-c n g" . org-roam-graph)
+	 ("C-c n i" . org-roam-node-insert)
+	 ("C-c n c" . org-roam-capture)
+	 ;; Dailies
+	 ("C-c n j" . org-roam-dailies-capture-today))
   :config
   ;; If you're using a vertical completion framework, you might want a more informative completion interface
   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
@@ -969,7 +969,7 @@
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
   (setq scroll-conservatively 101 ; important!
-	  scroll-margin 0) 
+	scroll-margin 0)
   :config
   (ultra-scroll-mode 1))
 ;; [[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1 ends here
@@ -978,13 +978,13 @@
 (use-package org
   :config
   (setq org-blank-before-new-entry
-    '((heading . always)
-      (plain-list-item . auto)))
+	'((heading . always)
+	  (plain-list-item . auto)))
   (setq org-auto-align-tags nil
-	  org-hide-emphasis-markers t
-	  org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
+	org-hide-emphasis-markers t
+	org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
   ;; (add-hook 'org-mode-hook #'my/org-mode-entry)
-  ;; Adjusts the scaling of latex previews, perhaps only needed on Windows?  
+  ;; Adjusts the scaling of latex previews, perhaps only needed on Windows?
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
   (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
   (add-hook 'org-mode-hook #'my/org-mode-entry)
@@ -1004,9 +1004,9 @@
   :after (org)
   :config
   (setq org-modern-table nil
-	  org-modern-block-name nil
-	  org-modern-block-fringe nil
-	  org-modern-star 'replace
+	org-modern-block-name nil
+	org-modern-block-fringe nil
+	org-modern-star 'replace
         ;; org-modern-replace-stars "◉○◈◇✳"
         org-modern-replace-stars "§◉○◈◇"))
 ;; org-modern:1 ends here
@@ -1057,7 +1057,7 @@
   :mode "\\.inputrc\\'"
   :hook
   (conf-mode . display-line-numbers-mode)
-  (conf-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers 
+  (conf-mode . (lambda () (setq-local truncate-lines t)))         ;; Enable line numbers
   )
 ;; conf-mode:1 ends here
 
@@ -1094,10 +1094,10 @@
   :hook (prog-mode . format-all-mode)
   :config
   (setq-default format-all-formatters
-		  '(("C"     (astyle "--mode=c"))
-		    ("Shell" (shfmt "-i" "4" "-ci"))
-		    ;; ("Nix" (alejandra "--quiet"))
-		    ))
+		'(("C"     (astyle "--mode=c"))
+		  ("Shell" (shfmt "-i" "4" "-ci"))
+		  ;; ("Nix" (alejandra "--quiet"))
+		  ))
   (add-hook 'format-all-mode-hook 'format-all-ensure-formatter))
 ;; format-all:1 ends here
 
@@ -1119,8 +1119,8 @@
 ;; [[file:emacs.org::*vterm][vterm:1]]
 (condition-case nil
     (progn
-	(require 'vterm)
-	(use-package vterm
+      (require 'vterm)
+      (use-package vterm
 	:after (general)
 	:config
 	(leader-keys
@@ -1159,9 +1159,15 @@
                   (insert "#+TITLE: Scratch Buffer\n\n")))))
   (leader-keys
     "os" '((lambda () (interactive)
-	    (let ((current-prefix-arg '(4))) ; Equivalent to C-u
-	      (call-interactively 'scratch))) :which-key "scratch")))
+	     (let ((current-prefix-arg '(4))) ; Equivalent to C-u
+	       (call-interactively 'scratch))) :which-key "scratch")))
 ;; scratch:1 ends here
+
+;; [[file:emacs.org::*envrc][envrc:1]]
+(use-package envrc
+  :straight t
+  :hook (after-init . envrc-global-mode))
+;; envrc:1 ends here
 
 ;; [[file:emacs.org::*evil-terminal-cursor-changer][evil-terminal-cursor-changer:1]]
 (use-package evil-terminal-cursor-changer
@@ -1195,12 +1201,12 @@
   :config
   (setq spacious-padding-widths
 	'( :internal-border-width 15
-	     :header-line-width 4
-	     :mode-line-width 2
-	     :tab-width 4
-	     :right-divider-width 30
-	     :scroll-bar-width 8
-	     :fringe-width 8))
+	   :header-line-width 4
+	   :mode-line-width 2
+	   :tab-width 4
+	   :right-divider-width 30
+	   :scroll-bar-width 8
+	   :fringe-width 8))
   (spacious-padding-mode 1)
   )
 ;; spacious-padding:1 ends here
@@ -1301,22 +1307,22 @@
   (setq modus-themes-common-palette-overrides
 	`((fg-region unspecified)
 	  (bg-region bg-sage)
-	  
+
 	  ;; A nuanced accented background, combined with a suitable foreground.
 	  (bg-prose-code bg-green-nuanced)
 	  (fg-prose-code green-cooler)
-	  
+
 	  (bg-prose-verbatim bg-magenta-nuanced)
 	  (fg-prose-verbatim magenta-warmer)
-	  
+
 	  (bg-prose-macro bg-blue-nuanced)
 	  (fg-prose-macro magenta-cooler)))
-  
+
   (setq modus-vivendi-palette-overrides
 	`((bg-main "#000000")
 	  (fg-heading-1 magenta-faint)
 	  (bg-line-number-active "#2f3849")))
-  
+
   (setq modus-operandi-palette-overrides
 	'((fg-heading-1 "#2f5f9f")
 	  (bg-region "#c0deff")
@@ -1355,9 +1361,9 @@
   :custom
   (visual-fill-column-width 100)
   :hook (org-mode . (lambda ()
-			(visual-fill-column-mode)
-			;; (visual-line-fill-column-mode)
-			(visual-fill-column-toggle-center-text)))
+		      (visual-fill-column-mode)
+		      ;; (visual-line-fill-column-mode)
+		      (visual-fill-column-toggle-center-text)))
   )
 ;; visual-fill-column:1 ends here
 
@@ -1372,9 +1378,9 @@
 (use-package emacs
   :config
   (add-hook 'after-make-frame-functions
-	      (lambda (frame) 
-			(with-selected-frame frame
-		  (my/toggle-menu-bar-in-fullscreen))))
+	    (lambda (frame)
+	      (with-selected-frame frame
+		(my/toggle-menu-bar-in-fullscreen))))
 
   (add-hook 'window-configuration-change-hook
 	    'my/toggle-menu-bar-in-fullscreen))
@@ -1422,7 +1428,7 @@
 ;; [[file:emacs.org::*helpful][helpful:1]]
 (use-package helpful
   :straight t
-:config
+  :config
   (global-set-key (kbd "C-h f") #'helpful-callable)
   (global-set-key (kbd "C-h v") #'helpful-variable)
   (global-set-key (kbd "C-h k") #'helpful-key)
@@ -1458,19 +1464,19 @@
   :commands popper-mode
   :init
   (if (boundp 'elpaca-after-init-hook)
-	(add-hook 'elpaca-after-init-hook #'popper-mode)
+      (add-hook 'elpaca-after-init-hook #'popper-mode)
     (add-hook 'emacs-startup-hook #'popper-mode))
   (setq popper-window-height 'my/max-window-height)
   ;; (setq popper-display-function #'display-buffer-pop-up-window)
   ;; (setq popper-display-function #'display-buffer-in-child-frame)
   (setq popper-reference-buffers
-	  (append my/help-modes-list
-		  ;; Match eshell, shell, term and/or vterm buffers
-		  '("^\\*eshell.*\\*$" eshell-mode ;eshell as a popup
-		    "^\\*shell.*\\*$"  shell-mode  ;shell as a popup
-		    "^\\*term.*\\*$"   term-mode   ;term as a popup
-		    "^\\*vterm.*\\*$"  vterm-mode  ;vterm as a popup
-		    )))
+	(append my/help-modes-list
+		;; Match eshell, shell, term and/or vterm buffers
+		'("^\\*eshell.*\\*$" eshell-mode ;eshell as a popup
+		  "^\\*shell.*\\*$"  shell-mode  ;shell as a popup
+		  "^\\*term.*\\*$"   term-mode   ;term as a popup
+		  "^\\*vterm.*\\*$"  vterm-mode  ;vterm as a popup
+		  )))
   )
 ;; popper:2 ends here
 
@@ -1483,3 +1489,4 @@
 ;; [[file:emacs.org::*Toggle org-mode emphasis markers][Toggle org-mode emphasis markers:2]]
 (define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
 ;; Toggle org-mode emphasis markers:2 ends here
+(put 'dired-find-alternate-file 'disabled nil)

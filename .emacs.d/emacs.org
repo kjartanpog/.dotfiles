@@ -1670,6 +1670,14 @@ Scratch is an extension to Emacs that enables one to create scratch buffers that
 	      (call-interactively 'scratch))) :which-key "scratch")))
 #+end_src
 
+*** envrc :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package envrc
+    :straight t
+    :hook (after-init . envrc-global-mode))
+#+end_src
+
 ** User Interface
 
 *** Cursor
