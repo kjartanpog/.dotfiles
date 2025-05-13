@@ -791,6 +791,17 @@ Hide commands in =M-x= which do not apply to the current mode.
     (corfu-prescient-mode t))
 #+end_src
 
+** File Management
+
+*** dired
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package dired
+    :config
+    (add-hook 'dired-mode-hook
+          (lambda ()
+            (dired-hide-details-mode))))
+#+end_src
 
 ** Fonts
 

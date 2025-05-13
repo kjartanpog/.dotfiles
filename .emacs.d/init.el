@@ -512,6 +512,14 @@
   (corfu-prescient-mode t))
 ;; corfu-prescient:1 ends here
 
+;; [[file:emacs.org::*dired][dired:1]]
+(use-package dired
+  :config
+  (add-hook 'dired-mode-hook
+        (lambda ()
+          (dired-hide-details-mode))))
+;; dired:1 ends here
+
 ;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
