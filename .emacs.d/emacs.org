@@ -1013,6 +1013,7 @@ Display evil-mode markers in the Emacs fringe
 #+begin_src elisp :tangle init.el :comments link
   (use-package evil-fringe-mark
     :straight t
+    :diminish (global-evil-fringe-mark-mode)
     :config
     (global-evil-fringe-mark-mode))
 #+end_src
@@ -1768,6 +1769,9 @@ I various =use-package= package declarations in my configuration, you can see a 
     :config
     ;; (diminish 'buffer-face-mode)
     ;; (diminish 'BufFace)
+    (diminish 'buffer-face-mode)
+    (diminish 'auto-revert-mode)
+    (diminish 'visual-line-mode)
     )
 #+end_src
 

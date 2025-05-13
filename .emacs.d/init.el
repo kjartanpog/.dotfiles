@@ -512,7 +512,7 @@
   (corfu-prescient-mode t))
 ;; corfu-prescient:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
 :config
@@ -688,6 +688,7 @@
 ;; [[file:emacs.org::*evil-fringe-mark][evil-fringe-mark:1]]
 (use-package evil-fringe-mark
   :straight t
+  :diminish (global-evil-fringe-mark-mode)
   :config
   (global-evil-fringe-mark-mode))
 ;; evil-fringe-mark:1 ends here
@@ -955,7 +956,7 @@
   (after-init-hook . gcmh-mode))
 ;; gcmh:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/jdtsmith/ultra-scroll/]/[ultra-scroll/]/]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
@@ -1222,6 +1223,9 @@
   :config
   ;; (diminish 'buffer-face-mode)
   ;; (diminish 'BufFace)
+  (diminish 'buffer-face-mode)
+  (diminish 'auto-revert-mode)
+  (diminish 'visual-line-mode)
   )
 ;; diminish:1 ends here
 
