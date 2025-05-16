@@ -1834,13 +1834,19 @@ I various =use-package= package declarations in my configuration, you can see a 
   (use-package diminish
     :straight t
     :config
-    ;; (diminish 'buffer-face-mode)
-    ;; (diminish 'BufFace)
+    (add-hook 'after-init-hook
+    (lambda ()
+    ;; Your custom initialization code here
+    (message "Diminish-ing modes")
     (diminish 'buffer-face-mode)
     (diminish 'auto-revert-mode)
     (diminish 'visual-line-mode)
     (diminish 'treesit-fold-mode)
-    )
+    (diminish 'global-evil-fringe-mark-mode)
+    ;; (diminish 'buffer-face-mode)
+    ;; (diminish 'BufFace)
+    ))  
+  )
 #+end_src
 
 *** Icons
