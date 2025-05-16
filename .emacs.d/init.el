@@ -1407,6 +1407,8 @@
   :defer t
   :custom
   (visual-fill-column-width 100)
+  :config  
+  (setq visual-line-fringe-indicators '(nil right-curly-arrow))
   :hook (org-mode . (lambda ()
 			(visual-fill-column-mode)
 			;; (visual-line-fill-column-mode)

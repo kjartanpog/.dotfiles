@@ -33,37 +33,41 @@
 
 ;; [[file:emacs.org::*modus-themes][modus-themes:2]]
 (defun my/modus-themes-custom-faces (&rest _)
-  (modus-themes-with-colors
-  (custom-set-faces
+(interactive)  
+(modus-themes-with-colors
+(custom-set-faces
 
-   ;; Change nerd-icons folder colors
-   '(nerd-icons-folder ((t (:foreground "#008899"))))
-   '(nerd-icons-folder-open ((t (:foreground "#008899"))))
-   '(nerd-icons-completion-dir-face ((t (:foreground "#008899"))))
-   '(nerd-icons-dired-dir-face ((t (:foreground "#008899"))))
+ ;; Change nerd-icons folder colors
+ '(nerd-icons-folder ((t (:foreground "#008899"))))
+ '(nerd-icons-folder-open ((t (:foreground "#008899"))))
+ '(nerd-icons-completion-dir-face ((t (:foreground "#008899"))))
+ '(nerd-icons-dired-dir-face ((t (:foreground "#008899"))))
 
 
-   ;; diff-hl fringe/margin colors
-   '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
-   '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
-   '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f"))))
+ ;; diff-hl fringe/margin colors
+ '(diff-hl-insert ((t (:background "#88ca9f" :foreground "#092f1f"))))
+ '(diff-hl-delete ((t (:background "#ff7f86" :foreground "#3a0c14"))))
+ '(diff-hl-change ((t (:background "#dfaf7a" :foreground "#381d0f"))))
 
-   ;; org-mode mixed fonts
-   '(org-checkbox ((t (:inherit 'fixed-pitch))))
-   '(org-block ((t (:foreground nil :inherit 'fixed-pitch))))
-   '(org-block-begin-line ((t (:inherit 'fixed-pitch))))
-   ;; '(org-block-end-line ((t (:inherit 'fixed-pitch))))
-   '(org-table ((t (:inherit 'fixed-pitch))))
-   '(org-code ((t (:inherit 'fixed-pitch))))
-   ;; '(org-verbatim ((t (:inherit 'fixed-pitch))))
+ ;; org-mode mixed fonts
+ '(org-checkbox ((t (:inherit 'fixed-pitch))))
+ '(org-block ((t (:foreground nil :inherit 'fixed-pitch))))
+ '(org-block-begin-line ((t (:inherit 'fixed-pitch))))
+ ;; '(org-block-end-line ((t (:inherit 'fixed-pitch))))
+ '(org-table ((t (:inherit 'fixed-pitch))))
+ '(org-code ((t (:inherit 'fixed-pitch))))
+ ;; '(org-verbatim ((t (:inherit 'fixed-pitch))))
 
-   ;; corfu mixed fonts
-   '(corfu-default ((t (:inherit 'fixed-pitch))))
-   
-   ;; Vundo symbol colors
-   '(vundo-saved ((t (:foreground "#008899"))))
-   '(vundo-last-saved ((t (:foreground "#900276"))))
-   )))
+ ;; corfu mixed fonts
+ '(corfu-default ((t (:inherit 'fixed-pitch))))
+ 
+ ;; Vundo symbol colors
+ '(vundo-saved ((t (:foreground "#008899"))))
+ '(vundo-last-saved ((t (:foreground "#900276"))))
+
+ ;; fringe-indicators
+ '(fringe ((t (:foreground "#008899"))))
+ )))
 ;; modus-themes:2 ends here
 
 ;; [[file:emacs.org::*Fullscreen][Fullscreen:1]]
