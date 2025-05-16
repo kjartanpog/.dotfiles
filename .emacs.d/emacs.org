@@ -1112,6 +1112,7 @@ Display evil-mode markers in the Emacs fringe
   (leader-keys
     "h" '(:ignore t :which-key "Help")
     "h <escape>" '(keyboard-escape-quit :which-key t)
+    "he" '(view-echo-area-messages :which-key "view-echo-area-messages")
     "hf" '(helpful-callable :which-key "Callable")
     "hv" '(helpful-variable :which-key "Variable")
     "hk" '(helpful-key :which-key "Key")
@@ -1297,6 +1298,7 @@ Display evil-mode markers in the Emacs fringe
   	    (elisp "elisp" "tree_sitter_elisp")
   	    (markdown "markdown" "tree_sitter_markdown")
   	    (markdown-inline "markdown-inline" "tree_sitter_markdown_inline")
+  	    (julia "julia" "tree_sitter_julia")
   	    ))
     (setq treesit-extra-load-path
   	  (list tree-sitter-langs--dir
@@ -1400,14 +1402,24 @@ The killer app that will save my digital life
   (use-package org
     :config
     (setq org-blank-before-new-entry
-      '((heading . always)
-        (plain-list-item . auto)))
+  	'((heading . always)
+  	    (plain-list-item . auto)))
     (setq org-auto-align-tags nil
-  	  org-hide-emphasis-markers t
-  	  org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
+  	org-hide-emphasis-markers t
+  	org-todo-keywords '((sequence "TODO" "IN PROGRESS" "|" "DONE")))
     ;; (add-hook 'org-mode-hook #'my/org-mode-entry)
     ;; Adjusts the scaling of latex previews, perhaps only needed on Windows?  
     (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((R . t)
+       (python . t)
+       (emacs-lisp t)
+       (shell . t)
+       (julia . t)
+       ))
+    ;; (add-to-list 'org-src-lang-modes '("python" . python-ts))
+    (add-to-list 'org-src-lang-modes '("python" . python))
     (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
     (add-hook 'org-mode-hook #'my/org-mode-entry)
     )
@@ -1461,6 +1473,15 @@ Richer html export, f.x. syntax highlighting in code blocks.
 #+end_src
 
 ** Programming
+*** Dependencies
+
+**** Emacs Speaks Statistics :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package ess
+    :straight t
+    :defer t)
+#+end_src
 
 *** Languages
 
@@ -1473,6 +1494,30 @@ Richer html export, f.x. syntax highlighting in code blocks.
     (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode))
 #+end_src
 
+**** Julia
+
+***** jula-mode :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package julia-mode
+    :straight t
+    :defer t)
+#+end_src
+
+***** julia-ts-mode :package:
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package julia-ts-mode
+    :straight t
+    :mode "\\.jl$"
+    :init
+    ;; (add-to-list 'org-babel-load-languages '(julia . t))
+    ;; (org-babel-do-load-languages 'org-babel-load-languages)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((julia . t)))
+    )
+#+end_src
 **** LaTeX
 
 ***** auctex :package:
@@ -1549,10 +1594,13 @@ Richer html export, f.x. syntax highlighting in code blocks.
   (use-package python
     :init
     (if (treesit-language-available-p 'python)
-        (setq major-mode-remap-alist
-  	    (append major-mode-remap-alist
-  		    '((python-mode . python-ts-mode))))))
+  	(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+      ;; (setq major-mode-remap-alist
+      ;; 	    (append major-mode-remap-alist
+      ;; 		  '((python-mode . python-ts-mode))))
+      ))
 #+end_src
+
 
 
 *** LSP
@@ -1791,6 +1839,7 @@ I various =use-package= package declarations in my configuration, you can see a 
     (diminish 'buffer-face-mode)
     (diminish 'auto-revert-mode)
     (diminish 'visual-line-mode)
+    (diminish 'treesit-fold-mode)
     )
 #+end_src
 
