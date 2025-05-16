@@ -1181,12 +1181,25 @@ Display evil-mode markers in the Emacs fringe
     ;; Bookmark / Recent
     "r" '(:ignore t :which-key "Recent")
     "r <escape>" '(keyboard-escape-quit :which-key t)
-    "rb" '(bookmark-jump :which-key "bookmark-jump")
+    "rb" '(my/revert-buffer-from-file :which-key "kill & re-open buffer")
+    "rj" '(bookmark-jump :which-key "bookmark-jump")
     "rm" '(bookmark-set :which-key "bookmark-set")
     "rl" '(bookmark-bmenu-list :which-key "bookmark-bmenu-list")
     "ru" '(vundo :which-key "Undo tree")
     "rf" '(consult-bookmark :which-key "find bookmark")
     "rd" '(bookmark-delete :which-key "bookmark delete"))
+#+end_src
+
+#+begin_src elisp :tangle defun.el :comments link
+  (defun my/revert-buffer-from-file ()
+  "Kill and reopen the current buffer from its associated file."
+  (interactive)
+  (let ((file (buffer-file-name)))
+    (if file
+	(progn
+	  (kill-buffer (current-buffer))
+	  (find-file file))
+      (message "Current buffer is not visiting a file."))))
 #+end_src
 
 **** <leader> s

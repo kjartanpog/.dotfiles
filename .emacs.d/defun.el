@@ -1,5 +1,17 @@
 ;;; -*- lexical-binding: t -*-
 
+;; [[file:emacs.org::*<leader> r][<leader> r:2]]
+(defun my/revert-buffer-from-file ()
+"Kill and reopen the current buffer from its associated file."
+(interactive)
+(let ((file (buffer-file-name)))
+  (if file
+	(progn
+	  (kill-buffer (current-buffer))
+	  (find-file file))
+    (message "Current buffer is not visiting a file."))))
+;; <leader> r:2 ends here
+
 ;; [[file:emacs.org::*org-modern][org-modern:2]]
 (defun my/org-mode-entry ()
     "Enable visual line mode and set word wrap in non-programming modes."

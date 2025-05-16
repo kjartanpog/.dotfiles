@@ -823,7 +823,8 @@
   ;; Bookmark / Recent
   "r" '(:ignore t :which-key "Recent")
   "r <escape>" '(keyboard-escape-quit :which-key t)
-  "rb" '(bookmark-jump :which-key "bookmark-jump")
+  "rb" '(my/revert-buffer-from-file :which-key "kill & re-open buffer")
+  "rj" '(bookmark-jump :which-key "bookmark-jump")
   "rm" '(bookmark-set :which-key "bookmark-set")
   "rl" '(bookmark-bmenu-list :which-key "bookmark-bmenu-list")
   "ru" '(vundo :which-key "Undo tree")
