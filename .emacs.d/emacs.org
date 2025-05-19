@@ -1,6 +1,7 @@
 #+title: My Literate Emacs Configuration
 #+author: Kjartan Másson
 #+options: toc:nil
+#+setupfile: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 #+auto_tangle: t
 
 My literate emacs configuration
@@ -98,8 +99,11 @@ This file is loaded before the package system and GUI is initialized, so in it y
         (eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
 
-  (straight-use-package 'org)
+  ;; (straight-use-package 'org)
   (straight-use-package 'use-package)
+  (setq straight-built-in-pseudo-packages '(org))
+  (use-package org
+    :straight nil)
 #+end_src
 
 ** defun.el
@@ -229,7 +233,7 @@ Indent bars are vertical guides that visually represent the indentation levels i
     (indent-bars-treesit-ignore-blank-lines-types '("module"))
     ;; Add other languages as needed
     (indent-bars-treesit-scope '((python function_definition class_definition for_statement
-				       if_statement with_statement while_statement)))
+  				       if_statement with_statement while_statement)))
     ;; Note: wrap may not be needed if no-descend-list is enough
     ;;(indent-bars-treesit-wrap '((python argument_list parameters ; for python, as an example
     ;;				      list list_comprehension
@@ -237,7 +241,7 @@ Indent bars are vertical guides that visually represent the indentation levels i
     ;;				      parenthesized_expression subscript)))
     ;; :hook ((python-ts-mode yaml-mode) . indent-bars-mode)
     :hook (((python-base-mode yaml-mode) . indent-bars-mode)
-	 (nix-ts-mode . indent-bars-mode)))
+  	 (nix-ts-mode . indent-bars-mode)))
 #+end_src
 
 *** Line Numbers, Wrapping & More
@@ -1423,6 +1427,7 @@ The killer app that will save my digital life
     ;; (add-hook 'org-mode-hook #'my/org-mode-entry)
     ;; Adjusts the scaling of latex previews, perhaps only needed on Windows?  
     (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+    (setq org-confirm-babel-evaluate nil)
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((R . t)
@@ -1432,7 +1437,7 @@ The killer app that will save my digital life
        (julia . t)
        ))
     ;; (add-to-list 'org-src-lang-modes '("python" . python-ts))
-    (add-to-list 'org-src-lang-modes '("python" . python))
+    ;; (add-to-list 'org-src-lang-modes '("python" . python))
     (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
     (add-hook 'org-mode-hook #'my/org-mode-entry)
     )
@@ -1607,10 +1612,10 @@ Richer html export, f.x. syntax highlighting in code blocks.
   (use-package python
     :init
     (if (treesit-language-available-p 'python)
-  	(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
-      ;; (setq major-mode-remap-alist
-      ;; 	    (append major-mode-remap-alist
-      ;; 		  '((python-mode . python-ts-mode))))
+  	;; (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+      (setq major-mode-remap-alist
+  	    (append major-mode-remap-alist
+  		  '((python-mode . python-ts-mode))))
       ))
 #+end_src
 
@@ -1625,6 +1630,8 @@ Richer html export, f.x. syntax highlighting in code blocks.
     :init
     (add-hook 'nix-mode-hook 'eglot-ensure)
     (add-hook 'nix-ts-mode-hook 'eglot-ensure)
+    (add-hook 'python-mode-hook 'eglot-ensure)
+    (add-hook 'python-ts-mode-hook 'eglot-ensure)
     :defer t)
 #+end_src
 
@@ -1634,6 +1641,7 @@ Richer html export, f.x. syntax highlighting in code blocks.
 
 #+begin_src elisp :tangle init.el :comments link
   (use-package format-all
+    :disabled
     :straight t
     :commands format-all-mode
     :hook (prog-mode . format-all-mode)
@@ -2043,6 +2051,7 @@ I various =use-package= package declarations in my configuration, you can see a 
 
 #+begin_src elisp :tangle init.el :comments link
   (use-package visual-fill-column
+    ;; :disabled t
     :straight t
     :defer t
     :custom
@@ -2050,9 +2059,9 @@ I various =use-package= package declarations in my configuration, you can see a 
     :config  
     (setq visual-line-fringe-indicators '(nil right-curly-arrow))
     :hook (org-mode . (lambda ()
-			(visual-fill-column-mode)
-			;; (visual-line-fill-column-mode)
-			(visual-fill-column-toggle-center-text)))
+  			(visual-fill-column-mode)
+  			;; (visual-line-fill-column-mode)
+  			(visual-fill-column-toggle-center-text)))
     )
 #+end_src
 

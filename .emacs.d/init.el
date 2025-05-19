@@ -17,8 +17,11 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(straight-use-package 'org)
+;; (straight-use-package 'org)
 (straight-use-package 'use-package)
+(setq straight-built-in-pseudo-packages '(org))
+(use-package org
+  :straight nil)
 ;; init.el:2 ends here
 
 ;; [[file:emacs.org::*defun.el][defun.el:2]]
@@ -520,7 +523,7 @@
           (dired-hide-details-mode))))
 ;; dired:1 ends here
 
-;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
+;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
 :config
@@ -967,7 +970,7 @@
   (after-init-hook . gcmh-mode))
 ;; gcmh:1 ends here
 
-;; [[file:emacs.org::*/[/[https:/github.com/jdtsmith/ultra-scroll/]/[ultra-scroll/]/]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
+;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
@@ -989,6 +992,7 @@
   ;; (add-hook 'org-mode-hook #'my/org-mode-entry)
   ;; Adjusts the scaling of latex previews, perhaps only needed on Windows?  
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+  (setq org-confirm-babel-evaluate nil)
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((R . t)
@@ -998,7 +1002,7 @@
      (julia . t)
      ))
   ;; (add-to-list 'org-src-lang-modes '("python" . python-ts))
-  (add-to-list 'org-src-lang-modes '("python" . python))
+  ;; (add-to-list 'org-src-lang-modes '("python" . python))
   (add-hook 'org-mode-hook #'my/org-auto-tangle-enable)
   (add-hook 'org-mode-hook #'my/org-mode-entry)
   )
@@ -1112,10 +1116,10 @@
 (use-package python
   :init
   (if (treesit-language-available-p 'python)
-	(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
-    ;; (setq major-mode-remap-alist
-    ;; 	    (append major-mode-remap-alist
-    ;; 		  '((python-mode . python-ts-mode))))
+	;; (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+    (setq major-mode-remap-alist
+	    (append major-mode-remap-alist
+		  '((python-mode . python-ts-mode))))
     ))
 ;; python:1 ends here
 
@@ -1124,11 +1128,14 @@
   :init
   (add-hook 'nix-mode-hook 'eglot-ensure)
   (add-hook 'nix-ts-mode-hook 'eglot-ensure)
+  (add-hook 'python-mode-hook 'eglot-ensure)
+  (add-hook 'python-ts-mode-hook 'eglot-ensure)
   :defer t)
 ;; eglot:1 ends here
 
 ;; [[file:emacs.org::*format-all][format-all:1]]
 (use-package format-all
+  :disabled
   :straight t
   :commands format-all-mode
   :hook (prog-mode . format-all-mode)
@@ -1403,6 +1410,7 @@
 
 ;; [[file:emacs.org::*visual-fill-column][visual-fill-column:1]]
 (use-package visual-fill-column
+  ;; :disabled t
   :straight t
   :defer t
   :custom
@@ -1538,3 +1546,4 @@
 ;; [[file:emacs.org::*Toggle org-mode emphasis markers][Toggle org-mode emphasis markers:2]]
 (define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
 ;; Toggle org-mode emphasis markers:2 ends here
+(put 'dired-find-alternate-file 'disabled nil)
