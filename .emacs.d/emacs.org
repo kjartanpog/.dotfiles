@@ -795,11 +795,24 @@ Hide commands in =M-x= which do not apply to the current mode.
     (corfu-prescient-mode t))
 #+end_src
 
+**** Snippets
+
+***** yasnippet :package:
+
+I wanted to include my snippet definition inside of this literate configuration, but the default behavious of both emacs & org to add a newline at the end of saved/tangled files messes with the snippets.
+
+#+begin_src elisp :tangle init.el :comments link
+  (use-package yasnippet
+    :straight t
+    :config
+    (yas-global-mode t))
+#+end_src
+
 ** File Management
 
 *** dired
 
-#+begin_src elisp :tangle init.el :comments link
+#+begin_src elisp :tangle init.el
   (use-package dired
     :config
     (add-hook 'dired-mode-hook

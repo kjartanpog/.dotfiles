@@ -515,13 +515,18 @@
   (corfu-prescient-mode t))
 ;; corfu-prescient:1 ends here
 
-;; [[file:emacs.org::*dired][dired:1]]
+;; [[file:emacs.org::*yasnippet][yasnippet:1]]
+(use-package yasnippet
+  :straight t
+  :config
+  (yas-global-mode t))
+;; yasnippet:1 ends here
+
 (use-package dired
   :config
   (add-hook 'dired-mode-hook
         (lambda ()
           (dired-hide-details-mode))))
-;; dired:1 ends here
 
 ;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
@@ -1546,4 +1551,3 @@
 ;; [[file:emacs.org::*Toggle org-mode emphasis markers][Toggle org-mode emphasis markers:2]]
 (define-key org-mode-map (kbd "C-c e") #'my/org-toggle-hide-emphasis-markers)
 ;; Toggle org-mode emphasis markers:2 ends here
-(put 'dired-find-alternate-file 'disabled nil)

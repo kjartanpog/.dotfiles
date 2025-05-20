@@ -1,0 +1,6 @@
+# key: mk
+# name: Inline Math
+# condition: (and (not (org-inside-LaTeX-fragment-p)) (quote auto))
+# group: math
+# --
+\\( $0 \\)
