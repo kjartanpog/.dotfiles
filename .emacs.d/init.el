@@ -528,7 +528,7 @@
         (lambda ()
           (dired-hide-details-mode))))
 
-;; [[file:emacs.org::*\[\[https:/github.com/protesilaos/fontaine\]\[fontaine\]\]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/protesilaos/fontaine/]/[fontaine/]/]][[[https://github.com/protesilaos/fontaine][fontaine]]:1]]
 (use-package fontaine
 :straight t
 :config
@@ -975,7 +975,7 @@
   (after-init-hook . gcmh-mode))
 ;; gcmh:1 ends here
 
-;; [[file:emacs.org::*\[\[https:/github.com/jdtsmith/ultra-scroll\]\[ultra-scroll\]\]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
+;; [[file:emacs.org::*/[/[https:/github.com/jdtsmith/ultra-scroll/]/[ultra-scroll/]/]][[[https://github.com/jdtsmith/ultra-scroll][ultra-scroll]]:1]]
 (use-package ultra-scroll
   :straight (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
   :init
