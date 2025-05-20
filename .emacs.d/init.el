@@ -791,6 +791,13 @@
   "hi" '(consult-info :which-key "Information"))
 ;; <leader> h:1 ends here
 
+;; [[file:emacs.org::*<leader> i][<leader> i:1]]
+(leader-keys
+  "i" '(:ignore t :which-key "Insert")
+  "i <escape>" '(keyboard-escape-quit :which-key t)
+  "is" '(yas-insert-snippet :which-key "Snippet"))
+;; <leader> i:1 ends here
+
 ;; [[file:emacs.org::*<leader> l][<leader> l:1]]
 (leader-keys
   "l" '(:ignore t :which-key "LLM")

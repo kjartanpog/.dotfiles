@@ -1144,6 +1144,15 @@ Display evil-mode markers in the Emacs fringe
     "hi" '(consult-info :which-key "Information"))
 #+end_src
 
+**** <leader> i
+
+#+begin_src elisp :tangle init.el :comments link
+  (leader-keys
+    "i" '(:ignore t :which-key "Insert")
+    "i <escape>" '(keyboard-escape-quit :which-key t)
+    "is" '(yas-insert-snippet :which-key "Snippet"))
+#+end_src
+
 **** <leader> l
 
 #+begin_src elisp :tangle init.el :comments link
